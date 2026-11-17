@@ -2,221 +2,172 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-e3S8bhALQB+3U0yQXQvx6a/lHvrWx8ij1yjc31Im+7c=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Subs Feed</title>
+<title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Subs">
+<meta name="apple-mobile-web-app-title" content="North Star">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#f3f5f4" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#101615" media="(prefers-color-scheme: dark)">
-<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAACT0lEQVR42u3dPU7DQBCA0UmUDo7GUUBUaaCmooq4CkfjAHRUFCDZOz9+7wCRlf28MbZHnO5eHgN+c/YVIA7EgTgQB+JAHIgDcSAOxAHiQByIA3EgDsSBOBAH4kAcIA7EgTgQB+JAHIgDcSAOxAHiQByIA3EgDsSBOBAH4kAciAPEgTgQB+JAHIgDcSAOxMHxXNKP4OvtY4+PvX99srq9d46dytj1k4/jlPjfIRes37/2j8/na52Febi9HzeOZWf2X/oolUWdRFyQ1i0j/djOynCE4kAcs7aN3OO0cyAOxIE4YsyNpsrHaedAHG03j8QjtHOU7iP32C7i+FkDD97CU1ka/KzsvXLK6H3Nsd/6KaP3zwp2DsSBOBAHiANxIA7EgTgQB2HKPkzZ2zlM2YcHb6bsY+orzabs00bKuiTigjTh7cAuY5im7K9hTFcciKPN6Vt/87BzIA7EgThiwP2G+nc77ByIo9jp2+ImqZ0jYZ263D43Zb90yt6DtzBl75rDlL04TNmHl33AXyuIA3EgDsSBOBAH4kAciAPClD2m7Anvc6RN2fd6hceUfcKU/bxEXJBu9nZgl9l5ceSs6LA+7ByIY9WJPmnzsHMgDsSBOKLs/Nmkux12DsSx5EQfdpPUzrHZis67fW7KfoMpew/ewpS9a44wZY8pe0zZ468VxIE4EAfiQByIA3EgDhAH4kAciANxIA7EgTgQB+IAcSAOxIE4EAfiQByIA3EgDhAH4kAciANxIA7EgTgQB+JAHL4CxIE4EAfiQByIA3EgDqb7BthnnpWRjX62AAAAAElFTkSuQmCC">
+<meta name="theme-color" content="#18181B">
+<link rel="apple-touch-icon" href="icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Layout idea: one quiet column, newest first, grouped by day. Thumb left, words right. */
-:root {
-  --bg: #f3f5f4;
-  --surface: #ffffff;
-  --ink: #16201e;
-  --muted: #5f6d6a;
-  --line: #dbe1df;
-  --accent: #0b7a6c;
-  --accent-ink: #ffffff;
-  --warn: #a8480f;
-  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
-  --font-body: "Figtree", -apple-system, "Segoe UI", system-ui, sans-serif;
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #101615;
-    --surface: #18211f;
-    --ink: #e8efed;
-    --muted: #93a39f;
-    --line: #27332f;
-    --accent: #4cc9b4;
-    --accent-ink: #06201c;
-    --warn: #f0a070;
-    color-scheme: dark;
-  }
-}
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--bg); color: var(--ink); }
-body {
-  font-family: var(--font-body);
-  font-size: 16px;
-  line-height: 1.4;
-  -webkit-text-size-adjust: 100%;
-  padding-bottom: calc(env(safe-area-inset-bottom) + 32px);
-}
+body { font-family: var(--font-body); font-size: 16px; line-height: 1.4; -webkit-text-size-adjust: 100%; }
 button, input { font: inherit; color: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 [hidden] { display: none !important; }
-
-.wrap { max-width: 720px; margin: 0 auto; padding: 0 16px; }
-
-header.bar {
-  position: sticky; top: 0; z-index: 5;
-  background: var(--bg);
-  border-bottom: 1px solid var(--line);
-  padding-top: env(safe-area-inset-top);
-}
-.bar-row { display: flex; align-items: center; gap: 8px; height: 56px; }
-.brand {
-  font-family: var(--font-display); font-weight: 700; font-size: 24px;
-  letter-spacing: -0.02em; margin: 0; flex: 1;
-}
+.wrap { max-width: 720px; margin: 0 auto; }
+header.bar { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); padding-top: env(safe-area-inset-top); }
+.bar-row { display: flex; align-items: center; gap: 8px; }
+.brand { margin: 0; flex: 1; }
 .brand span { color: var(--accent); }
-.icon-btn {
-  width: 44px; height: 44px; border-radius: 12px;
-  border: 1px solid var(--line); background: var(--surface);
-  display: grid; place-items: center; padding: 0;
-}
+.icon-btn { width: 44px; height: 44px; border: 1px solid var(--line); display: grid; place-items: center; padding: 0; }
 .icon-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .icon-btn.spin svg { animation: spin 0.9s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .icon-btn.spin svg { animation: none; } }
-
-.tools { display: flex; gap: 8px; padding: 10px 0 12px; align-items: center; }
-.tools input[type="search"] {
-  flex: 1; min-width: 0; height: 40px; padding: 0 12px;
-  border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
+@media (prefers-reduced-motion: reduce) {
+  .icon-btn.spin svg { animation: none; }
 }
-.chip {
-  height: 40px; padding: 0 12px; border-radius: 10px; white-space: nowrap;
-  border: 1px solid var(--line); background: var(--surface); font-weight: 500; font-size: 14px;
-}
+.tools { display: flex; gap: 8px; align-items: center; }
+.tools input[type="search"] { height: 40px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.chip { height: 40px; border-radius: 10px; white-space: nowrap; border: 1px solid var(--line); background: var(--surface); font-weight: 500; }
 .chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-
-.status { font-size: 14px; color: var(--muted); padding: 10px 0 0; min-height: 30px; }
+.status { color: var(--muted); padding: 10px 0 0; min-height: 30px; }
 .status.err { color: var(--warn); }
-
-.day {
-  font-family: var(--font-display); font-weight: 600; font-size: 15px;
-  color: var(--muted); margin: 22px 0 8px; display: flex; gap: 8px; align-items: baseline;
-}
-.day small { font-family: var(--font-body); font-weight: 400; font-size: 13px; }
-
-.list { display: flex; flex-direction: column; gap: 4px; }
-.vid {
-  display: grid; grid-template-columns: 42% 1fr auto; gap: 12px; align-items: start;
-  padding: 8px; margin: 0 -8px; border-radius: 14px;
-  text-decoration: none; color: inherit;
-}
-.vid:active { background: var(--surface); }
-.thumb {
-  position: relative; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden;
-  background: var(--line);
-}
+.day { display: flex; gap: 8px; align-items: baseline; }
+.list { flex-direction: column; }
+.vid { display: grid; text-decoration: none; }
+.thumb { position: relative; aspect-ratio: 16 / 9; overflow: hidden; }
 .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.badge {
-  position: absolute; right: 5px; bottom: 5px;
-  background: rgba(8, 14, 13, 0.82); color: #fff;
-  font-size: 12px; font-weight: 600; padding: 1px 5px; border-radius: 5px;
-  font-variant-numeric: tabular-nums;
-}
+.badge { position: absolute; background: rgba(8, 14, 13, 0.82); color: #fff; font-weight: 600; font-variant-numeric: tabular-nums; }
 .badge.live { background: var(--accent); color: var(--accent-ink); }
 .meta { min-width: 0; }
-.title {
-  font-weight: 600; font-size: 15px; line-height: 1.3; margin: 0 0 4px;
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-  overflow-wrap: anywhere;
-}
-.sub { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
-.seen-btn {
-  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line);
-  background: transparent; display: grid; place-items: center; padding: 0; color: var(--muted);
-}
-.seen-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-.vid.seen .thumb, .vid.seen .meta { opacity: 0.45; }
-.vid.seen .seen-btn { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-
-.empty { text-align: center; color: var(--muted); padding: 48px 0; }
-
-/* Setup / settings sheet */
+.title { margin: 0 0 4px; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.sub { overflow-wrap: anywhere; }
+.empty { text-align: center; color: var(--muted); }
 .sheet { padding: 20px 0 8px; }
 .sheet h2 { font-family: var(--font-display); font-size: 22px; letter-spacing: -0.01em; margin: 0 0 6px; text-wrap: balance; }
 .sheet p { color: var(--muted); margin: 0 0 16px; max-width: 60ch; }
 .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
 .field label { font-weight: 600; font-size: 14px; }
-.field input[type="text"], .field input[type="password"] {
-  height: 46px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px;
-  background: var(--surface); width: 100%;
-}
+.field input[type="text"], .field input[type="password"] { height: 46px; padding: 0 12px; border: 1px solid var(--line); background: var(--surface); width: 100%; }
 .field .hint { font-size: 13px; color: var(--muted); }
 .check { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; font-size: 15px; }
 .check input { width: 20px; height: 20px; accent-color: var(--accent); }
-.btn {
-  height: 46px; padding: 0 18px; border-radius: 10px; border: 1px solid var(--accent);
-  background: var(--accent); color: var(--accent-ink); font-weight: 600;
-}
+.btn { height: 46px; padding: 0 18px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); font-weight: 600; }
 .btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
 .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 20px; }
-details.help { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 12px 14px; margin-bottom: 14px; }
+details.help { border: 1px solid var(--line); background: var(--surface); padding: 12px 14px; margin-bottom: 14px; }
 details.help summary { font-weight: 600; cursor: pointer; }
 details.help ol { padding-left: 20px; margin: 10px 0 0; color: var(--muted); font-size: 14px; }
 details.help li { margin-bottom: 6px; }
 details.help code { font-size: 13px; background: var(--bg); padding: 1px 5px; border-radius: 5px; overflow-wrap: anywhere; }
 .or { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin: 4px 0 14px; }
-
-.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-top: 12px;
-  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
-.tab { height: 38px; border: 0; border-radius: 9px; background: transparent; font-weight: 600; font-size: 15px; color: var(--muted); }
-.tab[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
-.tools { flex-wrap: wrap; }
-.tools input[type="search"] { flex: 1 1 140px; }
-.acts { display: flex; flex-direction: column; gap: 6px; }
-.act-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line);
-  background: transparent; display: grid; place-items: center; padding: 0; color: var(--muted); }
+.tab { border: 0; background: transparent; color: var(--muted); }
+.acts { display: flex; }
+.act-btn { border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; padding: 0; }
 .act-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .vid.seen .act-btn.seen-toggle { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
-.toast { position: fixed; left: 16px; right: 16px; bottom: calc(env(safe-area-inset-bottom) + 16px); z-index: 9;
-  max-width: 560px; margin: 0 auto; background: var(--ink); color: var(--bg); border-radius: 12px;
-  padding: 10px 12px 10px 16px; display: flex; gap: 12px; align-items: center; font-size: 14px; }
+.toast { position: fixed; left: 16px; right: 16px; z-index: 9; max-width: 560px; margin: 0 auto; background: var(--ink); color: var(--bg); padding: 10px 12px 10px 16px; display: flex; gap: 12px; align-items: center; font-size: 14px; }
 .toast span { flex: 1; overflow-wrap: anywhere; }
 .toast button { border: 0; background: transparent; color: var(--bg); font-weight: 700; text-decoration: underline; padding: 8px; }
 .sheet h3 { font-family: var(--font-display); font-size: 17px; margin: 26px 0 10px; }
 .cats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; margin-bottom: 8px; }
-
-/* ---- Calm layout: large thumbnail, words underneath ---- */
 .wrap { padding: 0 18px; }
 header.bar { border-bottom-color: transparent; }
 .bar-row { height: 60px; }
-.brand { font-size: 26px; }
 .icon-btn { border-radius: 50%; border-color: transparent; background: var(--surface); }
-.tabs { border-radius: 999px; border-color: transparent; margin-top: 6px; }
-.tab { border-radius: 999px; height: 40px; transition: background-color .2s ease, color .2s ease; }
+.tabs { border-color: transparent; margin-top: 6px; }
+.tab { border-radius: 999px; transition: background-color .2s ease, color .2s ease; }
 .tools { padding: 14px 0 6px; }
 .tools input[type="search"], .chip { border-radius: 999px; border-color: transparent; height: 42px; }
-.tools input[type="search"] { padding: 0 18px; }
-.chip { padding: 0 16px; }
 .status { padding-top: 8px; font-size: 13px; }
-.day { font-size: 20px; color: var(--ink); margin: 34px 0 16px; letter-spacing: -0.01em; }
-.day small { color: var(--muted); }
+.day { letter-spacing: -0.01em; }
 .list { display: grid; grid-template-columns: 1fr; gap: 30px; }
-@media (min-width: 640px) { .list { grid-template-columns: 1fr 1fr; gap: 32px 22px; } }
-.vid { grid-template-columns: 1fr auto; gap: 12px 10px; padding: 0; margin: 0; border-radius: 22px; align-items: start; }
-.vid:active { background: transparent; }
-.thumb { grid-column: 1 / -1; border-radius: 22px; background: var(--surface);
-  box-shadow: 0 1px 2px rgba(10, 30, 26, 0.06), 0 8px 24px -12px rgba(10, 30, 26, 0.22);
-  transition: transform .18s ease; }
-.vid:active .thumb { transform: scale(0.985); }
+@media (min-width: 640px) {
+  .list { grid-template-columns: 1fr 1fr; gap: 32px 22px; }
+}
+.vid { grid-template-columns: 1fr auto; margin: 0; align-items: start; }
+.thumb { grid-column: 1 / -1; background: var(--surface); transition: transform .18s ease; }
 .badge { right: 10px; bottom: 10px; font-size: 13px; padding: 3px 8px; border-radius: 999px; }
-.meta { padding-left: 4px; }
-.title { font-size: 17px; line-height: 1.32; margin-bottom: 5px; -webkit-line-clamp: 2; }
+.title { -webkit-line-clamp: 2; }
 .sub { font-size: 14px; }
 .acts { flex-direction: row; gap: 8px; padding-right: 2px; }
-.act-btn { width: 38px; height: 38px; border-color: transparent; background: var(--surface); }
+.act-btn { width: 38px; height: 38px; border-color: transparent; }
 .vid.seen .thumb, .vid.seen .meta { opacity: 0.4; }
 .empty { padding: 64px 0; }
 .field input[type="text"], .field input[type="password"] { border-radius: 14px; }
 .btn { border-radius: 999px; }
 details.help { border-radius: 18px; }
 .toast { border-radius: 18px; }
-@media (prefers-reduced-motion: reduce) { .thumb, .tab { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .thumb, .tab { transition: none; }
+}
+.tabs { grid-template-columns: 1fr 1fr 1fr; }
+.panel { padding: 16px 0 4px; }
+.panel h2 { font-family: var(--font-display); font-size: 20px; margin: 0 0 4px; letter-spacing: -0.01em; }
+.panel p { color: var(--muted); font-size: 14px; margin: 0 0 14px; max-width: 60ch; }
+.seeds { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.seed { display: inline-flex; align-items: center; gap: 4px; background: var(--surface); border-radius: 999px; padding: 0 4px 0 14px; height: 38px; font-size: 14px; font-weight: 500; max-width: 100%; }
+.seed span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.seed button { width: 30px; height: 30px; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 18px; line-height: 1; padding: 0; }
+.seed-add { display: flex; gap: 8px; margin-bottom: 12px; }
+.seed-add input { flex: 1; min-width: 0; height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--surface); }
+.panel .btn-row { margin: 0 0 6px; }
+.chans { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 14px; }
+@media (min-width: 640px) {
+  .chans { grid-template-columns: 1fr 1fr; }
+}
+.chan { display: grid; grid-template-columns: 64px 1fr; gap: 6px 14px; background: var(--surface); border-radius: 22px; padding: 16px; }
+.chan img { width: 64px; height: 64px; border-radius: 50%; background: var(--line); object-fit: cover; grid-row: span 2; }
+.chan h3 { font-family: var(--font-display); font-size: 18px; margin: 2px 0 2px; overflow-wrap: anywhere; }
+.chan .sub { font-size: 13px; }
+.chan ul { grid-column: 1 / -1; list-style: none; margin: 8px 0 4px; padding: 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--muted); }
+.chan li { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.chan .btn-row { grid-column: 1 / -1; margin: 6px 0 0; }
+.btn.small { height: 40px; padding: 0 16px; font-size: 14px; display: inline-flex; align-items: center; text-decoration: none; }
+:root { --bg: #18181B; --surface: #27272C; --ink: #EFEDE9; --muted: #B0ACA6; --line: #33333A; --accent: #C98B6B; --accent-ink: #1A1210; --warn: #F0A070; --paper: #F1ECE2; --pink: #2A2622; --pmuted: #6B6256; --font-display: "Manrope", system-ui, sans-serif; --font-body: "Manrope", -apple-system, system-ui, sans-serif; color-scheme: dark; }
+body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
+.brand { display: flex; align-items: center; gap: 10px; font-family: "Bebas Neue", Impact, sans-serif; font-weight: 400; font-size: 32px; letter-spacing: 0.04em; line-height: 1; }
+.brand svg { flex: none; }
+.tabs { position: fixed; left: 16px; right: 16px; bottom: calc(env(safe-area-inset-bottom) + 14px); max-width: 560px; margin: 0 auto; z-index: 6; display: flex; gap: 4px; padding: 6px; border: 0; border-radius: 999px; background: var(--surface); box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.65); }
+.tab { flex: 1; height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 600; }
+.tab svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tab[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+.toast { bottom: calc(env(safe-area-inset-bottom) + 92px); }
+.day { font-family: "Caveat", "Bradley Hand", cursive; font-size: 32px; font-weight: 700; color: var(--ink); margin: 26px 0 18px; }
+.day small { font-family: "Manrope", system-ui, sans-serif; font-size: 13px; font-weight: 500; color: var(--muted); }
+.vid { position: relative; background: var(--paper); color: var(--pink); padding: 10px 10px 14px; border-radius: 6px; gap: 10px 8px; transform-origin: 50% 0; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25), 0 16px 28px -14px rgba(0, 0, 0, 0.6); -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.vid:active { background: var(--paper); }
+.vid::before { content: ""; position: absolute; top: -6px; left: 50%; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; z-index: 2; background: var(--accent); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), inset 0 -2px 3px rgba(0, 0, 0, 0.25); }
+.vid:active .thumb { transform: none; }
+.thumb { border-radius: 3px; box-shadow: none; }
+.title { font-family: "Caveat", "Bradley Hand", cursive; font-weight: 700; font-size: 25px; line-height: 1.1; margin-bottom: 4px; }
+.sub { color: var(--pmuted); }
+.meta { padding-left: 2px; }
+.act-btn { background: rgba(42, 38, 34, 0.08); color: var(--pmuted); }
+.saved-tag { position: absolute; left: 8px; top: 8px; background: var(--accent); color: var(--accent-ink); font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+#laterBox { margin-bottom: 6px; }
+.later-row { display: flex; gap: 14px; overflow-x: auto; padding: 8px 4px 14px; margin: 0 -18px; padding-left: 18px; padding-right: 18px; scroll-snap-type: x proximity; }
+.later-card { position: relative; flex: none; width: 168px; background: var(--paper); color: var(--pink); border-radius: 6px; padding: 6px 6px 10px; text-decoration: none; scroll-snap-align: start; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25), 0 12px 22px -12px rgba(0, 0, 0, 0.6); }
+.later-card .thumb { border-radius: 3px; }
+.later-card .lt { font-weight: 600; font-size: 13px; line-height: 1.3; margin-top: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.later-card .ls { font-size: 12px; color: var(--pmuted); margin-top: 2px; }
+.later-x { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; border: 0; background: rgba(24, 24, 27, 0.78); color: #fff; display: grid; place-items: center; padding: 0; }
+.later-x svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.6; stroke-linecap: round; }
+.vid { transform: rotate(calc(var(--tilt, 0) * 1deg)); }
+.vid.live { transform: rotate(calc(var(--tilt, 0) * 1deg + var(--sway, 0deg) * var(--k, 1))); will-change: transform; }
+.more-marker { height: 1px; }
+.brand { white-space: nowrap; overflow: hidden; }
+.tools { flex-wrap: nowrap; }
+.tools input[type="search"] { flex: 1 1 0; min-width: 0; padding: 0 14px; }
+.chip { padding: 0 12px; font-size: 13px; flex: none; }
 </style>
 </head>
 <body>
@@ -224,7 +175,7 @@ details.help { border-radius: 18px; }
 <header class="bar">
   <div class="wrap">
     <div class="bar-row">
-      <h1 class="brand">Subs<span>.</span></h1>
+      <h1 class="brand"><svg viewBox="-60 -60 120 120" width="34" height="34" role="img" aria-label="North Star logo"><path d="M0,-50 Q7,-7 50,0 Q7,7 0,50 Q-7,7 -50,0 Q-7,-7 0,-50Z" fill="#C98B6B"/><path d="M-7,-11 L12,0 L-7,11Z" fill="#18181B"/></svg>NORTH STAR</h1>
       <button class="icon-btn" id="refreshBtn" type="button" aria-label="Refresh feed">
         <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 4v5h-5"/></svg>
       </button>
@@ -239,15 +190,31 @@ details.help { border-radius: 18px; }
   <!-- Feed view -->
   <section id="feedView" hidden>
     <div class="tabs" role="tablist">
-      <button class="tab" id="tabSubs" type="button" role="tab" aria-selected="true">Subscriptions</button>
-      <button class="tab" id="tabDisc" type="button" role="tab" aria-selected="false">Discover</button>
+      <button class="tab" id="tabSubs" type="button" role="tab" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z"/></svg>Subs</button>
+      <button class="tab" id="tabDisc" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Discover</button>
+      <button class="tab" id="tabChan" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><circle cx="17.5" cy="8" r="2.5"/><path d="M17.5 13.5c2.2.2 3.7 1.7 4.2 4.5"/></svg>Channels</button>
     </div>
-    <div class="tools">
-      <input type="search" id="search" placeholder="Filter by title or channel" aria-label="Filter by title or channel">
+    <div class="panel" id="chanPanel" hidden>
+      <h2>Find channels like the ones you follow</h2>
+      <p>Pick up to 5 of your subscriptions. The app looks at what each one makes and suggests other channels making similar videos.</p>
+      <div class="seeds" id="seeds"></div>
+      <div class="seed-add">
+        <input type="text" id="seedInput" list="subList" placeholder="Type a channel you follow" aria-label="Add a channel you follow" autocomplete="off">
+        <datalist id="subList"></datalist>
+        <button class="btn small" id="seedAddBtn" type="button">Add</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn ghost small" id="seedAutoBtn" type="button">Pick for me</button>
+        <button class="btn small" id="findChanBtn" type="button">Find similar channels</button>
+      </div>
+    </div>
+    <div class="tools" id="tools">
+      <input type="search" id="search" placeholder="Filter" aria-label="Filter by title or channel">
       <button class="chip" id="sortBtn" type="button" aria-pressed="false">For you</button>
       <button class="chip" id="hideSeenBtn" type="button" aria-pressed="false">Hide watched</button>
     </div>
     <div class="status" id="status" role="status"></div>
+    <div id="laterBox" hidden></div>
     <div id="feed"></div>
   </section>
 
@@ -319,7 +286,9 @@ details.help { border-radius: 18px; }
 
     <h3>Playback</h3>
     <label class="check"><input type="checkbox" id="hideShorts" checked> Leave out Shorts and live streams</label>
-    <label class="check"><input type="checkbox" id="openInApp" checked> Open videos in the YouTube app</label>
+    <label class="check"><input type="checkbox" id="openInApp"> Use the direct app link (may show an "Open in YouTube?" prompt)</label>
+    <label class="check"><input type="checkbox" id="sway" checked> Let cards sway while you scroll</label>
+    <p>Press and hold a video to save it to Watch later.</p>
 
     <div class="btn-row">
       <button class="btn" id="saveBtn" type="button">Save and load feed</button>
@@ -329,6 +298,7 @@ details.help { border-radius: 18px; }
     <div class="status" id="setupStatus" role="status"></div>
 
     <div class="btn-row">
+      <button class="btn ghost" id="fullBtn" type="button">Check every channel now</button>
       <button class="btn ghost" id="clearSeenBtn" type="button">Reset watched marks</button>
       <button class="btn ghost" id="forgetBtn" type="button">Forget everything on this device</button>
     </div>
@@ -336,7 +306,6 @@ details.help { border-radius: 18px; }
 </main>
 <div class="toast" id="toast" hidden><span id="toastMsg"></span><button type="button" id="toastAct"></button></div>
 
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
 (function () {
   "use strict";
@@ -347,8 +316,9 @@ details.help { border-radius: 18px; }
   function save(k, v) { mem[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   function drop(k) { delete mem[k]; try { localStorage.removeItem(k); } catch (e) {} }
 
-  var DEFAULT_CFG = { key: "", channel: "", clientId: "", hideShorts: true, openInApp: true, topics: "", mutedWords: "", blockCats: ["25"] };
+  var DEFAULT_CFG = { key: "", channel: "", clientId: "", hideShorts: true, openInApp: false, sway: true, topics: "", mutedWords: "", blockCats: ["25"] };
   var cfg = Object.assign({}, DEFAULT_CFG, load("sf_cfg", {}));
+  if (!cfg.v2) { cfg.openInApp = false; cfg.v2 = 1; save("sf_cfg", cfg); }
   var subs = load("sf_subs", []);
   var feed = load("sf_feed", { at: 0, items: [] });
   var disc = load("sf_disc", { at: 0, n: 0, items: [] });
@@ -360,6 +330,12 @@ details.help { border-radius: 18px; }
   var hideSeen = load("sf_hideSeen", false);
   var tab = load("sf_tab", "subs");
   var sortMode = load("sf_sort", "new");
+  var seeds = load("sf_seeds", []);
+  var rec = load("sf_rec", { at: 0, items: [] });
+  var recNo = load("sf_recNo", {});
+  var later = load("sf_later", []);
+  var holdFired = false;
+  var gsiLoading = false;
   var busy = false;
 
   var CATS = [["25", "News & Politics"], ["20", "Gaming"], ["17", "Sports"], ["24", "Entertainment"], ["22", "People & Blogs"], ["23", "Comedy"], ["26", "Howto & Style"], ["2", "Autos & Vehicles"]];
@@ -582,6 +558,43 @@ details.help { border-radius: 18px; }
     if (dirty) save("sf_shown", shown);
   }, { threshold: 0.6 }) : null;
 
+  // Cards near the screen are "live": only those take part in the sway.
+  var liveObs = ("IntersectionObserver" in window) ? new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) { en.target.classList.toggle("live", en.isIntersecting); });
+  }, { rootMargin: "200px 0px" }) : null;
+  // The feed is drawn a page at a time; a marker near the bottom asks for the next page.
+  var PAGE = 30, view = null;
+  var moreObs = ("IntersectionObserver" in window) ? new IntersectionObserver(function (entries) {
+    if (entries.some(function (en) { return en.isIntersecting; })) appendMore();
+  }, { rootMargin: "900px 0px" }) : null;
+  function appendMore() {
+    if (!view || view.pos >= view.items.length) return;
+    var box = $("feed"), end = moreObs ? Math.min(view.items.length, view.pos + PAGE) : view.items.length;
+    if (view.marker && view.marker.parentNode) view.marker.parentNode.removeChild(view.marker);
+    for (var i = view.pos; i < end; i++) {
+      var v = view.items[i];
+      if (view.ranked) {
+        if (!view.list) { view.list = el("div", "list"); view.list.style.marginTop = "18px"; box.appendChild(view.list); }
+      } else {
+        var d = new Date(v.at), k = dayKey(d);
+        if (k !== view.day) {
+          view.day = k;
+          var h = el("h2", "day", dayLabel(d));
+          h.appendChild(el("small", null, view.counts[k] + (view.counts[k] === 1 ? " video" : " videos")));
+          box.appendChild(h);
+          view.list = el("div", "list"); box.appendChild(view.list);
+        }
+      }
+      view.list.appendChild(row(v));
+    }
+    view.pos = end;
+    if (view.pos < view.items.length && moreObs) {
+      view.marker = view.marker || el("div", "more-marker");
+      box.appendChild(view.marker);
+      moreObs.observe(view.marker);
+    }
+  }
+
   // ---------- filters ----------
   function mutedWordList() { return (cfg.mutedWords || "").toLowerCase().split(",").map(function (s) { return s.trim(); }).filter(Boolean); }
   function topicList() { return (cfg.topics || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean); }
@@ -614,6 +627,15 @@ details.help { border-radius: 18px; }
   function start() { busy = true; $("refreshBtn").classList.add("spin"); }
   function finish() { busy = false; $("refreshBtn").classList.remove("spin"); }
 
+  // When each channel was last checked and when it last posted: { subId: [checkedMs, latestUploadMs] }.
+  var chk = load("sf_chk", {});
+  function dueForCheck(c, now) {
+    if (!c) return true;
+    var sinceCheck = now - c[0], quiet = now - (c[1] || 0);
+    if (quiet < 14 * 86400000) return true;                    // posted in the last two weeks: every refresh
+    if (quiet < 60 * 86400000) return sinceCheck > 6 * 3600000; // quieter: every six hours
+    return sinceCheck > 24 * 3600000;                           // dormant: once a day
+  }
   function refreshSubs(opts) {
     opts = opts || {};
     if (busy) return;
@@ -625,18 +647,36 @@ details.help { border-radius: 18px; }
       subs = list; save("sf_subs", subs);
     }) : Promise.resolve();
 
+    var now = Date.now(), mode = cfg.hideShorts ? "UULF" : "UU", todo = [], kept = [];
     p.then(function () {
       show("feed");
-      return pool(subs, 6, function (s) { return fetchChannelUploads(s, cfg.hideShorts); }, function (n) {
-        setStatus("Checking channel " + n + " of " + subs.length);
+      if (chk._mode !== mode || opts.full || needSubs) chk = { _mode: mode };
+      var skip = {};
+      subs.forEach(function (x) { if (dueForCheck(chk[x.id], now)) todo.push(x); else skip[x.id] = 1; });
+      kept = feed.items.filter(function (v) { return skip[v.sid || v.chId]; });
+      return pool(todo, 8, function (x) {
+        return fetchChannelUploads(x, cfg.hideShorts).then(function (list) {
+          var latest = 0;
+          list.forEach(function (v) { v.sid = x.id; var t = new Date(v.at).getTime(); if (t > latest) latest = t; });
+          chk[x.id] = [now, latest];
+          return list;
+        });
+      }, function (n) {
+        setStatus("Checking channel " + n + " of " + todo.length);
       });
     }).then(function (lists) {
+      save("sf_chk", chk);
+      // Videos we already know keep their length and category, so they are not looked up again.
+      var known = {};
+      feed.items.forEach(function (v) { if (v.det && (!v.live || v.live === "none")) known[v.id] = v; });
+      lists.forEach(function (l) { (l || []).forEach(function (v) { var o = known[v.id]; if (o) { v.dur = o.dur; v.cat = o.cat; v.live = o.live; v.det = 1; } }); });
       var all = [], ids = {};
+      lists.push(kept);
       lists.forEach(function (l) { (l || []).forEach(function (v) { if (!ids[v.id]) { ids[v.id] = 1; all.push(v); } }); });
       all.sort(function (a, b) { return a.at < b.at ? 1 : a.at > b.at ? -1 : 0; });
       all = all.slice(0, 200);
       setStatus("Getting video lengths");
-      return addDetails(all).catch(function () {}).then(function () { return all; });
+      return addDetails(all.filter(function (v) { return !v.det; })).catch(function () {}).then(function () { return all; });
     }).then(function (all) {
       settleSkips();
       feed = { at: Date.now(), items: all };
@@ -693,11 +733,196 @@ details.help { border-radius: 18px; }
     }).catch(function (e) { setStatus(explain(e), true); }).then(finish);
   }
 
-  function refresh(opts) { if (tab === "disc" && !(opts && (opts.reimport || opts.token))) refreshDiscover(); else refreshSubs(opts); }
+  // ---------- similar channels ----------
+  function parseKeywords(str) {
+    var out = [], re = /"([^"]+)"|(\S+)/g, m;
+    while ((m = re.exec(str || ""))) { var k = (m[1] || m[2]).trim(); if (k) out.push(k); }
+    return out;
+  }
+  // What a channel is about, as a short search phrase: its own keywords first, then words its recent titles share.
+  function seedQuery(info, id) {
+    var kw = parseKeywords(info.keywords).slice(0, 3);
+    if (kw.length < 2) {
+      var freq = {};
+      feed.items.forEach(function (v) { if (v.chId === id) words(v.title).forEach(function (w) { freq[w] = (freq[w] || 0) + 1; }); });
+      var top = Object.keys(freq).filter(function (w) { return freq[w] > 1; }).sort(function (a, b) { return freq[b] - freq[a]; }).slice(0, 3 - kw.length);
+      kw = kw.concat(top);
+    }
+    if (!kw.length && info.topics.length) kw = info.topics.slice(0, 2);
+    if (!kw.length) kw = [info.title];
+    return kw.join(" ");
+  }
+  function fmtCount(n) {
+    n = +n || 0;
+    if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace(/\.0$/, "") + "M";
+    if (n >= 1e3) return (n / 1e3).toFixed(n >= 1e5 ? 0 : 1).replace(/\.0$/, "") + "K";
+    return String(n);
+  }
+  function findChannels() {
+    if (busy) return;
+    if (!cfg.key) { show("settings"); setStatus("Add an API key to start.", true); return; }
+    if (!seeds.length) { setStatus("Add at least one channel you follow, or tap Pick for me.", true); return; }
+    if (quotaLeft() < seeds.length * 100 + 20) { setStatus("Not enough of today's free quota left. It resets at midnight Pacific time.", true); return; }
+    start();
+    var subIds = {}, seedSet = {}, cand = {}, infos = {};
+    subs.forEach(function (x) { subIds[x.id] = 1; });
+    seeds.forEach(function (id) { seedSet[id] = 1; });
+    var mw = mutedWordList();
+    var lang = (navigator.language || "en").slice(0, 2);
+    setStatus("Reading what your channels make");
+
+    api("channels", { part: "snippet,brandingSettings,topicDetails", id: seeds.join(","), maxResults: 50 }).then(function (j) {
+      (j.items || []).forEach(function (it) {
+        var b = (it.brandingSettings && it.brandingSettings.channel) || {};
+        var tc = (it.topicDetails && it.topicDetails.topicCategories) || [];
+        infos[it.id] = {
+          title: (it.snippet && it.snippet.title) || "",
+          keywords: b.keywords || "",
+          topics: tc.map(function (u) { try { return decodeURIComponent(u.split("/").pop()).replace(/_/g, " "); } catch (e) { return ""; } }).filter(Boolean)
+        };
+      });
+      var list = seeds.filter(function (id) { return infos[id]; });
+      return list.reduce(function (p, id, idx) {
+        return p.then(function () {
+          var info = infos[id];
+          setStatus("Looking for channels like " + info.title + " (" + (idx + 1) + " of " + list.length + ")");
+          var params = { part: "snippet", type: "video", q: seedQuery(info, id), maxResults: 50, order: "relevance", relevanceLanguage: lang, safeSearch: "moderate" };
+          if (cfg.hideShorts) params.videoDuration = "medium";
+          return api("search", params, null, 100).then(function (r) {
+            (r.items || []).forEach(function (it) {
+              var sn = it.snippet || {}, cid = sn.channelId;
+              if (!cid || subIds[cid] || seedSet[cid] || recNo[cid] || mutedCh[cid]) return;
+              var c = cand[cid] || (cand[cid] = { id: cid, title: decodeEntities(sn.channelTitle), from: {}, samples: [], hits: 0 });
+              c.hits++; c.from[info.title] = 1;
+              var t = decodeEntities(sn.title);
+              if (c.samples.length < 3 && c.samples.indexOf(t) < 0) c.samples.push(t);
+            });
+          });
+        });
+      }, Promise.resolve());
+    }).then(function () {
+      var all = Object.keys(cand).map(function (k) { return cand[k]; }).filter(function (c) {
+        var hay = (c.title + " " + c.samples.join(" ")).toLowerCase();
+        for (var i = 0; i < mw.length; i++) if (hay.indexOf(mw[i]) >= 0) return false;
+        return true;
+      });
+      all.forEach(function (c) { c.from = Object.keys(c.from); c.score = c.from.length * 3 + c.hits + (model.ch[c.id] || 0); });
+      all.sort(function (a, b) { return b.score - a.score; });
+      all = all.slice(0, 40);
+      if (!all.length) return all;
+      setStatus("Getting channel details");
+      return api("channels", { part: "snippet,statistics", id: all.map(function (c) { return c.id; }).join(","), maxResults: 50 }).then(function (j) {
+        var byId = {}; all.forEach(function (c) { byId[c.id] = c; });
+        (j.items || []).forEach(function (it) {
+          var c = byId[it.id]; if (!c) return;
+          var th = (it.snippet && it.snippet.thumbnails) || {}, st = it.statistics || {};
+          c.title = (it.snippet && it.snippet.title) || c.title;
+          c.thumb = (th.medium || th.default || {}).url || "";
+          c.subsCount = st.hiddenSubscriberCount ? null : +st.subscriberCount || 0;
+          c.videos = +st.videoCount || 0;
+        });
+        return all.filter(function (c) { return c.videos === undefined || c.videos >= 5; });
+      }, function () { return all; });
+    }).then(function (all) {
+      rec = { at: Date.now(), items: all.slice(0, 30) };
+      save("sf_rec", rec);
+      render();
+    }).catch(function (e) { setStatus(explain(e), true); }).then(finish);
+  }
+
+  function subTitle(id) { for (var i = 0; i < subs.length; i++) if (subs[i].id === id) return subs[i].title; return id; }
+  function addSeed(id) {
+    if (!id || seeds.indexOf(id) >= 0) return;
+    if (seeds.length >= 5) { setStatus("Five channels at a time keeps the search focused. Remove one to add another.", true); return; }
+    seeds.push(id); save("sf_seeds", seeds); renderSeeds();
+  }
+  function addSeedFromInput() {
+    var val = $("seedInput").value.trim().toLowerCase();
+    if (!val) return;
+    var hit = null, i;
+    for (i = 0; i < subs.length && !hit; i++) if (subs[i].title.toLowerCase() === val) hit = subs[i];
+    for (i = 0; i < subs.length && !hit; i++) if (subs[i].title.toLowerCase().indexOf(val) >= 0) hit = subs[i];
+    if (!hit) { setStatus("That is not one of your subscriptions. Pick a name from the list.", true); return; }
+    setStatus("");
+    addSeed(hit.id);
+    $("seedInput").value = "";
+  }
+  function autoSeeds() {
+    var ranked = subs.slice().sort(function (a, b) { return (model.ch[b.id] || 0) - (model.ch[a.id] || 0); });
+    var picks = ranked.filter(function (x) { return (model.ch[x.id] || 0) > 0; }).slice(0, 5).map(function (x) { return x.id; });
+    var rest = subs.filter(function (x) { return picks.indexOf(x.id) < 0; });
+    while (picks.length < 5 && rest.length) picks.push(rest.splice(Math.floor(Math.random() * rest.length), 1)[0].id);
+    seeds = picks; save("sf_seeds", seeds); renderSeeds();
+    setStatus("Picked the channels you open most, topped up at random. Swap any you like.");
+  }
+  function renderSeeds() {
+    var box = $("seeds"); box.textContent = "";
+    seeds.forEach(function (id) {
+      var chip = el("span", "seed");
+      chip.appendChild(el("span", null, subTitle(id)));
+      var x = el("button", null, "×"); x.type = "button"; x.setAttribute("aria-label", "Remove " + subTitle(id));
+      x.addEventListener("click", function () { seeds = seeds.filter(function (s) { return s !== id; }); save("sf_seeds", seeds); renderSeeds(); });
+      chip.appendChild(x); box.appendChild(chip);
+    });
+    var dl = $("subList");
+    if (dl.childElementCount !== subs.length) {
+      dl.textContent = "";
+      subs.forEach(function (x) { var o = el("option"); o.value = x.title; dl.appendChild(o); });
+    }
+  }
+  function renderChannels(box) {
+    renderSeeds();
+    var items = rec.items.filter(function (c) { return !recNo[c.id] && !mutedCh[c.id]; });
+    if (rec.at) setStatus(items.length + " suggested channels. Updated " + ago(rec.at) + ".");
+    else if (!$("status").textContent) setStatus("");
+    if (!items.length) {
+      box.appendChild(el("p", "empty", rec.at ? "No suggestions left. Try different channels above." : "Choose a few channels above, then tap Find similar channels."));
+      return;
+    }
+    var grid = el("div", "chans");
+    items.forEach(function (c) {
+      var card = el("article", "chan");
+      var img = el("img"); img.alt = ""; img.loading = "lazy"; img.referrerPolicy = "no-referrer"; if (c.thumb) img.src = c.thumb;
+      card.appendChild(img);
+      card.appendChild(el("h3", null, c.title));
+      var bits = [];
+      if (c.subsCount) bits.push(fmtCount(c.subsCount) + " subscribers");
+      bits.push("Like " + c.from.slice(0, 2).join(" and "));
+      card.appendChild(el("div", "sub", bits.join(" · ")));
+      var ul = el("ul");
+      c.samples.slice(0, 2).forEach(function (t) { ul.appendChild(el("li", null, t)); });
+      card.appendChild(ul);
+      var rowEl = el("div", "btn-row");
+      var a = el("a", "btn small", "View channel");
+      a.href = (cfg.openInApp ? "youtube://www.youtube.com/channel/" : "https://www.youtube.com/channel/") + encodeURIComponent(c.id);
+      a.rel = "noopener";
+      var no = el("button", "btn ghost small", "Not for me"); no.type = "button";
+      no.addEventListener("click", function () { recNo[c.id] = 1; save("sf_recNo", recNo); bump(model.ch, c.id, -1); save("sf_model", model); render(); });
+      rowEl.appendChild(a); rowEl.appendChild(no);
+      card.appendChild(rowEl);
+      grid.appendChild(card);
+    });
+    box.appendChild(grid);
+  }
+
+  function refresh(opts) {
+    if (tab === "chan" && !(opts && (opts.reimport || opts.token))) { findChannels(); return; } if (tab === "disc" && !(opts && (opts.reimport || opts.token))) refreshDiscover(); else refreshSubs(opts); }
 
   function googleImport() {
     if (!cfg.clientId) { setStatus("Paste an OAuth client ID first, then save.", true); return; }
-    if (!(window.google && google.accounts && google.accounts.oauth2)) { setStatus("Google sign-in has not loaded yet. Try again in a moment.", true); return; }
+    if (!(window.google && google.accounts && google.accounts.oauth2)) {
+      // Loaded only when asked for, so opening the app never contacts Google's sign-in service.
+      if (!gsiLoading) {
+        gsiLoading = true;
+        setStatus("Getting Google sign-in ready");
+        var sc = document.createElement("script");
+        sc.src = "https://accounts.google.com/gsi/client";
+        sc.onload = function () { gsiLoading = false; setStatus("Google sign-in is ready. Tap Import with Google again."); };
+        sc.onerror = function () { gsiLoading = false; setStatus("Could not load Google sign-in. Check your connection and try again.", true); };
+        document.head.appendChild(sc);
+      }
+      return;
+    }
     var client = google.accounts.oauth2.initTokenClient({
       client_id: cfg.clientId,
       scope: "https://www.googleapis.com/auth/youtube.readonly",
@@ -741,20 +966,27 @@ details.help { border-radius: 18px; }
     a.href = videoHref(v.id);
     a.rel = "noopener";
     a.setAttribute("data-id", v.id);
-    a.addEventListener("click", function () {
+    var h = hash(v.id);
+    a.style.setProperty("--tilt", String(((h % 5) - 2) * 0.55));
+    a.style.setProperty("--k", String(0.7 + (h % 7) * 0.1));
+    a.addEventListener("click", function (ev) {
+      if (holdFired) { holdFired = false; ev.preventDefault(); return; }
       if (!seen[v.id]) learn(v, 1);
       mark(v.id, true, a);
     });
+    attachHold(a, v);
 
     var th = el("div", "thumb");
     var img = el("img"); img.loading = "lazy"; img.alt = ""; img.decoding = "async";
-    // Ask for the sharp 720p still; fall back to the small one when a video has none.
+    // Mid-size still (640 wide): sharp enough at phone width, about a quarter of the 720p download.
+    img.referrerPolicy = "no-referrer";
     var fellBack = false;
     function fallback() { if (!fellBack) { fellBack = true; img.src = v.thumb; } }
     img.addEventListener("error", fallback);
     img.addEventListener("load", function () { if (!fellBack && img.naturalWidth && img.naturalWidth <= 120) fallback(); });
-    img.src = "https://i.ytimg.com/vi/" + encodeURIComponent(v.id) + "/hq720.jpg";
+    img.src = "https://i.ytimg.com/vi/" + encodeURIComponent(v.id) + "/sddefault.jpg";
     th.appendChild(img);
+    if (isSaved(v.id)) th.appendChild(el("span", "saved-tag", "Saved"));
     if (v.live === "live") th.appendChild(el("span", "badge live", "LIVE"));
     else if (v.live === "upcoming") th.appendChild(el("span", "badge", "Soon"));
     else if (v.dur) th.appendChild(el("span", "badge", fmtDur(v.dur)));
@@ -791,15 +1023,22 @@ details.help { border-radius: 18px; }
     acts.appendChild(b); acts.appendChild(x);
     a.appendChild(acts);
     if (observer && !shown[v.id] && !seen[v.id]) observer.observe(a);
+    if (liveObs) liveObs.observe(a); else a.classList.add("live");
     return a;
   }
 
   function render() {
     var box = $("feed");
     box.textContent = "";
-    var isDisc = tab === "disc";
-    $("tabSubs").setAttribute("aria-selected", String(!isDisc));
+    view = null;
+    var isDisc = tab === "disc", isChan = tab === "chan";
+    $("tabSubs").setAttribute("aria-selected", String(tab === "subs"));
     $("tabDisc").setAttribute("aria-selected", String(isDisc));
+    $("tabChan").setAttribute("aria-selected", String(isChan));
+    $("tools").hidden = isChan;
+    $("chanPanel").hidden = !isChan;
+    renderLater(false);
+    if (isChan) { renderChannels(box); return; }
     $("sortBtn").hidden = isDisc;
     $("sortBtn").setAttribute("aria-pressed", String(sortMode === "you"));
     $("hideSeenBtn").setAttribute("aria-pressed", String(!!hideSeen));
@@ -848,27 +1087,11 @@ details.help { border-radius: 18px; }
         }
         items = mixed;
       }
-      var list = el("div", "list");
-      list.style.marginTop = "18px";
-      items.forEach(function (v) { list.appendChild(row(v)); });
-      box.appendChild(list);
-      return;
     }
-
-    var groups = [], cur = null;
-    items.forEach(function (v) {
-      var d = new Date(v.at), k = dayKey(d);
-      if (!cur || cur.key !== k) { cur = { key: k, label: dayLabel(d), items: [] }; groups.push(cur); }
-      cur.items.push(v);
-    });
-    groups.forEach(function (g) {
-      var h = el("h2", "day", g.label);
-      h.appendChild(el("small", null, g.items.length + (g.items.length === 1 ? " video" : " videos")));
-      box.appendChild(h);
-      var list = el("div", "list");
-      g.items.forEach(function (v) { list.appendChild(row(v)); });
-      box.appendChild(list);
-    });
+    var counts = {};
+    if (!ranked) items.forEach(function (v) { var k = dayKey(new Date(v.at)); counts[k] = (counts[k] || 0) + 1; });
+    view = { items: items, pos: 0, ranked: ranked, counts: counts, day: null, list: null, marker: null };
+    appendMore();
   }
 
   function mark(id, on, node) {
@@ -878,6 +1101,7 @@ details.help { border-radius: 18px; }
   }
   function setTab(t) {
     tab = t; save("sf_tab", tab);
+    setStatus("");
     render();
     if (t === "disc" && !disc.items.length && topicList().length) refreshDiscover();
   }
@@ -890,7 +1114,8 @@ details.help { border-radius: 18px; }
     $("topics").value = cfg.topics || "";
     $("mutedWords").value = cfg.mutedWords || "";
     $("hideShorts").checked = cfg.hideShorts !== false;
-    $("openInApp").checked = cfg.openInApp !== false;
+    $("openInApp").checked = !!cfg.openInApp;
+    $("sway").checked = cfg.sway !== false;
     $("originText").textContent = location.origin;
     $("closeBtn").hidden = !feed.items.length;
     var cats = $("cats"); cats.textContent = "";
@@ -916,7 +1141,9 @@ details.help { border-radius: 18px; }
       mutedWords: $("mutedWords").value.trim(),
       blockCats: blocked,
       hideShorts: $("hideShorts").checked,
-      openInApp: $("openInApp").checked
+      openInApp: $("openInApp").checked,
+      sway: $("sway").checked,
+      v2: 1
     };
     save("sf_cfg", cfg);
     return { channelChanged: oldChannel !== cfg.channel };
@@ -934,9 +1161,16 @@ details.help { border-radius: 18px; }
   });
   $("googleBtn").addEventListener("click", function () { readSettings(); googleImport(); });
   $("refreshBtn").addEventListener("click", function () { refresh(); });
+  $("fullBtn").addEventListener("click", function () { readSettings(); tab = "subs"; save("sf_tab", tab); refreshSubs({ full: true }); });
   $("tabSubs").addEventListener("click", function () { setTab("subs"); });
   $("tabDisc").addEventListener("click", function () { setTab("disc"); });
-  $("search").addEventListener("input", render);
+  $("tabChan").addEventListener("click", function () { setTab("chan"); });
+  $("seedAddBtn").addEventListener("click", addSeedFromInput);
+  $("seedInput").addEventListener("change", addSeedFromInput);
+  $("seedAutoBtn").addEventListener("click", autoSeeds);
+  $("findChanBtn").addEventListener("click", findChannels);
+  var searchTimer = null;
+  $("search").addEventListener("input", function () { clearTimeout(searchTimer); searchTimer = setTimeout(render, 160); });
   $("sortBtn").addEventListener("click", function () { sortMode = sortMode === "you" ? "new" : "you"; save("sf_sort", sortMode); render(); });
   $("hideSeenBtn").addEventListener("click", function () { hideSeen = !hideSeen; save("sf_hideSeen", hideSeen); render(); });
   $("clearSeenBtn").addEventListener("click", function () { seen = {}; save("sf_seen", seen); setStatus("Watched marks cleared."); });
@@ -947,13 +1181,108 @@ details.help { border-radius: 18px; }
   });
   $("clearMutedBtn").addEventListener("click", function () { mutedCh = {}; save("sf_mutedCh", mutedCh); fillSettings(); setStatus("All channels unmuted."); });
   $("forgetBtn").addEventListener("click", function () {
-    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota"].forEach(drop);
-    cfg = Object.assign({}, DEFAULT_CFG);
+    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_later", "sf_chk"].forEach(drop);
+    chk = {};
+    cfg = Object.assign({}, DEFAULT_CFG, { v2: 1 });
     subs = []; feed = { at: 0, items: [] }; disc = { at: 0, n: 0, items: [] };
     seen = {}; hidden = {}; mutedCh = {}; shown = {}; model = { ch: {}, cat: {}, w: {}, n: 0 };
-    hideSeen = false; tab = "subs"; sortMode = "new";
+    hideSeen = false; tab = "subs"; sortMode = "new"; seeds = []; rec = { at: 0, items: [] }; recNo = {}; later = [];
     fillSettings(); setStatus("Everything on this device was removed.");
   });
+
+  // ---------- watch later (press and hold) ----------
+  function hash(str) { var h = 0; for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0; return Math.abs(h); }
+  function cssId(id) { return String(id).replace(/[^A-Za-z0-9_-]/g, ""); }
+  function isSaved(id) { for (var i = 0; i < later.length; i++) if (later[i].id === id) return true; return false; }
+  function setSavedTags(id, on) {
+    var cards = document.querySelectorAll('.vid[data-id="' + cssId(id) + '"]');
+    Array.prototype.forEach.call(cards, function (c) {
+      var th = c.querySelector(".thumb"), tag = c.querySelector(".saved-tag");
+      if (on && th && !tag) { var t = el("span", "saved-tag", "Saved"); th.insertBefore(t, th.firstChild); }
+      if (!on && tag) tag.parentNode.removeChild(tag);
+    });
+  }
+  function toggleLater(v) {
+    var was = isSaved(v.id);
+    if (was) later = later.filter(function (x) { return x.id !== v.id; });
+    else later.unshift({ id: v.id, title: v.title, channel: v.channel, chId: v.chId, at: v.at, thumb: v.thumb, dur: v.dur || 0, cat: v.cat || "" });
+    later = later.slice(0, 50);
+    save("sf_later", later);
+    setSavedTags(v.id, !was);
+    renderLater(true);
+    toast(was ? "Removed from Watch later." : "Saved to Watch later.", "Undo", function () { toggleLater(v); });
+  }
+  function attachHold(a, v) {
+    var timer = null, sx = 0, sy = 0;
+    function cancel() { clearTimeout(timer); timer = null; }
+    a.addEventListener("touchstart", function (e) {
+      holdFired = false; cancel();
+      if (e.target.closest && e.target.closest("button")) return;
+      var t = e.touches[0]; sx = t.clientX; sy = t.clientY;
+      timer = setTimeout(function () { timer = null; holdFired = true; toggleLater(v); }, 550);
+    }, { passive: true });
+    a.addEventListener("touchmove", function (e) {
+      var t = e.touches[0];
+      if (Math.abs(t.clientX - sx) > 8 || Math.abs(t.clientY - sy) > 8) cancel();
+    }, { passive: true });
+    a.addEventListener("touchend", cancel);
+    a.addEventListener("touchcancel", cancel);
+    a.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+  }
+  function renderLater(keepPlace) {
+    var box = $("laterBox"), h0 = box.hidden ? 0 : box.offsetHeight;
+    box.textContent = "";
+    box.hidden = tab !== "subs" || !later.length;
+    if (!box.hidden) {
+      var head = el("h2", "day", "Watch later");
+      head.appendChild(el("small", null, later.length + " saved"));
+      box.appendChild(head);
+      var rowEl = el("div", "later-row");
+      later.forEach(function (v) {
+        var c = el("a", "later-card");
+        c.href = videoHref(v.id); c.rel = "noopener";
+        c.addEventListener("click", function () {
+          if (!seen[v.id]) learn(v, 1);
+          seen[v.id] = 1; save("sf_seen", seen);
+          var m = document.querySelectorAll('.vid[data-id="' + cssId(v.id) + '"]');
+          Array.prototype.forEach.call(m, function (n) { n.classList.add("seen"); });
+        });
+        var th = el("div", "thumb");
+        var img = el("img"); img.loading = "lazy"; img.alt = ""; img.referrerPolicy = "no-referrer"; img.src = v.thumb; th.appendChild(img);
+        if (v.dur) th.appendChild(el("span", "badge", fmtDur(v.dur)));
+        c.appendChild(th);
+        c.appendChild(el("div", "lt", v.title));
+        c.appendChild(el("div", "ls", v.channel));
+        var x = el("button", "later-x"); x.type = "button"; x.setAttribute("aria-label", "Remove from Watch later");
+        x.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+        x.addEventListener("click", function (ev) { ev.preventDefault(); ev.stopPropagation(); toggleLater(v); });
+        c.appendChild(x);
+        rowEl.appendChild(c);
+      });
+      box.appendChild(rowEl);
+    }
+    var h1 = box.hidden ? 0 : box.offsetHeight;
+    if (keepPlace && h1 !== h0 && window.scrollY > 40) window.scrollBy(0, h1 - h0);
+  }
+
+  // ---------- pin sway ----------
+  var reduceMotion = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  var sw = { a: 0, w: 0, y: window.scrollY || 0, t: 0, raf: 0 };
+  function swayOn() { return cfg.sway !== false && !reduceMotion; }
+  function swayFrame() {
+    sw.w += -0.07 * sw.a; sw.w *= 0.91; sw.a += sw.w;
+    sw.a = Math.max(-3.5, Math.min(3.5, sw.a));
+    var live = Math.abs(sw.a) > 0.01 || Math.abs(sw.w) > 0.01;
+    $("feed").style.setProperty("--sway", (live ? sw.a : 0).toFixed(3) + "deg");
+    sw.raf = live ? requestAnimationFrame(swayFrame) : 0;
+  }
+  window.addEventListener("scroll", function () {
+    if (!swayOn()) return;
+    var now = performance.now(), dy = window.scrollY - sw.y, dt = Math.max(8, now - sw.t);
+    sw.y = window.scrollY; sw.t = now;
+    sw.w += Math.max(-0.5, Math.min(0.5, -(dy / dt) * 0.12));
+    if (!sw.raf) sw.raf = requestAnimationFrame(swayFrame);
+  }, { passive: true });
 
   // ---------- start ----------
   if (cfg.key && subs.length) {
