@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ZkO0yMkht7qsoJDpP2pCR+SwJoxcDAYVTxtMAIsyUnM=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-C85mCQ1hjVx9h51vNP4qW3rrBAZGXJzEtN3vHSa5DK4=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -211,6 +211,7 @@ body.light #feed { scroll-snap-type: none !important; }
 .f-av img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .f-name { font: italic 700 19px/1.15 Georgia, "Caveat", serif; margin: 10px 2px 3px; overflow-wrap: anywhere; }
 .f-meta { font-size: 12px; color: var(--pmuted); margin: 0 2px; }
+.f-quiet { position: absolute; left: 12px; top: 12px; z-index: 3; height: 22px; padding: 0 8px; border-radius: 11px; background: #3a3a40; color: #e7e2d8; font-size: 11.5px; font-weight: 700; display: grid; place-items: center; }
 .f-new { position: absolute; right: 12px; top: 12px; z-index: 3; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 11px; background: var(--accent); color: var(--accent-ink); font-size: 12px; font-weight: 700; display: grid; place-items: center; }
 #chHead { padding-top: 4px; }
 .ch-top { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
@@ -356,6 +357,36 @@ body.light .jk-turn { animation: none; }
   .jk-ctl button, .jk-play { height: 38px; padding: 0 12px; }
 }
 .field textarea { width: 100%; box-sizing: border-box; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 10px 12px; font: inherit; font-size: 16px; resize: vertical; }
+.chan .why { font-size: 12.5px; font-style: italic; opacity: .85; margin: 2px 0 6px; }
+.chan .th { min-width: 44px; padding: 0 10px; }
+.chan .th.on { background: var(--accent); }
+.sugg-top { display: flex; align-items: center; gap: 10px; margin: 6px 0 12px; }
+.sugg-top small { opacity: .7; font-size: 12px; }
+#settingsBtn { position: relative; --q: 0; --qc: var(--accent); }
+#settingsBtn::after { content: ""; position: absolute; inset: -3px; border-radius: 50%; pointer-events: none; background: conic-gradient(var(--qc) calc(var(--q) * 1%), rgba(255,255,255,.12) 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); }
+.sh-chrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; }
+.sh-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 6px 0 10px; }
+.sh-top h2 { margin: 0; font: italic 700 26px/1 Georgia, "Caveat", serif; }
+.sh-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 120px; }
+.sh-card { position: relative; aspect-ratio: 9 / 14; border: 0; padding: 0; border-radius: 14px; overflow: hidden; background: #222; color: #fff; text-align: left; }
+.sh-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sh-card.seen img { opacity: 0.45; }
+.sh-card span { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 10px 8px; font-size: 12.5px; line-height: 1.25; background: linear-gradient(transparent, rgba(0,0,0,.85)); }
+.sh-card small { display: block; opacity: .75; font-size: 11px; margin-top: 2px; }
+.sh-ov { position: fixed; inset: 0; z-index: 20; background: #000; color: #fff; }
+.sh-vid, .sh-vid iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.sh-hit { position: absolute; inset: 64px 0 90px 0; touch-action: none; }
+.sh-x { position: absolute; left: 14px; top: calc(env(safe-area-inset-top) + 10px); width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(0,0,0,.55); color: #fff; font-size: 18px; z-index: 2; }
+.sh-n { position: absolute; right: 16px; top: calc(env(safe-area-inset-top) + 22px); font-size: 13px; opacity: .8; z-index: 2; text-shadow: 0 1px 3px #000; }
+.sh-side { position: absolute; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 110px); display: flex; flex-direction: column; gap: 14px; z-index: 2; }
+.sh-side button { width: 52px; height: 52px; border-radius: 50%; border: 0; background: rgba(0,0,0,.55); font-size: 24px; line-height: 1; }
+.sh-cap { position: absolute; left: 16px; right: 84px; bottom: calc(env(safe-area-inset-bottom) + 22px); z-index: 2; text-shadow: 0 1px 4px #000; pointer-events: none; }
+.sh-cap b { display: block; font-size: 15px; }
+.sh-cap span { display: block; font-size: 14px; margin-top: 3px; opacity: .9; max-height: 3.6em; overflow: hidden; }
+.sh-ov .stamp { z-index: 5; font-size: 34px; }
+body.shOn { overflow: hidden; }
+body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px); }
+#tabSrch[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
 </style>
 </head>
 <body>
@@ -365,6 +396,7 @@ body.light .jk-turn { animation: none; }
   <div class="wrap">
     <div class="bar-row">
       <h1 class="brand"><svg viewBox="-60 -60 120 120" width="34" height="34" role="img" aria-label="North Star logo"><path d="M0,-50 Q7,-7 50,0 Q7,7 0,50 Q-7,7 -50,0 Q-7,-7 0,-50Z" fill="#C98B6B"/><path d="M-7,-11 L12,0 L-7,11Z" fill="#18181B"/></svg>NORTH STAR</h1>
+      <button class="icon-btn" id="tabSrch" type="button" aria-label="Search" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
       <button class="icon-btn" id="refreshBtn" type="button" aria-label="Refresh feed">
         <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 4v5h-5"/></svg>
       </button>
@@ -384,7 +416,7 @@ body.light .jk-turn { animation: none; }
       <button class="tab" id="tabDisc" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Discover</button>
       <button class="tab" id="tabFollow" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><circle cx="17.5" cy="8" r="2.5"/><path d="M17.5 13.5c2.2.2 3.7 1.7 4.2 4.5"/></svg>Following</button>
       <button class="tab" id="tabJuke" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>Jukebox</button>
-      <button class="tab" id="tabSrch" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</button>
+      <button class="tab" id="tabShorts" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="3"/><path d="M11 9.5l3 2.5-3 2.5z"/></svg>Shorts</button>
     </div>
     <div class="d-tog" id="discTog" hidden><button class="chip" id="dtVid" type="button" aria-pressed="true">Videos</button><button class="chip" id="dtChan" type="button" aria-pressed="false">Find channels</button></div>
     <div class="panel" id="srchPanel" hidden>
@@ -497,7 +529,8 @@ body.light .jk-turn { animation: none; }
     <div class="field"><label for="favMusic">Favorite music for the Jukebox</label><textarea id="favMusic" rows="3" autocomplete="off" autocapitalize="off" placeholder="Artists and genres, one per line or separated by commas. Example: Tyler Childers, bluegrass, Khruangbin, jazz"></textarea></div>
     <div class="hint">The Jukebox looks for new artists like these, and it learns from what you play or skip.</div>
     <div class="btn-row"><button class="btn ghost small" id="srchClear" type="button">Clear remembered searches</button></div>
-    <label class="check"><input type="checkbox" id="hideShorts" checked> Leave out Shorts and live streams</label>
+    <label class="check"><input type="checkbox" id="hideShorts" checked> Leave out Shorts and live streams (from Subs and Discover)</label>
+    <div class="field"><label>Channels hidden from the Shorts tab</label><div id="shChList"></div></div>
     <label class="check"><input type="checkbox" id="openInApp"> Use the direct app link (may show an "Open in YouTube?" prompt)</label>
     <label class="check"><input type="checkbox" id="sway" checked> Cards swing when you scroll</label>
     <label class="check"><input type="checkbox" id="lightMode"> Light mode: no swing, flat shadows, fewer cards drawn at once (turns on by itself after a crash)</label>
@@ -518,11 +551,26 @@ body.light .jk-turn { animation: none; }
     </div>
     <h3>Diagnostics</h3>
     <p>If something looks wrong, tap Copy and paste the result into chat. It has no API key, sign-in token or watch history.</p>
+    <div class="field"><label>Backup</label><div class="hint">Saves your keepers, hidden items, favorites, learning and follows into one file. It leaves out your API key and client ID.</div>
+      <div class="btn-row"><button class="btn ghost" id="expBtn" type="button">Export backup</button><button class="btn ghost" id="impBtn" type="button">Import backup</button></div>
+      <input type="file" id="impFile" accept="application/json,.json" hidden></div>
     <div class="btn-row"><button class="btn ghost" id="diagBtn" type="button">Copy diagnostics</button><button class="btn" id="crashBtn" type="button">Copy crash report</button></div>
     <textarea class="mtest" id="diagBox" rows="9" readonly hidden></textarea>
     <p id="versionLine"></p>
   </section>
 </main>
+<div class="sh-ov" id="shOv" hidden>
+  <div class="sh-vid" id="shVid"></div>
+  <div class="sh-hit" id="shHit"></div>
+  <button class="sh-x" id="shX" type="button" aria-label="Close Shorts">&#10005;</button>
+  <div class="sh-n" id="shN"></div>
+  <div class="sh-side">
+    <button type="button" id="shUp" aria-label="Keeper, more like this">&#128077;</button>
+    <button type="button" id="shDn" aria-label="Nah, less like this">&#128078;</button>
+    <button type="button" id="shMute" aria-label="Hide Shorts from this channel">&#128683;</button>
+  </div>
+  <div class="sh-cap"><b id="shCh"></b><span id="shTi"></span></div>
+</div>
 <div class="toast" id="toast" hidden><span id="toastMsg"></span><button type="button" id="toastAct"></button></div>
 
 <script>
@@ -558,9 +606,11 @@ body.light .jk-turn { animation: none; }
   var tab = load("sf_tab", "subs"); if (tab === "chan") tab = "srch";
   var discFind = false;
   var sortMode = load("sf_sort", "new");
+  var SORTS = { "new": "Newest", old: "Oldest", you: "For you", views: "Most viewed", short: "Shortest", "long": "Longest" };
+  if (!SORTS[sortMode]) sortMode = "new";
   var seeds = load("sf_seeds", []);
   var rec = load("sf_rec", { at: 0, items: [] });
-  var recNo = load("sf_recNo", {});
+  var recNo = load("sf_recNo", {}), recYes = load("sf_recYes", {});
   var later = load("sf_later", []);
   var holdFired = false;
   var gsiLoading = false;
@@ -600,7 +650,13 @@ body.light .jk-turn { animation: none; }
   // ---------- quota (rough, per Pacific day) ----------
   function pacificDay() { try { return new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" }); } catch (e) { return new Date().toISOString().slice(0, 10); } }
   function quota() { var q = load("sf_quota", { day: "", used: 0 }); if (q.day !== pacificDay()) q = { day: pacificDay(), used: 0 }; return q; }
-  function spend(n) { var q = quota(); q.used += n; save("sf_quota", q); }
+  function spend(n) { var q = quota(); q.used += n; save("sf_quota", q); quotaRing(); }
+  function quotaRing() {
+    var b = document.getElementById("settingsBtn"); if (!b) return;
+    var pct = Math.min(100, quota().used / 100);
+    b.style.setProperty("--q", String(Math.round(pct))); b.style.setProperty("--qc", pct >= 95 ? "#E5484D" : pct >= 80 ? "#F2B03C" : "var(--accent)");
+    b.setAttribute("aria-label", "Open settings. " + Math.round(pct) + " percent of today's quota used");
+  }
   function quotaLeft() { return Math.max(0, 10000 - quota().used); }
 
   // ---------- YouTube API ----------
@@ -1041,6 +1097,9 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   window.addEventListener("resize", function () { var g = document.querySelector(".f-grid"); if (g) masonry(g); });
   function unseenCount(id) { var n = 0; feed.items.forEach(function (v) { if ((v.sid || v.chId) === id && !seen[v.id] && !hidden[v.id]) n++; }); return n; }
 
+  var QUIET_MS = 180 * 864e5;
+  function quietMs(id) { var c = chk[id], t = c && c[1]; return t ? Date.now() - t : 0; }
+  function isQuiet(id) { return quietMs(id) > QUIET_MS; }
   function renderFollow(box) {
     $("search").placeholder = "Filter channels";
     $("sortBtn").hidden = false; $("sortBtn").textContent = folSort === "az" ? "A–Z" : "Recent";
@@ -1051,9 +1110,12 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var counts = {}, other = 0;
     subs.forEach(function (s) { var t = themeOf(s.id).ids; if (!t.length) other++; t.forEach(function (i) { counts[i] = (counts[i] || 0) + 1; }); });
     var tk = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || a - b; });
-    if (folTopic && folTopic !== "__other" && !counts[topicIdx(folTopic)]) folTopic = null;
+    var nQuiet = subs.filter(function (s) { return isQuiet(s.id); }).length;
+    if (folTopic && folTopic !== "__other" && folTopic !== "__quiet" && !counts[topicIdx(folTopic)]) folTopic = null;
+    if (folTopic === "__quiet" && !nQuiet) folTopic = null;
     var list = subs.filter(function (s) { return !q || s.title.toLowerCase().indexOf(q) >= 0; });
-    if (folTopic) list = list.filter(function (s) { var t = themeOf(s.id).ids; return folTopic === "__other" ? !t.length : t.indexOf(topicIdx(folTopic)) >= 0; });
+    if (folTopic === "__quiet") list = list.filter(function (s) { return isQuiet(s.id); });
+    else if (folTopic) list = list.filter(function (s) { var t = themeOf(s.id).ids; return folTopic === "__other" ? !t.length : t.indexOf(topicIdx(folTopic)) >= 0; });
     if (folSort === "recent") list.sort(function (a, b) { return ((chk[b.id] || [0, 0])[1] || 0) - ((chk[a.id] || [0, 0])[1] || 0); });
     else list.sort(function (a, b) { return a.title.toLowerCase() < b.title.toLowerCase() ? -1 : 1; });
     setStatus("");
@@ -1063,6 +1125,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       var row = el("div", "f-chips");
       var defs = [[null, "All " + subs.length]].concat(tk.map(function (i) { return [TOPICS[i][0], TOPICS[i][0] + " " + counts[i]]; }));
       if (other) defs.push(["__other", "Other " + other]);
+      if (nQuiet) defs.push(["__quiet", "Quiet " + nQuiet]);
       defs.forEach(function (d) {
         var b = el("button", folTopic === d[0] ? "chip on" : "chip", d[1]); b.type = "button";
         b.addEventListener("click", function () { folTopic = folTopic === d[0] ? null : d[0]; renderFollowLazy(); });
@@ -1085,6 +1148,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       var card = el("button", "f-card"); card.type = "button";
       card.style.setProperty("--tilt", String((((h >> 3) % 5) - 2) * 0.5));
       if (n) card.appendChild(el("span", "f-new", n + " new"));
+      if (isQuiet(s.id)) card.appendChild(el("span", "f-quiet", "Quiet " + Math.floor(quietMs(s.id) / (30 * 864e5)) + " mo"));
       var ph = el("div", "f-photo"); ph.style.background = themeBg(s.id, h);
       ph.appendChild(backdropEl(s.id, false)); ph.appendChild(avatarEl(s.id, s.title)); stickerFor(s.id, h, ph, card); card.appendChild(ph);
       if (card._tag) card.appendChild(card._tag);
@@ -1969,6 +2033,192 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       render();
     }).catch(function (e) { setStatus(explain(e), true); }).then(finish);
   }
+
+  // ---------- Shorts ----------
+  var shs = load("sf_shorts", { items: [], at: 0 }), shCh = load("sf_shch", {}), shList = [], shI = 0, shState = -1, shFrame = null, shBusy = 0;
+  shs.items = shs.items || [];
+  function shOrder() {
+    var per = {}, out = shs.items.filter(function (v) { return !hidden[v.id] && !shCh[v.chId]; }).sort(function (a, b) { return (seen[a.id] ? 1 : 0) - (seen[b.id] ? 1 : 0) || String(b.at).localeCompare(String(a.at)); });
+    out = out.filter(function (v) { per[v.chId] = (per[v.chId] || 0) + 1; return per[v.chId] <= 3; });
+    var rest = out.slice(), res = [], recent = [];
+    while (rest.length) {
+      var at = -1;
+      for (var i = 0; i < rest.length; i++) { if (recent.indexOf(rest[i].chId) < 0) { at = i; break; } }
+      if (at < 0) { res = res.concat(rest); break; }
+      var v = rest.splice(at, 1)[0]; res.push(v); recent.push(v.chId); if (recent.length > 3) recent.shift();
+    }
+    return res;
+  }
+  function shCost() { return subs.filter(function (x) { return !shCh[x.id]; }).length; }
+  function shFetch() {
+    if (busy) return;
+    if (!cfg.key) { show("settings"); setStatus("Add an API key to start.", true); return; }
+    var list = subs.filter(function (x) { return !shCh[x.id]; });
+    if (!list.length) { toast("Follow some channels first.", null, null); return; }
+    if (quotaLeft() < list.length + 100) { toast("Not enough of today's free quota left to load Shorts.", null, null); return; }
+    start(); setStatus("Loading Shorts (0 of " + list.length + ")");
+    pool(list, 4, function (x) {
+      return api("playlistItems", { part: "snippet,contentDetails", maxResults: 4, playlistId: "UUSH" + x.id.slice(2) }).then(function (j) {
+        return (j.items || []).map(function (it) {
+          var sn = it.snippet || {}, c = it.contentDetails || {};
+          return { id: c.videoId, title: sn.title || "", channel: sn.videoOwnerChannelTitle || x.title, chId: sn.videoOwnerChannelId || x.id, at: c.videoPublishedAt || sn.publishedAt };
+        }).filter(function (v) { return v.id && v.at && v.title !== "Private video" && v.title !== "Deleted video"; });
+      }).catch(function (e) { if (e.status === 404) return []; throw e; });
+    }, function (d) { setStatus("Loading Shorts (" + d + " of " + list.length + ")"); }).then(function (res) {
+      var have = {}, out = [];
+      (res || []).forEach(function (l) { (l || []).forEach(function (v) { if (!have[v.id]) { have[v.id] = 1; out.push(v); } }); });
+      shs.items.forEach(function (v) { if (!have[v.id] && (v.keep || seen[v.id])) { have[v.id] = 1; out.push(v); } });
+      out.sort(function (a, b) { return String(b.at).localeCompare(String(a.at)); });
+      shs.items = out.slice(0, 400); shs.at = Date.now(); save("sf_shorts", shs);
+      toast("Loaded " + out.length + " Shorts.", null, null);
+      if (tab === "shorts") render();
+    }).catch(function (e) { setStatus(explain(e), true); }).then(function () { finish(); if (!$("status").classList.contains("err")) setStatus(""); });
+  }
+  function renderShorts(box) {
+    setStatus("");
+    shList = shOrder();
+    var top = el("div", "sh-top"); top.appendChild(el("h2", null, "Shorts"));
+    var rb = el("button", "btn small", shs.items.length ? "Refresh" : "Load Shorts"); rb.type = "button"; rb.addEventListener("click", shFetch); top.appendChild(rb); box.appendChild(top);
+    if (!shList.length) { box.appendChild(el("div", "hint", shs.items.length ? "Nothing left to watch. Tap Refresh for new Shorts." : "No Shorts yet. Loading checks each channel you follow once (about " + shCost() + " quota units).")); return; }
+    box.appendChild(el("div", "hint", shCost() + " units per refresh. Tap a Short to watch full screen: swipe up for the next, 👍 keeps, 👎 hides."));
+    var g = el("div", "sh-grid");
+    shList.forEach(function (v, i) {
+      var b = el("button", "sh-card" + (seen[v.id] ? " seen" : "")); b.type = "button";
+      var im = el("img"); im.alt = ""; im.loading = "lazy"; im.referrerPolicy = "no-referrer"; im.src = jkThumb(v.id); b.appendChild(im);
+      var t = el("span", null, v.title); t.appendChild(el("small", null, v.channel)); b.appendChild(t);
+      b.addEventListener("click", function () { shOpen(i); });
+      g.appendChild(b);
+    });
+    box.appendChild(g);
+  }
+  function shCmd(func, args) { try { if (shFrame && shFrame.contentWindow) shFrame.contentWindow.postMessage(JSON.stringify({ event: "command", func: func, args: args || [] }), "*"); } catch (e) {} }
+  function shSrc(id) {
+    var o = /^https?:/.test(location.protocol) ? "&origin=" + encodeURIComponent(location.origin) : "";
+    return "https://www.youtube.com/embed/" + encodeURIComponent(id) + "?autoplay=1&playsinline=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&enablejsapi=1" + o;
+  }
+  function shOpen(i) {
+    shI = i; document.body.classList.add("shOn"); $("shOv").hidden = false;
+    var v = shList[shI]; if (!v) return;
+    if (!shFrame) {
+      shFrame = el("iframe"); shFrame.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture"); shFrame.setAttribute("title", "Short"); shFrame.referrerPolicy = "strict-origin-when-cross-origin";
+      shFrame.addEventListener("load", function () { try { shFrame.contentWindow.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), "*"); } catch (e) {} });
+      shFrame.src = shSrc(v.id); $("shVid").appendChild(shFrame);
+    } else { shCmd("loadVideoById", [v.id]); }
+    shInfo();
+  }
+  function shInfo() {
+    var v = shList[shI]; if (!v) return;
+    $("shCh").textContent = v.channel; $("shTi").textContent = v.title; $("shN").textContent = (shI + 1) + " / " + shList.length;
+    if (!seen[v.id]) mark(v.id, true);
+  }
+  function shClose() {
+    $("shOv").hidden = true; document.body.classList.remove("shOn");
+    if (shFrame && shFrame.parentNode) shFrame.parentNode.removeChild(shFrame); shFrame = null; shState = -1;
+    if (tab === "shorts") render();
+  }
+  function shGo(d) {
+    var n = shI + d; if (n < 0 || n >= shList.length) return;
+    shI = n; var v = shList[shI]; shCmd("loadVideoById", [v.id]); shInfo();
+  }
+  function stampOn(c, kind, done) {
+    if (!c.animate || light.on) { done(); return; }
+    var keep = kind === "keep", rot = keep ? -9 : 7, st = el("div", "stamp " + kind, keep ? "Keeper" : "Nah"); c.appendChild(st);
+    var T = function (r, sc) { return "translate(-50%, -50%) rotate(" + r + "deg) scale(" + sc + ")"; };
+    st.animate([{ opacity: 0, transform: T(rot + 14, 2.6), offset: 0 }, { opacity: 1, transform: T(rot, 1), offset: 0.25 }, { opacity: 1, transform: T(rot, 1), offset: 0.8 }, { opacity: 0, transform: T(rot, 1), offset: 1 }], { duration: 900, easing: "ease-out" }).onfinish = function () { if (st.parentNode) st.parentNode.removeChild(st); done(); };
+  }
+  function shAfterRemove(removed) {
+    shList = shList.filter(function (x) { return removed.indexOf(x.id) < 0; });
+    if (!shList.length) { shClose(); return; }
+    if (shI >= shList.length) shI = shList.length - 1;
+    var v = shList[shI]; shCmd("loadVideoById", [v.id]); shInfo();
+  }
+  function shKeep() {
+    var v = shList[shI]; if (!v || shBusy) return; shBusy = 1;
+    learn(v, 2); shs.items.forEach(function (x) { if (x.id === v.id) x.keep = 1; }); save("sf_shorts", shs);
+    stampOn($("shOv"), "keep", function () { shBusy = 0; toast("Keeper. More like this will show up.", null, null); });
+  }
+  function shNah() {
+    var v = shList[shI]; if (!v || shBusy) return; shBusy = 1;
+    hidden[v.id] = 1; save("sf_hidden", hidden); learn(v, -1.5);
+    stampOn($("shOv"), "nah", function () {
+      shBusy = 0; shAfterRemove([v.id]);
+      toast("Hidden. You will see fewer like it.", "Undo", function () { delete hidden[v.id]; save("sf_hidden", hidden); learn(v, 1.5); shs.items.forEach(function (x) { if (x.id === v.id && !shList.some(function (y) { return y.id === v.id; })) shList.splice(shI, 0, x); }); if (!$("shOv").hidden) shInfo(); });
+    });
+  }
+  function shMute() {
+    var v = shList[shI]; if (!v) return;
+    shCh[v.chId] = v.channel; save("sf_shch", shCh);
+    var ids = shList.filter(function (x) { return x.chId === v.chId; }).map(function (x) { return x.id; });
+    shAfterRemove(ids);
+    toast("No more Shorts from " + v.channel + ".", "Undo", function () { delete shCh[v.chId]; save("sf_shch", shCh); });
+  }
+  function renderShCh() {
+    var box = $("shChList"); if (!box) return; box.textContent = "";
+    var ks = Object.keys(shCh);
+    if (!ks.length) { box.appendChild(el("div", "hint", "None.")); return; }
+    ks.forEach(function (k) {
+      var r = el("div", "sh-chrow"); r.appendChild(el("span", null, shCh[k] || k));
+      var b = el("button", "btn small", "Show again"); b.type = "button"; b.addEventListener("click", function () { delete shCh[k]; save("sf_shch", shCh); renderShCh(); });
+      r.appendChild(b); box.appendChild(r);
+    });
+  }
+  window.addEventListener("message", function (e) {
+    if (!/youtube\.com$/.test(String(e.origin).replace(/^https?:\/\//, ""))) return;
+    var d; try { d = typeof e.data === "string" ? JSON.parse(e.data) : e.data; } catch (x) { return; }
+    if (!d) return;
+    var st = d.event === "onStateChange" ? d.info : (d.info && d.info.playerState != null ? d.info.playerState : null);
+    if (st == null) return; shState = st;
+    if (st === 0) { shCmd("seekTo", [0, true]); shCmd("playVideo"); }
+  });
+  (function () {
+    var hit = $("shHit"), y0 = 0, t0 = 0, x0 = 0;
+    hit.addEventListener("pointerdown", function (e) { y0 = e.clientY; x0 = e.clientX; t0 = Date.now(); });
+    hit.addEventListener("pointerup", function (e) {
+      var dy = e.clientY - y0, dx = e.clientX - x0;
+      if (Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx)) { shGo(dy < 0 ? 1 : -1); return; }
+      if (Math.abs(dy) < 12 && Math.abs(dx) < 12) { if (shState === 1) shCmd("pauseVideo"); else shCmd("playVideo"); }
+    });
+    $("shX").addEventListener("click", shClose); $("shUp").addEventListener("click", shKeep); $("shDn").addEventListener("click", shNah); $("shMute").addEventListener("click", shMute);
+  })();
+
+  // ---------- backup ----------
+  var BK_KEYS = ["sf_cfg", "sf_subs", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_chTags", "sf_jb", "sf_jbl", "sf_shorts", "sf_shch", "sf_rec", "sf_recNo", "sf_recYes", "sf_seeds", "sf_later", "sf_sh", "sf_unf", "sf_dboost", "sf_chTheme"];
+  function bkMake() {
+    var data = {};
+    BK_KEYS.forEach(function (k) { var raw = localStorage.getItem(k); if (raw == null) return; try { data[k] = JSON.parse(raw); } catch (e) {} });
+    if (data.sf_cfg) { data.sf_cfg = JSON.parse(JSON.stringify(data.sf_cfg)); delete data.sf_cfg.key; delete data.sf_cfg.clientId; }
+    return JSON.stringify({ app: "north-star-backup", version: VERSION, at: new Date().toISOString(), data: data });
+  }
+  function bkExport() {
+    var txt = bkMake(), name = "north-star-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+    try {
+      var f = new File([txt], name, { type: "application/json" });
+      if (navigator.canShare && navigator.canShare({ files: [f] })) { navigator.share({ files: [f], title: "North Star backup" }).catch(function () {}); return; }
+    } catch (e) {}
+    var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([txt], { type: "application/json" })); a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  }
+  function bkImport(file) {
+    var rd = new FileReader();
+    rd.onload = function () {
+      var o; try { o = JSON.parse(String(rd.result)); } catch (e) { toast("That file is not a North Star backup.", null, null); return; }
+      if (!o || o.app !== "north-star-backup" || !o.data) { toast("That file is not a North Star backup.", null, null); return; }
+      if (!confirm("Restore this backup? It replaces your keepers, hidden items, favorites and learning on this phone. Your API key stays.")) return;
+      var keep = cfg, n = 0;
+      BK_KEYS.forEach(function (k) {
+        if (!(k in o.data)) return; var v = o.data[k];
+        if (k === "sf_cfg") { v = Object.assign({}, v, { key: keep.key, clientId: keep.clientId }); }
+        try { localStorage.setItem(k, JSON.stringify(v)); n++; } catch (e) {}
+      });
+      toast("Restored " + n + " items. Reloading.", null, null);
+      setTimeout(function () { location.reload(); }, 900);
+    };
+    rd.readAsText(file);
+  }
+  $("expBtn").addEventListener("click", bkExport);
+  $("impBtn").addEventListener("click", function () { $("impFile").click(); });
+  $("impFile").addEventListener("change", function () { var f = $("impFile").files && $("impFile").files[0]; if (f) bkImport(f); $("impFile").value = ""; });
+  quotaRing();
   // ---------- similar channels ----------
   function parseKeywords(str) {
     var out = [], re = /"([^"]+)"|(\S+)/g, m;
@@ -2107,15 +2357,75 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     }
   }
   function renderFollowLazy() { var box = $("feed"); box.textContent = ""; view = null; renderFollow(box); }
+  function chTrain(c, k) {
+    bump(model.ch, c.id, k);
+    (c.samples || []).forEach(function (t) { words(t).forEach(function (w) { bump(model.w, w, 0.3 * k); }); });
+    model.n = (model.n || 0) + 1; save("sf_model", model);
+  }
+  function refreshSugg() {
+    if (busy) return;
+    if (!cfg.key) { show("settings"); setStatus("Add an API key to start.", true); return; }
+    var subIds = {}, have = {};
+    subs.forEach(function (x) { subIds[x.id] = 1; });
+    rec.items = rec.items.filter(function (c) { return !subIds[c.id] && !recNo[c.id] && !mutedCh[c.id]; });
+    rec.items.forEach(function (c) { have[c.id] = 1; });
+    save("sf_rec", rec);
+    var liked = rec.items.filter(function (c) { return recYes[c.id]; }).slice(0, 2);
+    var qs = liked.map(function (c) { var w = []; (c.samples || []).forEach(function (t) { words(t).slice(0, 2).forEach(function (x) { if (w.indexOf(x) < 0) w.push(x); }); }); return { q: (c.title + " " + w.slice(0, 2).join(" ")).trim(), why: "Because you liked " + c.title }; });
+    var tl = topicList(); if (tl.length && qs.length < 2) { var t = tl[(rec.n = (rec.n || 0) + 1) % tl.length]; qs.push({ q: t, why: "Matches your topic: " + t }); }
+    var sd = seeds.filter(function (id) { return subIds[id]; });
+    if (qs.length < 2 && sd.length) { var id = sd[(rec.n || 0) % sd.length]; qs.push({ q: subTitle(id) + " similar", why: "Because you follow " + subTitle(id) }); }
+    if (!qs.length) { setStatus("Pick a channel above or 👍 a suggestion first, so there is something to base new ones on.", true); return; }
+    if (quotaLeft() < qs.length * 100 + 20) { setStatus("Not enough of today's free quota left. It resets at midnight Pacific time.", true); return; }
+    start(); var cand = {}, mw = mutedWordList(), lang = (navigator.language || "en").slice(0, 2);
+    qs.reduce(function (p, q, i) {
+      return p.then(function () {
+        setStatus("Finding new suggestions (" + (i + 1) + " of " + qs.length + ")");
+        var params = { part: "snippet", type: "video", q: q.q, maxResults: 50, order: "relevance", relevanceLanguage: lang, safeSearch: "moderate" };
+        if (cfg.hideShorts) params.videoDuration = "medium";
+        return api("search", params, null, 100).then(function (r) {
+          (r.items || []).forEach(function (it) {
+            var sn = it.snippet || {}, cid = sn.channelId;
+            if (!cid || subIds[cid] || have[cid] || recNo[cid] || mutedCh[cid]) return;
+            var c = cand[cid] || (cand[cid] = { id: cid, title: decodeEntities(sn.channelTitle), from: [], why: q.why, samples: [], hits: 0 });
+            c.hits++; var tt = decodeEntities(sn.title);
+            var hay = (c.title + " " + tt).toLowerCase(), bad = false; mw.forEach(function (m) { if (hay.indexOf(m) >= 0) bad = true; });
+            if (!bad && c.samples.length < 3 && c.samples.indexOf(tt) < 0) c.samples.push(tt);
+          });
+        });
+      });
+    }, Promise.resolve()).then(function () {
+      var all = Object.keys(cand).map(function (k) { return cand[k]; }).filter(function (c) { return c.samples.length; });
+      all.forEach(function (c) { c.score = c.hits + (model.ch[c.id] || 0); }); all.sort(function (a, b) { return b.score - a.score; }); all = all.slice(0, 20);
+      if (!all.length) return all;
+      return api("channels", { part: "snippet,statistics", id: all.map(function (c) { return c.id; }).join(","), maxResults: 50 }).then(function (j) {
+        var byId = {}; all.forEach(function (c) { byId[c.id] = c; });
+        (j.items || []).forEach(function (it) {
+          var c = byId[it.id]; if (!c) return; var th = (it.snippet && it.snippet.thumbnails) || {}, st = it.statistics || {};
+          c.title = (it.snippet && it.snippet.title) || c.title; c.thumb = (th.medium || th.default || {}).url || "";
+          c.subsCount = st.hiddenSubscriberCount ? null : +st.subscriberCount || 0; c.videos = +st.videoCount || 0;
+        });
+        return all.filter(function (c) { return c.videos === undefined || c.videos >= 5; });
+      }, function () { return all; });
+    }).then(function (fresh) {
+      var keepN = Math.max(0, 30 - Math.min(20, fresh.length));
+      rec.items = rec.items.slice(0, keepN).concat(fresh); rec.at = Date.now(); save("sf_rec", rec);
+      toast(fresh.length ? "Added " + fresh.length + " new suggestions." : "Nothing new this time.", null, null);
+      render();
+    }).catch(function (e) { setStatus(explain(e), true); }).then(finish);
+  }
   function renderChannels(box) {
     renderSeeds();
     var items = rec.items.filter(function (c) { return !recNo[c.id] && !mutedCh[c.id]; });
     if (rec.at) setStatus(items.length + " suggested channels. Updated " + ago(rec.at) + ".");
     else if (!$("status").textContent) setStatus("");
     if (!items.length) {
-      box.appendChild(el("p", "empty", rec.at ? "No suggestions left. Try different channels above." : "Choose a few channels above, then tap Find similar channels."));
+      box.appendChild(el("p", "empty", rec.at ? "No suggestions left." : "Choose a few channels above, then tap Find similar channels."));
+      if (rec.at) { var rs0 = el("button", "btn small", "Refresh suggestions"); rs0.type = "button"; rs0.addEventListener("click", refreshSugg); box.appendChild(rs0); }
       return;
     }
+    var rs = el("button", "btn small", "Refresh suggestions"); rs.type = "button"; rs.addEventListener("click", refreshSugg);
+    var rsw = el("div", "sugg-top"); rsw.appendChild(rs); rsw.appendChild(el("small", null, "Drops ones you followed or said no to, then adds new ones (about 200 units).")); box.appendChild(rsw);
     var grid = el("div", "chans");
     items.forEach(function (c) {
       var card = el("article", "chan");
@@ -2124,8 +2434,8 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       card.appendChild(el("h3", null, c.title));
       var bits = [];
       if (c.subsCount) bits.push(fmtCount(c.subsCount) + " subscribers");
-      bits.push("Like " + c.from.slice(0, 2).join(" and "));
       card.appendChild(el("div", "sub", bits.join(" · ")));
+      card.appendChild(el("div", "why", c.why || ("Because you follow " + c.from.slice(0, 2).join(" and "))));
       var ul = el("ul");
       c.samples.slice(0, 2).forEach(function (t) { ul.appendChild(el("li", null, t)); });
       card.appendChild(ul);
@@ -2133,9 +2443,19 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       var a = el("a", "btn small", "View channel");
       a.href = (cfg.openInApp ? "youtube://www.youtube.com/channel/" : "https://www.youtube.com/channel/") + encodeURIComponent(c.id);
       a.rel = "noopener";
-      var no = el("button", "btn ghost small", "Not for me"); no.type = "button";
-      no.addEventListener("click", function () { recNo[c.id] = 1; save("sf_recNo", recNo); bump(model.ch, c.id, -1); save("sf_model", model); render(); });
-      rowEl.appendChild(a); rowEl.appendChild(no);
+      var up = el("button", "btn ghost small th" + (recYes[c.id] ? " on" : ""), "\uD83D\uDC4D"); up.type = "button"; up.setAttribute("aria-label", "Yes, more like this");
+      up.addEventListener("click", function () {
+        if (recYes[c.id]) return; recYes[c.id] = 1; save("sf_recYes", recYes); chTrain(c, 2);
+        up.classList.add("on"); toast("Got it. More like " + c.title + ".", null, null);
+      });
+      var no = el("button", "btn ghost small th", "\uD83D\uDC4E"); no.type = "button"; no.setAttribute("aria-label", "No, less like this");
+      no.addEventListener("click", function () {
+        recNo[c.id] = 1; save("sf_recNo", recNo); chTrain(c, -1.5);
+        var was = recYes[c.id]; if (was) { delete recYes[c.id]; save("sf_recYes", recYes); }
+        render();
+        toast("Hidden. Less like " + c.title + ".", "Undo", function () { delete recNo[c.id]; save("sf_recNo", recNo); chTrain(c, 1.5); if (was) { recYes[c.id] = 1; save("sf_recYes", recYes); } render(); });
+      });
+      rowEl.appendChild(a); rowEl.appendChild(up); rowEl.appendChild(no);
       card.appendChild(rowEl);
       grid.appendChild(card);
     });
@@ -2145,7 +2465,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   function refresh(opts) {
     if (tab === "srch") { runSearch(false, true); return; }
     if (tab === "juke") { jukeRefill(); return; }
-    if (tab === "disc" && discFind && !(opts && (opts.reimport || opts.token))) { findChannels(); return; } if (tab === "disc" && !(opts && (opts.reimport || opts.token))) refreshDiscover(); else refreshSubs(opts); }
+    if (tab === "disc" && discFind && !(opts && (opts.reimport || opts.token))) { if (rec.at) refreshSugg(); else findChannels(); return; } if (tab === "disc" && !(opts && (opts.reimport || opts.token))) refreshDiscover(); else refreshSubs(opts); }
 
   function googleImport() {
     if (!cfg.clientId) { setStatus("Paste an OAuth client ID first, then save.", true); return; }
@@ -2305,16 +2625,16 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var box = $("feed");
     box.textContent = "";
     view = null;
-    var isDisc = tab === "disc", isChan = isDisc && discFind, isSrch = tab === "srch", isJuke = tab === "juke", isFol = tab === "follow";
+    var isDisc = tab === "disc", isChan = isDisc && discFind, isSrch = tab === "srch", isJuke = tab === "juke", isFol = tab === "follow", isSh = tab === "shorts";
     seedJukebox();
     $("tabSubs").setAttribute("aria-selected", String(tab === "subs"));
     $("tabDisc").setAttribute("aria-selected", String(isDisc));
     $("tabFollow").setAttribute("aria-selected", String(isFol));
-    $("tabSrch").setAttribute("aria-selected", String(isSrch)); $("tabJuke").setAttribute("aria-selected", String(isJuke)); document.body.classList.toggle("juke", isJuke);
+    $("tabSrch").setAttribute("aria-selected", String(isSrch)); $("tabShorts").setAttribute("aria-selected", String(isSh)); $("tabJuke").setAttribute("aria-selected", String(isJuke)); document.body.classList.toggle("juke", isJuke);
     $("discTog").hidden = !isDisc; $("dtVid").setAttribute("aria-pressed", String(!isChan)); $("dtChan").setAttribute("aria-pressed", String(isChan));
     $("srchPanel").hidden = !isSrch; $("srchMoreBox").hidden = true;
     var inChannel = isFol && !!fol.id;
-    $("tools").hidden = isChan || isSrch || isJuke || inChannel;
+    $("tools").hidden = isChan || isSrch || isJuke || isSh || inChannel;
     $("chHead").hidden = !inChannel;
     $("chanPanel").hidden = !isChan;
     $("search").placeholder = "Filter";
@@ -2323,13 +2643,14 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     if (isChan) { renderChannels(box); return; }
     if (isSrch) { renderSearch(box); return; }
     if (isJuke) { renderJuke(box); return; }
+    if (isSh) { renderShorts(box); return; }
     if (isFol) {
       if (inChannel) { setStatus(""); renderChannelPage(box); return; }
       loadInfo().then(function () { if (tab === "follow" && !fol.id) renderFollowLazy(); });
       renderFollow(box); return;
     }
     $("sortBtn").hidden = isDisc;
-    $("sortBtn").setAttribute("aria-pressed", String(sortMode === "you"));
+    $("sortBtn").textContent = SORTS[sortMode] || SORTS.new; $("sortBtn").setAttribute("aria-pressed", String(sortMode !== "new"));
     $("hideSeenBtn").setAttribute("aria-pressed", String(!!hideSeen));
 
     var q = $("search").value.trim().toLowerCase();
@@ -2364,8 +2685,11 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       return;
     }
 
-    var ranked = isDisc || sortMode === "you";
-    if (ranked) {
+    var flat = !isDisc && (sortMode === "views" || sortMode === "short" || sortMode === "long");
+    var ranked = isDisc || sortMode === "you" || flat;
+    if (!ranked) items.sort(function (a, b) { return sortMode === "old" ? String(a.at).localeCompare(String(b.at)) : String(b.at).localeCompare(String(a.at)); });
+    if (flat) items.sort(function (a, b) { return sortMode === "views" ? (b.views || 0) - (a.views || 0) : sortMode === "short" ? (a.dur || 9e9) - (b.dur || 9e9) : (b.dur || 0) - (a.dur || 0); });
+    else if (ranked) {
       var half = isDisc ? 365 : 3;
       items.forEach(function (v) { v._r = affinity(v) + 4 * Math.exp(-ageDays(v) / half); });
       items.sort(function (a, b) { return b._r - a._r; });
@@ -2405,7 +2729,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     $("topics").value = cfg.topics || "";
     $("minViews").value = cfg.minViews != null ? cfg.minViews : 25000; $("refreshCap").value = cfg.refreshCap || 4;
     $("mutedWords").value = cfg.mutedWords || "";
-    $("hideShorts").checked = cfg.hideShorts !== false;
+    $("hideShorts").checked = cfg.hideShorts !== false; renderShCh();
     $("openInApp").checked = !!cfg.openInApp;
     $("sway").checked = cfg.sway !== false; $("srchInf").checked = cfg.srchInf !== false; $("favMusic").value = cfg.favMusic || "";
     $("lightMode").checked = !!light.on;
@@ -2464,6 +2788,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   $("tabSubs").addEventListener("click", function () { if (tab === "subs") toTop(); else setTab("subs"); });
   $("tabDisc").addEventListener("click", function () { if (tab === "disc") toTop(); else setTab("disc"); });
   $("tabJuke").addEventListener("click", function () { if (tab === "juke") toTop(); else setTab("juke"); });
+  $("tabShorts").addEventListener("click", function () { if (tab === "shorts") toTop(); else setTab("shorts"); });
   $("tabSrch").addEventListener("click", function () { if (tab === "srch") toTop(); else setTab("srch"); });
   $("dtVid").addEventListener("click", function () { discFind = false; render(); });
   $("dtChan").addEventListener("click", function () { discFind = true; render(); });
@@ -2488,7 +2813,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   $("search").addEventListener("input", function () { clearTimeout(searchTimer); searchTimer = setTimeout(render, 160); });
   $("sortBtn").addEventListener("click", function () {
     if (tab === "follow") { folSort = folSort === "az" ? "recent" : "az"; save("sf_folSort", folSort); render(); return; }
-    sortMode = sortMode === "you" ? "new" : "you"; save("sf_sort", sortMode); render(); });
+    openSheet("Sort videos", Object.keys(SORTS).map(function (k) { return { label: SORTS[k], checked: sortMode === k, pick: function () { sortMode = k; save("sf_sort", sortMode); render(); window.scrollTo(0, 0); } }; })); });
   $("hideSeenBtn").addEventListener("click", function () { hideSeen = !hideSeen; save("sf_hideSeen", hideSeen); render(); });
   $("clearSeenBtn").addEventListener("click", function () { seen = {}; save("sf_seen", seen); setStatus("Watched marks cleared."); });
   $("resetLearnBtn").addEventListener("click", function () {
@@ -2498,12 +2823,12 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   });
   $("clearMutedBtn").addEventListener("click", function () { mutedCh = {}; save("sf_mutedCh", mutedCh); fillSettings(); setStatus("All channels unmuted."); });
   $("forgetBtn").addEventListener("click", function () {
-    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_later", "sf_chk", "sf_chinfo", "sf_folSort", "sf_chSort", "sf_chHide", "sf_plSort", "sf_chTheme", "sf_topicsSeeded", "sf_dref", "sf_dq", "sf_dseen", "sf_dboost", "sf_topicAt", "sf_light", "sf_crash", "sf_sq", "sf_sc", "sf_sh", "sf_jb", "sf_lastcrash", "sf_unf", "sf_chTags", "sf_jbl"].forEach(drop);
+    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_recYes", "sf_later", "sf_chk", "sf_chinfo", "sf_folSort", "sf_chSort", "sf_chHide", "sf_plSort", "sf_chTheme", "sf_topicsSeeded", "sf_dref", "sf_dq", "sf_dseen", "sf_dboost", "sf_topicAt", "sf_light", "sf_crash", "sf_sq", "sf_sc", "sf_sh", "sf_jb", "sf_shorts", "sf_shch", "sf_lastcrash", "sf_unf", "sf_chTags", "sf_jbl"].forEach(drop);
     chk = {};
     cfg = Object.assign({}, DEFAULT_CFG, { v2: 1 });
     subs = []; feed = { at: 0, items: [] }; disc = { at: 0, n: 0, items: [] };
     seen = {}; hidden = {}; mutedCh = {}; shown = {}; model = { ch: {}, cat: {}, w: {}, n: 0 };
-    hideSeen = false; tab = "subs"; sortMode = "new"; seeds = []; rec = { at: 0, items: [] }; recNo = {}; later = [];
+    hideSeen = false; tab = "subs"; sortMode = "new"; seeds = []; rec = { at: 0, items: [] }; recNo = {}; recYes = {}; later = [];
     fillSettings(); setStatus("Everything on this device was removed.");
   });
 
@@ -2583,7 +2908,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 26;
+  var VERSION = 27;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
