@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-D1P5vAtz3QUVkJBRTyY7mgf2BKdo1ainan7wbGb+MI4=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-jmfXtEipvradR5b0zgwrg4ynk7T0fWtE92cuQdzx/cg=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -62,7 +62,10 @@ header.bar { position: sticky; top: 0; z-index: 5; background: var(--bg); border
 .check input { width: 20px; height: 20px; accent-color: var(--accent); }
 .btn { height: 46px; padding: 0 18px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); font-weight: 600; }
 .btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
-.ver { display: inline-block; margin: 0 0 10px; padding: 3px 10px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-size: 12px; font-weight: 700; }
+.verbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 0 0 16px; padding: 14px 16px; border-radius: 14px; background: var(--accent); color: var(--accent-ink); }
+.verbar b { font-size: 22px; letter-spacing: 0.02em; }
+.verbar span { flex: 1 1 100%; font-size: 13px; font-weight: 600; }
+.verbar .btn { margin-left: auto; color: var(--accent-ink); border-color: currentColor; }
 .mtest { margin: 0 0 14px; padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.06); font: 12px/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap; min-height: 1.5em; }
 .mtest:empty { display: none; }
 .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 20px; }
@@ -224,7 +227,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   <!-- Settings view -->
   <section id="settingsView" class="sheet" hidden>
     <h2>Connect your subscriptions</h2>
-    <p class="ver" id="versionTop"></p>
+    <div class="verbar"><b id="versionTop"></b><button class="btn ghost" id="reloadBtn" type="button">Reload newest</button><span id="updMsg">Checking for a newer version</span></div>
     <p>This page reads your subscription list from YouTube and shows the newest uploads, nothing else. Everything you enter stays in this browser.</p>
 
     <details class="help">
@@ -307,6 +310,10 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
       <button class="btn ghost" id="clearSeenBtn" type="button">Reset watched marks</button>
       <button class="btn ghost" id="forgetBtn" type="button">Forget everything on this device</button>
     </div>
+    <h3>Diagnostics</h3>
+    <p>If something looks wrong, tap Copy and paste the result into chat. It has no API key, sign-in token or watch history.</p>
+    <div class="btn-row"><button class="btn ghost" id="diagBtn" type="button">Copy diagnostics</button></div>
+    <textarea class="mtest" id="diagBox" rows="9" readonly hidden></textarea>
     <h3>Motion test</h3>
     <p>Shows whether this phone is sending tilt readings.</p>
     <div class="btn-row"><button class="btn ghost" id="motionBtn" type="button">Run motion test</button></div>
@@ -319,6 +326,13 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
 <script>
 (function () {
   "use strict";
+
+  // ---------- error log (kept in memory only, shown in Diagnostics) ----------
+  var errLog = [];
+  function logErr(kind, msg) { errLog.push(new Date().toISOString().slice(11, 19) + " " + kind + ": " + String(msg).slice(0, 160)); if (errLog.length > 12) errLog.shift(); }
+  window.addEventListener("error", function (e) { logErr("error", (e.message || "") + " @" + (e.lineno || "")); });
+  window.addEventListener("unhandledrejection", function (e) { logErr("promise", e.reason && e.reason.message || e.reason); });
+  document.addEventListener("securitypolicyviolation", function (e) { logErr("csp", e.violatedDirective + " " + (e.blockedURI || "").split("?")[0]); });
 
   // ---------- storage ----------
   var mem = {};
@@ -573,7 +587,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   var liveObs = ("IntersectionObserver" in window) ? new IntersectionObserver(function (entries) {
     entries.forEach(function (en) {
       en.target.classList.toggle("live", en.isIntersecting);
-      if (en.isIntersecting) liveSet.push(en.target); else { var i = liveSet.indexOf(en.target); if (i > -1) liveSet.splice(i, 1); en.target.style.removeProperty("--sway"); en.target.style.removeProperty("--bob"); }
+      if (en.isIntersecting) { liveSet.push(en.target); var st = en.target._s; if (st && !ph.raf) { st.a = ph.rest * st.am; st.w = 0; st.b = 0; st.v = 0; en.target.style.setProperty("--sway", st.a.toFixed(3) + "deg"); } } else { var i = liveSet.indexOf(en.target); if (i > -1) liveSet.splice(i, 1); en.target.style.removeProperty("--sway"); en.target.style.removeProperty("--bob"); }
     });
   }, { rootMargin: "200px 0px" }) : null;
   // The feed is drawn a page at a time; a marker near the bottom asks for the next page.
@@ -981,6 +995,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     a.rel = "noopener";
     a.setAttribute("data-id", v.id);
     var h = hash(v.id);
+    a._h = h;
     a.style.setProperty("--tilt", String(((h % 5) - 2) * 0.55));
     a.style.setProperty("--k", String(0.7 + (h % 7) * 0.1));
     a.addEventListener("click", function (ev) {
@@ -1288,44 +1303,66 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling and leaning with phone tilt ----------
-  var VERSION = 8;
+  var VERSION = 9;
   // a = current angle, w = angular speed, rest = where gravity wants the card (from tilt). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0, tiltOn: false, asked: false };
-  var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 5, LAG = 4;
-  var SPRING = 0.008, DAMP = 0.90, PUSH_MAX = 6.5, PUSH_W = 0.62, TILT_GAIN = 0.45, TILT_MAX = 16;
+  var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
+  var SPRING = 0.006, DAMP = 0.90, PUSH_MAX = 2.6, PUSH_W = 0.2, TILT_GAIN = 0.18, TILT_MAX = 6.5;
   function physStep() {
     ph.w += SPRING * (ph.rest - ph.a);
     ph.w *= DAMP;
     ph.a += ph.w;
-    var lim = TILT_MAX + PUSH_MAX + 3;
-    if (ph.a < -lim) { ph.a = -lim; ph.w = 0; }
-    if (ph.a > lim) { ph.a = lim; ph.w = 0; }
+    var lim = Math.abs(ph.rest) + PUSH_MAX, lo = -lim, hi = lim;
+    if (ph.a < lo) { ph.a = lo; ph.w = Math.abs(ph.w) * 0.3; }
+    if (ph.a > hi) { ph.a = hi; ph.w = -Math.abs(ph.w) * 0.3; }
     // the rope bounce: a small up-and-down spring
     ph.bv += -BOB_SPRING * ph.b; ph.bv *= BOB_DAMP; ph.b += ph.bv;
     if (ph.b > BOB_MAX) { ph.b = BOB_MAX; ph.bv = 0; } if (ph.b < -BOB_MAX) { ph.b = -BOB_MAX; ph.bv = 0; }
     ph.hist.push(ph.a, ph.b); if (ph.hist.length > 80) ph.hist.splice(0, 2);
   }
-  // Each card hangs further down the rope, so it feels the motion a few frames after the card above it.
+  // Every card follows the rope with its own spring, strength and delay (seeded from its video id),
+  // so neighbours never move in step.
+  function cardState(c) {
+    var h = c._h || 0;
+    return c._s = { a: 0, w: 0, b: 0, v: 0, sp: 0.05 + (h % 6) * 0.012, dm: 0.76 + ((h >> 3) % 6) * 0.025, am: 0.6 + ((h >> 5) % 7) * 0.1, lag: (h >> 8) % 9, bs: 0.04 + ((h >> 11) % 5) * 0.012 };
+  }
+  function rankCards() {
+    liveSet.map(function (c) { return [c.getBoundingClientRect().top, c]; }).sort(function (x, y) { return x[0] - y[0]; })
+      .forEach(function (r, i) { r[1]._r = i; });
+  }
+  function stepCards() {
+    var h = ph.hist, frames = h.length / 2; if (!frames) return false;
+    var busy = false;
+    liveSet.forEach(function (c) {
+      var s = c._s || cardState(c), f = Math.min(frames - 1, (c._r || 0) * LAG + s.lag), k = (frames - 1 - f) * 2;
+      var ta = h[k] * s.am, tb = h[k + 1] * s.am;
+      s.w += s.sp * (ta - s.a); s.w *= s.dm; s.a += s.w;
+      s.v += s.bs * (tb - s.b); s.v *= BOB_DAMP; s.b += s.v;
+      if (Math.abs(s.a - ph.rest * s.am) > 0.02 || Math.abs(s.w) > 0.01 || Math.abs(s.b) > 0.02 || Math.abs(s.v) > 0.01) busy = true;
+    });
+    return busy;
+  }
   function applyCards() {
-    var n = liveSet.length; if (!n) return;
-    var rows = liveSet.map(function (c) { return [c.getBoundingClientRect().top, c]; }).sort(function (x, y) { return x[0] - y[0]; });
-    var h = ph.hist, frames = h.length / 2;
-    rows.forEach(function (r, i) {
-      var f = Math.min(frames - 1, i * LAG); if (f < 0) return;
-      var k = (frames - 1 - f) * 2;
-      r[1].style.setProperty("--sway", h[k].toFixed(3) + "deg");
-      r[1].style.setProperty("--bob", h[k + 1].toFixed(2) + "px");
+    liveSet.forEach(function (c) {
+      var s = c._s || cardState(c);
+      c.style.setProperty("--sway", s.a.toFixed(3) + "deg");
+      c.style.setProperty("--bob", s.b.toFixed(2) + "px");
     });
   }
   function physFrame(now) {
     var dt = Math.min(100, now - (ph.last || now)); ph.last = now; ph.acc += dt;
-    while (ph.acc >= 16.667) { physStep(); ph.acc -= 16.667; }
-    var moving = Math.abs(ph.rest - ph.a) > 0.02 || Math.abs(ph.w) > 0.01 || Math.abs(ph.b) > 0.02 || Math.abs(ph.bv) > 0.01 || false;
+    rankCards();
+    var cardsBusy = false;
+    while (ph.acc >= 16.667) { physStep(); if (stepCards()) cardsBusy = true; ph.acc -= 16.667; }
+    var moving = Math.abs(ph.rest - ph.a) > 0.02 || Math.abs(ph.w) > 0.01 || Math.abs(ph.b) > 0.02 || Math.abs(ph.bv) > 0.01 || cardsBusy;
     ph.quiet = moving ? 0 : (ph.quiet || 0) + 1;
-    var live = ph.quiet < 40;
-    if (!live) { ph.a = ph.rest; ph.w = 0; ph.b = 0; ph.bv = 0; ph.hist.length = 0; }
+    var live = ph.quiet < 3;
+    if (!live) {
+      ph.a = ph.rest; ph.w = 0; ph.b = 0; ph.bv = 0; ph.hist.length = 0;
+      liveSet.forEach(function (c) { var s = c._s || cardState(c); s.a = ph.rest * s.am; s.w = 0; s.b = 0; s.v = 0; });
+    }
     $("feed").style.setProperty("--sway", ph.a.toFixed(3) + "deg");
-    if (live) applyCards(); else liveSet.forEach(function (c) { c.style.setProperty("--sway", ph.a.toFixed(3) + "deg"); c.style.setProperty("--bob", "0px"); });
+    applyCards();
     if (live) ph.raf = requestAnimationFrame(physFrame); else { ph.raf = 0; ph.last = 0; ph.acc = 0; }
   }
   function physKick() { if (!ph.raf) { ph.last = 0; ph.raf = requestAnimationFrame(physFrame); } }
@@ -1335,14 +1372,15 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     ph.y = window.scrollY; ph.t = now;
     // A scroll push may raise the swing speed only up to PUSH_W, which tops out near PUSH_MAX degrees.
     var w0 = Math.abs(ph.w);
-    ph.bv += Math.max(-0.5, Math.min(0.5, -(dy / dt) * 0.12));
-    ph.w += Math.max(-0.3, Math.min(0.3, -(dy / dt) * 0.13));
+    ph.bv += Math.max(-0.2, Math.min(0.2, -(dy / dt) * 0.05));
+    ph.w += Math.max(-0.12, Math.min(0.12, -(dy / dt) * 0.05));
     if (Math.abs(ph.w) > PUSH_W && Math.abs(ph.w) > w0) ph.w = (ph.w < 0 ? -1 : 1) * Math.max(w0, PUSH_W);
     physKick();
   }, { passive: true });
 
   // Tilt: a card hanging from a pin stays partly upright as the phone rolls left or right.
   function onTilt(e) {
+    ph.reads = (ph.reads || 0) + 1; ph.lastG = e.gamma; ph.lastB = e.beta;
     if (!cfg.tilt) return;
     var ang = (screen.orientation && typeof screen.orientation.angle === "number") ? screen.orientation.angle : (window.orientation || 0);
     var roll = ang === 90 ? e.beta : (ang === 270 || ang === -90) ? -e.beta : e.gamma;
@@ -1387,6 +1425,53 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     } else { ph.perm = "not needed"; listen(); }
   }
   $("motionBtn").addEventListener("click", motionTest);
+
+  // ---------- newer-version check (own file only) ----------
+  var upd = "not checked";
+  function checkUpdate() {
+    $("updMsg").textContent = "Checking for a newer version";
+    fetch(location.pathname, { cache: "no-store", credentials: "omit" }).then(function (r) { return r.text(); }).then(function (t) {
+      var m = /var VERSION = (\d+);/.exec(t), nv = m ? +m[1] : 0;
+      upd = nv > VERSION ? "newer available: " + nv : nv ? "up to date" : "could not read";
+      $("updMsg").textContent = nv > VERSION ? "Version " + nv + " is ready. Tap Reload newest." : nv ? "You have the newest version." : "Could not check. Tap Reload newest to be sure.";
+    }).catch(function (e) { upd = "check failed"; logErr("update", e && e.message || e); $("updMsg").textContent = "Could not check. Tap Reload newest to be sure."; });
+  }
+  $("reloadBtn").addEventListener("click", function () { location.replace(location.pathname + "?r=" + Date.now()); });
+  $("settingsBtn").addEventListener("click", checkUpdate);
+
+  // ---------- diagnostics (no key, token or watch history) ----------
+  function clean(t) { return String(t).replace(/AIza[\w-]+/g, "[key]").replace(/ya29\.[\w.-]+/g, "[token]").replace(/([?&](?:key|access_token)=)[^&\s"]+/g, "$1[x]"); }
+  function diagText() {
+    var D = window.DeviceOrientationEvent, sz = {}, tot = 0;
+    try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i), n = (localStorage.getItem(k) || "").length; if (k.indexOf("sf_") === 0) { sz[k.slice(3)] = n; tot += n; } } } catch (e) {}
+    var mq = function (q) { try { return matchMedia(q).matches; } catch (e) { return "?"; } };
+    var L = [
+      "North Star diagnostics",
+      "version: " + VERSION + "   update: " + upd,
+      "time: " + new Date().toString(),
+      "page: " + location.origin + location.pathname,
+      "home-screen app: " + (navigator.standalone === true || mq("(display-mode: standalone)")),
+      "device: " + navigator.userAgent,
+      "screen: " + screen.width + "x" + screen.height + " @" + window.devicePixelRatio + "x, window " + innerWidth + "x" + innerHeight,
+      "language: " + navigator.language + "   online: " + navigator.onLine,
+      "reduce motion: " + mq("(prefers-reduced-motion: reduce)") + "   dark: " + mq("(prefers-color-scheme: dark)"),
+      "motion API: " + (D ? (typeof D.requestPermission === "function" ? "needs permission" : "open") : "missing") + "   permission: " + (ph.perm || (ph.asked ? "asked" : "not asked")),
+      "tilt listener on: " + ph.tiltOn + "   readings: " + (ph.reads || 0) + "   gamma: " + (ph.lastG == null ? "none" : (+ph.lastG).toFixed(1)) + "   beta: " + (ph.lastB == null ? "none" : (+ph.lastB).toFixed(1)),
+      "settings: sway " + (cfg.sway !== false) + ", tilt " + !!cfg.tilt + ", app link " + !!cfg.openInApp + ", hide shorts " + (cfg.hideShorts !== false),
+      "set up: key " + (cfg.key ? "yes" : "no") + ", handle " + (cfg.channel ? "yes" : "no") + ", client id " + (cfg.clientId ? "yes" : "no"),
+      "counts: subs " + subs.length + ", feed " + feed.items.length + ", discover " + (disc.items || []).length + ", suggestions " + (rec.items || []).length + ", watch later " + later.length + ", watched " + Object.keys(seen).length,
+      "feed updated: " + (feed.at ? new Date(feed.at).toISOString() : "never"),
+      "cards on screen: " + liveSet.length + "   swing now: " + ph.a.toFixed(2) + " deg   physics running: " + !!ph.raf,
+      "storage bytes: " + tot + " " + JSON.stringify(sz),
+      "recent errors: " + (errLog.length ? "\n  " + errLog.join("\n  ") : "none")
+    ];
+    return clean(L.join("\n"));
+  }
+  $("diagBtn").addEventListener("click", function () {
+    var t = diagText(), box = $("diagBox"); box.value = t; box.hidden = false;
+    function done(ok) { toast(ok ? "Diagnostics copied. Paste them in chat." : "Select the text below and copy it."); if (!ok) { box.focus(); box.select(); } }
+    try { navigator.clipboard.writeText(t).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
+  });
   document.addEventListener("click", tiltOnTap, true);
   document.addEventListener("touchend", tiltOnTap, true);
   if (cfg.tilt && window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission !== "function") tiltListen();
