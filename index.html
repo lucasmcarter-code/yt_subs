@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-TMaGIqCwfd6ROKcaAdvWf8YoX1/FzZLAiPNIHEu8Idk=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ZkO0yMkht7qsoJDpP2pCR+SwJoxcDAYVTxtMAIsyUnM=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -320,6 +320,8 @@ body.light #feed { scroll-snap-type: none !important; }
 .jk-play { background: #fff3dc; }
 .jk-ctl button:active, .jk-play:active { transform: translate(2px, 3px); box-shadow: none; }
 .jk-ctl .jk-nah { color: #8C3636; }
+.jk-ctl .jk-keep { color: #2E7D4F; }
+.jk-ctl .jk-kv.on { background: #fff3dc; }
 .jk-strip { background: #efe8d8; border: 3px solid #2a2622; border-radius: 10px; padding: 6px; transform-origin: left center; min-height: 120px; }
 .jk-row { display: flex; gap: 10px; align-items: center; padding: 6px; border-radius: 8px; width: 100%; text-align: left; border: 0; background: none; color: #2a2622; }
 .jk-row.on { background: rgba(164, 92, 56, 0.28); outline: 2px solid #2a2622; }
@@ -1758,24 +1760,39 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
 
 
   // ---------- Jukebox ----------
-  var jb = load("sf_jb", { seeds: [], items: [] }), jkSel = 0, jkPage = 0, jkList = [], jkUI = null;
+  var jb = load("sf_jb", { seeds: [], items: [] }), jkKeepOnly = false, jkSel = 0, jkPage = 0, jkList = [], jkUI = null;
   jb.items = jb.items || []; jb.seeds = jb.seeds || [];
   function jbItem(v) { return { id: v.id, title: v.title, channel: v.channel, chId: v.chId, at: v.at, dur: v.dur || 0, cat: v.cat || "", views: v.views, live: "none", det: 1 }; }
   function jbAdd(v) { jbLearn(v, 1); if (!jb.items.some(function (x) { return x.id === v.id; })) { jb.items.unshift(jbItem(v)); jb.items = jb.items.slice(0, 150); save("sf_jb", jb); } toast("Added to the Jukebox.", null, null); }
   function jukeList() {
     var mw = mutedWordList(), si = {}, got = {}, out = [];
     subs.forEach(function (x) { si[x.id] = 1; });
-    jb.items.concat(jb.seeds.filter(function (v) { return !si[v.chId]; })).forEach(function (v) { if (got[v.id]) return; got[v.id] = 1; if (passes(v, false, mw, si)) out.push(v); });
+    jb.items.concat(jb.seeds.filter(function (v) { return !si[v.chId]; })).forEach(function (v) { if (got[v.id]) return; got[v.id] = 1; if (!v.keep && (jbl.t[artistOf(v.channel).toLowerCase()] || 0) <= -6) return; if (passes(v, false, mw, si)) out.push(v); });
+    if (jkKeepOnly) out = out.filter(function (v) { return v.keep; });
+    var per = {}; out = out.filter(function (v) { var k = artistKey(v); per[k] = (per[k] || 0) + 1; return per[k] <= 3; });
     return jkSpread(out).slice(0, 120);
+  }
+  // The artist of a video: a favorite named in the title, else the text before " - ", else the channel.
+  function artistKey(v) {
+    var t = String(v.title || ""), tl = t.toLowerCase(), best = "";
+    favTerms().concat(Object.keys(jbl.t)).forEach(function (f) {
+      f = f.toLowerCase(); if (f.length < 3 || f.length <= best.length || new RegExp(GENRE_RE.source, "i").test(f)) return;
+      var i = tl.indexOf(f); if (i < 0) return;
+      var b = i === 0 || /\W/.test(tl[i - 1]), e = i + f.length >= tl.length || /\W/.test(tl[i + f.length]);
+      if (b && e) best = f;
+    });
+    if (best) return best;
+    var m = /^(.{2,40}?)\s+[-\u2013\u2014|:]\s+/.exec(t);
+    return (m ? m[1] : artistOf(v.channel)).toLowerCase().trim();
   }
   // One artist at most once per 6 slots, so no band floods the first page.
   function jkSpread(list) {
     var rest = list.slice(), out = [], recent = [];
     while (rest.length) {
       var at = -1;
-      for (var i = 0; i < rest.length; i++) { if (recent.indexOf(artistOf(rest[i].channel).toLowerCase()) < 0) { at = i; break; } }
+      for (var i = 0; i < rest.length; i++) { if (recent.indexOf(artistKey(rest[i])) < 0) { at = i; break; } }
       if (at < 0) { out = out.concat(rest); break; }
-      var v = rest.splice(at, 1)[0]; out.push(v); recent.push(artistOf(v.channel).toLowerCase()); if (recent.length > 5) recent.shift();
+      var v = rest.splice(at, 1)[0]; out.push(v); recent.push(artistKey(v)); if (recent.length > 5) recent.shift();
     }
     return out;
   }
@@ -1816,11 +1833,13 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var jk = el("div", "jk"); box.appendChild(jk);
     jk.appendChild(el("div", "jk-sign", "Jukebox"));
     var refill = el("button", null, "Refill"); refill.type = "button"; refill.addEventListener("click", jukeRefill);
+    var kv = el("button", "jk-kv" + (jkKeepOnly ? " on" : ""), jkKeepOnly ? "All" : "Keepers"); kv.type = "button";
+    kv.addEventListener("click", function () { jkKeepOnly = !jkKeepOnly; jkSel = 0; jkPage = 0; render(); });
     if (!jkList.length) {
-      var w = el("div", "jk-win"); w.appendChild(el("div", "jk-title", "The jukebox is empty")); w.appendChild(el("div", "jk-meta", "Music videos you load or add will show up here."));
+      var w = el("div", "jk-win"); w.appendChild(el("div", "jk-title", "The jukebox is empty")); w.appendChild(el("div", "jk-meta", jkKeepOnly ? "No keepers yet. Tap the check on a song you like." : "Music videos you load or add will show up here."));
       jk.appendChild(w);
-      var c0 = el("div", "jk-ctl"); c0.appendChild(refill); jk.appendChild(c0);
-      jk.appendChild(el("div", "jk-cost", "Refill runs 2 searches (200 units): Tiny Desk, live sets and music videos.")); jkUI = null; return;
+      var c0 = el("div", "jk-ctl"); if (jkKeepOnly) c0.appendChild(kv); c0.appendChild(refill); jk.appendChild(c0);
+      jk.appendChild(el("div", "jk-cost", "Refill runs 3 searches (300 units): Tiny Desk, live sets and music videos.")); jkUI = null; return;
     }
     var win = el("div", "jk-win"), cv = el("div", "jk-cv"), cover = el("div", "jk-cover");
     cv.appendChild(cover); win.appendChild(cv);
@@ -1836,23 +1855,48 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var prev = el("button", null, "‹"); prev.type = "button"; prev.setAttribute("aria-label", "Previous");
     var next = el("button", null, "›"); next.type = "button"; next.setAttribute("aria-label", "Next");
     var play = el("a", "jk-play", "▶ Play"); play.rel = "noopener";
+    var keepB = el("button", "jk-keep", "✓"); keepB.type = "button"; keepB.setAttribute("aria-label", "Keeper");
     var nah = el("button", "jk-nah", "✗"); nah.type = "button"; nah.setAttribute("aria-label", "Not interested");
-    ctl.appendChild(prev); ctl.appendChild(play); ctl.appendChild(next); ctl.appendChild(nah); ctl.appendChild(refill); jk.appendChild(ctl);
+    ctl.appendChild(prev); ctl.appendChild(play); ctl.appendChild(next); ctl.appendChild(keepB); ctl.appendChild(nah); ctl.appendChild(kv); ctl.appendChild(refill); jk.appendChild(ctl);
     var strip = el("div", "jk-strip"), pager = el("div", "jk-pager");
     var pp = el("button", null, "‹ Prev page"), pn = el("button", null, "Next page ›"), pt = el("span");
     pp.type = "button"; pn.type = "button"; pager.appendChild(pp); pager.appendChild(pt); pager.appendChild(pn);
     jk.appendChild(strip); jk.appendChild(pager);
-    jk.appendChild(el("div", "jk-cost", "Play opens the video in YouTube. Refill runs 2 searches (200 units)."));
+    jk.appendChild(el("div", "jk-cost", "Play opens the video in YouTube. ✓ trains more like it; ✗ hides it (Undo for a few seconds). Refill runs 3 searches (300 units)."));
     jkUI = { cover: cover, title: title, meta: meta, play: play, strip: strip, pageTxt: pt, pp: pp, pn: pn, reel: reel };
     prev.addEventListener("click", function () { if (jkSel > 0) { jkSel--; jkUpdate(true); } });
     next.addEventListener("click", function () { if (jkSel < jkList.length - 1) { jkSel++; jkUpdate(true); } });
     pp.addEventListener("click", function () { jkSel = Math.max(0, jkPage * 5 - 5); jkUpdate(true); });
     pn.addEventListener("click", function () { jkSel = Math.min(jkList.length - 1, jkPage * 5 + 5); jkUpdate(true); });
     play.addEventListener("click", function () { var v = jkList[jkSel]; if (!v) return; if (!seen[v.id]) { learn(v, 1); jbLearn(v, 1); } mark(v.id, true); setTimeout(function () { jkStrip(false); }, 50); });
+    var jkBusy = 0;
+    function jkStamp(kind, done) {
+      var c = jkUI && jkUI.cover; if (!c || !c.animate || light.on) { done(); return; }
+      var keep = kind === "keep", rot = keep ? -9 : 7, st = el("div", "stamp " + kind, keep ? "Keeper" : "Nah"); c.appendChild(st);
+      var T = function (r, sc) { return "translate(-50%, -50%) rotate(" + r + "deg) scale(" + sc + ")"; };
+      st.animate([{ opacity: 0, transform: T(rot + 14, 2.6), offset: 0 }, { opacity: 1, transform: T(rot, 1), offset: 0.25 }, { opacity: 1, transform: T(rot, 1), offset: 0.8 }, { opacity: 0, transform: T(rot, 1), offset: 1 }], { duration: 1000, easing: "ease-out" }).onfinish = function () { if (st.parentNode) st.parentNode.removeChild(st); done(); };
+    }
+    keepB.addEventListener("click", function () {
+      var v = jkList[jkSel]; if (!v || jkBusy) return; jkBusy = 1;
+      learn(v, 2); jbLearn(v, 3);
+      if (!jb.items.some(function (x) { return x.id === v.id; })) jb.items.unshift(jbItem(v));
+      jb.items.forEach(function (x) { if (x.id === v.id) x.keep = 1; });
+      v.keep = 1; save("sf_jb", jb);
+      jkStamp("keep", function () { jkBusy = 0; toast("Keeper. More like this will show up.", null, null); });
+    });
     nah.addEventListener("click", function () {
-      var v = jkList[jkSel]; if (!v) return;
-      hidden[v.id] = 1; save("sf_hidden", hidden); learn(v, -1.5); jbLearn(v, -2);
-      jb.items = jb.items.filter(function (x) { return x.id !== v.id; }); save("sf_jb", jb); render();
+      var v = jkList[jkSel]; if (!v || jkBusy) return; jkBusy = 1;
+      hidden[v.id] = 1; save("sf_hidden", hidden); learn(v, -1.5); jbLearn(v, -3);
+      jb.items = jb.items.filter(function (x) { return x.id !== v.id; }); save("sf_jb", jb);
+      var nv = jbItem(v); nv.keep = v.keep;
+      jkStamp("nah", function () {
+        jkBusy = 0; render();
+        toast("Hidden. You will hear less like it.", "Undo", function () {
+          delete hidden[v.id]; save("sf_hidden", hidden); learn(v, 1.5); jbLearn(v, 3);
+          if (!jb.items.some(function (x) { return x.id === v.id; })) { jb.items.unshift(nv); save("sf_jb", jb); }
+          render();
+        });
+      });
     });
     var rq = 0;
     reel.addEventListener("scroll", function () {
@@ -1913,12 +1957,12 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
         });
       });
     }, Promise.resolve()).then(function () { return addDetails(fresh).catch(function () {}); }).then(function () {
-      var mw = mutedWordList(), known = 0, cnt = {};
+      var mw = mutedWordList(), known = 0, cnt = {}; jb.items.slice(0, 40).forEach(function (x) { var k = artistKey(x); cnt[k] = (cnt[k] || 0) + 1; });
       var keep = fresh.filter(function (v) { return v.det && v.dur >= 120 && (!v.live || v.live === "none") && passes(v, false, mw, si); }).filter(function (v) {
         var a = artistOf(v.channel).toLowerCase(), isFav = favs.some(function (f) { return a.indexOf(f) >= 0 || (jbl.t[a] || 0) > 1; });
         if (isFav) { known++; return known <= 3; }
         return true;
-      }).filter(function (v) { var a = artistOf(v.channel).toLowerCase(); cnt[a] = (cnt[a] || 0) + 1; return cnt[a] <= 2; }).map(jbItem);
+      }).filter(function (v) { var a = artistKey(v); cnt[a] = (cnt[a] || 0) + 1; return cnt[a] <= 2; }).map(jbItem);
       jb.items = keep.concat(jb.items).slice(0, 150); save("sf_jb", jb);
       jkSel = 0; jkPage = 0;
       toast(keep.length ? "Added " + keep.length + " to the jukebox." : "Nothing new this time.", null, null);
@@ -2539,7 +2583,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 25;
+  var VERSION = 26;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
