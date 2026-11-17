@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MK40zM5wI+gojHq5ji/RysIWF1f3q6QJ9DsnrPFEspA=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-GXUdgoubglM6ZLmNk4I4GqgnmmkG19OzZ8TK35czhCU=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -143,8 +143,8 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
 .brand { display: flex; align-items: center; gap: 10px; font-family: "Bebas Neue", Impact, sans-serif; font-weight: 400; font-size: 32px; letter-spacing: 0.04em; line-height: 1; }
 .brand svg { flex: none; }
 .tabs { position: fixed; left: 16px; right: 16px; bottom: calc(env(safe-area-inset-bottom) + 14px); max-width: 560px; margin: 0 auto; z-index: 6; display: flex; gap: 4px; padding: 6px; border: 0; border-radius: 999px; background: var(--surface); box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.65); }
-.tab { flex: 1; height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 600; }
-.tab svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.tab { flex: 1; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+.tab svg { stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .tab[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
 .toast { bottom: calc(env(safe-area-inset-bottom) + 92px); }
 .day { font-family: "Caveat", "Bradley Hand", cursive; font-size: 32px; font-weight: 700; color: var(--ink); margin: 26px 0 18px; }
@@ -170,6 +170,53 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
 .vid { transform: rotate(calc(var(--tilt, 0) * 1deg)); }
 .vid.live { transform: translateY(var(--bob, 0px)) rotate(calc(var(--tilt, 0) * 1deg + var(--sway, 0deg) * var(--k, 1))); will-change: transform; }
 .more-marker { height: 1px; }
+.tab { flex-direction: column; gap: 2px; font-size: 11px; height: 52px; }
+.tab svg { width: 18px; height: 18px; }
+.f-head { margin: 4px 0 0; }
+.f-h { font: italic 700 32px/1.1 Georgia, "Caveat", serif; color: var(--ink); margin: 10px 0 2px; }
+.f-sub { font-size: 13px; color: var(--muted); margin: 0 0 6px; }
+.f-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 26px 16px; padding: 14px 0 20px; }
+.f-card { position: relative; display: block; text-align: left; width: 100%; padding: 8px 8px 11px; border: 0; border-radius: 6px; background: var(--paper); color: var(--pink); transform-origin: 50% 0; transform: rotate(calc(var(--tilt, 0) * 1deg)); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25), 0 16px 28px -14px rgba(0, 0, 0, 0.6); }
+.f-card::before { content: ""; position: absolute; top: -6px; left: 50%; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; z-index: 2; background: var(--accent); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); }
+.f-photo { height: 104px; border-radius: 3px; display: grid; place-items: center; overflow: hidden; }
+.f-av { width: 72px; height: 72px; border-radius: 50%; overflow: hidden; border: 3px solid var(--paper); display: grid; place-items: center; background: rgba(255, 255, 255, 0.2); color: #fff; font: 700 28px Georgia, serif; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3); }
+.f-av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.f-name { font: italic 700 18px/1.1 Georgia, "Caveat", serif; margin: 8px 2px 2px; overflow-wrap: anywhere; }
+.f-meta { font-size: 12px; color: var(--pmuted); margin: 0 2px; }
+.f-new { position: absolute; right: 12px; top: 12px; z-index: 3; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 11px; background: var(--accent); color: var(--accent-ink); font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+#chHead { padding-top: 4px; }
+.ch-top { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+.ch-id { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+.ch-av { width: 56px; height: 56px; flex: none; font-size: 22px; }
+.ch-name { font: italic 700 24px/1.05 Georgia, "Caveat", serif; color: var(--ink); overflow-wrap: anywhere; }
+.ch-sub { font-size: 13px; color: var(--muted); margin-top: 3px; }
+.ch-bar { margin-top: 12px; }
+.seg { display: flex; background: var(--surface); border-radius: 999px; padding: 4px; margin-bottom: 10px; }
+.seg button { flex: 1; height: 34px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font-size: 14px; font-weight: 600; }
+.seg button.on { background: var(--paper); color: var(--pink); }
+.ch-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.ch-count { font-size: 13px; color: var(--muted); }
+.pl-list { padding-top: 22px; }
+.stk { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; text-align: left; margin: 0 0 30px; color: var(--pink); }
+.stk .back1, .stk .back2 { position: absolute; inset: 0; border-radius: 6px; background: #E3DCCD; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
+.stk .back1 { transform: rotate(-2.4deg) translate(-4px, 5px); }
+.stk .back2 { transform: rotate(2deg) translate(5px, 9px); background: #D9D1C0; }
+.stk-card { position: relative; background: var(--paper); border-radius: 6px; padding: 8px 8px 12px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25), 0 16px 28px -14px rgba(0, 0, 0, 0.6); }
+.stk-card .title { margin: 9px 2px 2px; }
+.prog { height: 5px; border-radius: 3px; background: rgba(42, 38, 34, 0.12); margin: 8px 2px 0; overflow: hidden; }
+.prog i { display: block; height: 100%; width: 0; background: var(--accent); }
+.sh-wrap { position: fixed; inset: 0; z-index: 20; }
+.sh-veil { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.55); }
+.sh { position: absolute; left: 0; right: 0; bottom: 0; max-width: 560px; margin: 0 auto; background: var(--surface); border-radius: 22px 22px 0 0; padding: 12px 18px calc(env(safe-area-inset-bottom) + 24px); }
+.sh-grab { width: 44px; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto 14px; }
+.sh h4 { font: italic 700 24px/1 Georgia, "Caveat", serif; margin: 0 0 8px; color: var(--ink); }
+.sh-opt { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 48px; border: 0; border-bottom: 1px solid var(--line); background: none; color: var(--ink); font-size: 16px; text-align: left; padding: 0; }
+.sh-ck { color: var(--accent); font-weight: 700; }
+.sh-tg { border-bottom: 0; margin-top: 6px; }
+.sh-sw { width: 48px; height: 28px; border-radius: 14px; background: var(--line); position: relative; }
+.sh-sw::after { content: ""; position: absolute; left: 3px; top: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); }
+.sh-sw.on { background: var(--accent); }
+.sh-sw.on::after { left: 23px; background: var(--accent-ink); }
 .stamp { position: absolute; left: 50%; top: 50%; padding: 6px 16px; border: 4px solid currentColor; border-radius: 8px; z-index: 4; pointer-events: none; opacity: 0; font: 900 26px/1 Impact, "Arial Black", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; transform: translate(-50%, -50%); }
 .stamp::before { content: ""; position: absolute; inset: 3px; border: 1.5px solid currentColor; border-radius: 4px; }
 .stamp.keep { color: #3FB26A; }
@@ -188,6 +235,19 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   #feed .day { flex: none; writing-mode: vertical-rl; margin: 14px 6px 0; white-space: nowrap; align-self: flex-start; font-size: 24px; }
   #feed .day small { display: block; margin-top: 8px; }
   #feed .more-marker { flex: none; width: 1px; }
+  #feed .f-grid, #feed .pl-list { display: contents; }
+  #feed .f-head { display: none; }
+  #feed .f-card { flex: none; width: 190px; margin: 0 14px; scroll-snap-align: center; }
+  #feed .stk { flex: none; width: 250px; margin: 0 14px; scroll-snap-align: center; }
+  .tab { flex-direction: row; gap: 6px; height: 38px; font-size: 12px; }
+  .ch-av, .ch-sub { display: none; }
+  .ch-top { margin-top: 0; }
+  #chHead .ch-name { font-size: 18px; }
+  .ch-bar { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .ch-bar .seg { margin: 0; width: 210px; flex: none; }
+  .ch-bar .seg button { height: 28px; }
+  #chHead { padding-top: 0; }
+  .tabs { max-width: 520px; }
   .tools, #status { display: none; }
   .tab { height: 38px; }
   .tabs { bottom: calc(env(safe-area-inset-bottom) + 8px); max-width: 420px; }
@@ -224,7 +284,8 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     <div class="tabs" role="tablist">
       <button class="tab" id="tabSubs" type="button" role="tab" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z"/></svg>Subs</button>
       <button class="tab" id="tabDisc" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Discover</button>
-      <button class="tab" id="tabChan" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><circle cx="17.5" cy="8" r="2.5"/><path d="M17.5 13.5c2.2.2 3.7 1.7 4.2 4.5"/></svg>Channels</button>
+      <button class="tab" id="tabFollow" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><circle cx="17.5" cy="8" r="2.5"/><path d="M17.5 13.5c2.2.2 3.7 1.7 4.2 4.5"/></svg>Following</button>
+      <button class="tab" id="tabChan" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Find</button>
     </div>
     <div class="panel" id="chanPanel" hidden>
       <h2>Find channels like the ones you follow</h2>
@@ -240,6 +301,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
         <button class="btn small" id="findChanBtn" type="button">Find similar channels</button>
       </div>
     </div>
+    <div id="chHead" hidden></div>
     <div class="tools" id="tools">
       <input type="search" id="search" placeholder="Filter" aria-label="Filter by title or channel">
       <button class="chip" id="sortBtn" type="button" aria-pressed="false">For you</button>
@@ -646,6 +708,336 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     }
   }
 
+  // ---------- Following: channel postcards, then one channel's videos and playlists ----------
+  var chInfo = load("sf_chinfo", {});                 // channelId -> { t: avatar url, n: video count, at: ms }
+  var folSort = load("sf_folSort", "az");             // Following page order: az | recent
+  var chSort = load("sf_chSort", "new");              // channel page order
+  var chHide = load("sf_chHide", false);              // hide watched on channel pages
+  var plSort = load("sf_plSort", "new");
+  var fol = { id: null, mode: "videos", pl: null };   // what is open
+  var upCache = {}, plListCache = {}, plItemCache = {};
+
+  function subTitle(id) { for (var i = 0; i < subs.length; i++) if (subs[i].id === id) return subs[i].title; return (chInfo[id] && chInfo[id].title) || "Channel"; }
+  function loadInfo() {
+    var now = Date.now(), need = subs.filter(function (s) { var c = chInfo[s.id]; return !c || now - c.at > 7 * 86400000; }).map(function (s) { return s.id; });
+    if (!need.length || !cfg.key) return Promise.resolve();
+    var chunks = []; for (var i = 0; i < need.length; i += 50) chunks.push(need.slice(i, i + 50));
+    return chunks.reduce(function (p, ids) {
+      return p.then(function () {
+        return api("channels", { part: "snippet,statistics", id: ids.join(","), maxResults: 50 }).then(function (j) {
+          (j.items || []).forEach(function (c) {
+            var t = (c.snippet && c.snippet.thumbnails) || {};
+            chInfo[c.id] = { t: (t.medium || t.default || {}).url || "", n: +((c.statistics || {}).videoCount) || 0, title: (c.snippet || {}).title || "", at: now };
+          });
+        });
+      });
+    }, Promise.resolve()).then(function () { save("sf_chinfo", chInfo); }).catch(function () {});
+  }
+
+  var PALETTE = [["#B3763E", "#8E5A2C"], ["#4F7CAC", "#375A82"], ["#6E7F8A", "#4E5C66"], ["#8A5A44", "#6B4332"], ["#B24B4B", "#8C3636"], ["#4F8C7A", "#37695A"], ["#8C7A3E", "#6C5C2A"], ["#7A5A9A", "#5A4078"]];
+  function avatarEl(id, title, cls) {
+    var d = el("div", cls || "f-av"), t = chInfo[id] && chInfo[id].t;
+    if (t) {
+      var img = el("img"); img.alt = ""; img.loading = "lazy"; img.referrerPolicy = "no-referrer"; img.src = t;
+      img.addEventListener("error", function () { img.remove(); d.textContent = (title || "?").charAt(0).toUpperCase(); });
+      d.appendChild(img);
+    } else d.textContent = (title || "?").charAt(0).toUpperCase();
+    return d;
+  }
+  function unseenCount(id) { var n = 0; feed.items.forEach(function (v) { if ((v.sid || v.chId) === id && !seen[v.id] && !hidden[v.id]) n++; }); return n; }
+
+  function renderFollow(box) {
+    $("search").placeholder = "Filter channels";
+    $("sortBtn").hidden = false; $("sortBtn").textContent = folSort === "az" ? "A–Z" : "Recent";
+    $("sortBtn").setAttribute("aria-pressed", String(folSort === "recent"));
+    $("hideSeenBtn").hidden = true;
+    var q = $("search").value.trim().toLowerCase();
+    if (!subs.length) { setStatus(""); box.appendChild(el("p", "empty", "No channels yet. Add your key and channel in settings, then refresh.")); return; }
+    var list = subs.filter(function (s) { return !q || s.title.toLowerCase().indexOf(q) >= 0; });
+    if (folSort === "recent") list.sort(function (a, b) { return ((chk[b.id] || [0, 0])[1] || 0) - ((chk[a.id] || [0, 0])[1] || 0); });
+    else list.sort(function (a, b) { return a.title.toLowerCase() < b.title.toLowerCase() ? -1 : 1; });
+    setStatus("");
+    var head = el("div", "f-head"); head.appendChild(el("h2", "f-h", "Following"));
+    head.appendChild(el("p", "f-sub", subs.length + " channels you subscribe to")); box.appendChild(head);
+    if (!list.length) { box.appendChild(el("p", "empty", "No channel matches that filter.")); return; }
+    var grid = el("div", "f-grid");
+    list.forEach(function (s) {
+      var h = hash(s.id), pal = PALETTE[h % PALETTE.length], n = unseenCount(s.id), inf = chInfo[s.id];
+      var card = el("button", "f-card"); card.type = "button";
+      card.style.setProperty("--tilt", String((((h >> 3) % 5) - 2) * 0.5));
+      if (n) card.appendChild(el("span", "f-new", n + " new"));
+      var ph = el("div", "f-photo"); ph.style.background = "linear-gradient(160deg," + pal[0] + "," + pal[1] + ")";
+      ph.appendChild(avatarEl(s.id, s.title)); card.appendChild(ph);
+      card.appendChild(el("div", "f-name", s.title));
+      card.appendChild(el("div", "f-meta", inf && inf.n ? inf.n + (inf.n === 1 ? " video" : " videos") : " "));
+      card.addEventListener("click", function () { openChannel(s.id); });
+      grid.appendChild(card);
+    });
+    box.appendChild(grid);
+  }
+
+  // --- data for one channel or playlist
+  function mapItem(it, sid, title) {
+    var s = it.snippet || {}, c = it.contentDetails || {}, t = s.thumbnails || {};
+    return { id: c.videoId, title: s.title || "", channel: s.videoOwnerChannelTitle || title, chId: s.videoOwnerChannelId || sid,
+      at: c.videoPublishedAt || s.publishedAt, pos: s.position, sid: sid,
+      thumb: (t.medium || t.high || t.default || {}).url || ("https://i.ytimg.com/vi/" + c.videoId + "/mqdefault.jpg") };
+  }
+  function addStats(items) {
+    var chunks = [], byId = {};
+    items.forEach(function (v) { byId[v.id] = v; });
+    for (var i = 0; i < items.length; i += 50) chunks.push(items.slice(i, i + 50));
+    return chunks.reduce(function (p, ch) {
+      return p.then(function () {
+        return api("videos", { part: "snippet,contentDetails,statistics", id: ch.map(function (v) { return v.id; }).join(","), maxResults: 50 }).then(function (j) {
+          (j.items || []).forEach(function (r) {
+            var v = byId[r.id]; if (!v) return;
+            v.dur = parseDur((r.contentDetails || {}).duration); v.cat = (r.snippet || {}).categoryId || "";
+            v.live = (r.snippet || {}).liveBroadcastContent || "none";
+            var vc = (r.statistics || {}).viewCount; v.views = vc != null ? +vc : null; v.det = 1;
+          });
+        });
+      });
+    }, Promise.resolve()).catch(function () {});
+  }
+  function pagePlaylist(playlistId, token, sid, title) {
+    var p = { part: "snippet,contentDetails", maxResults: 50, playlistId: playlistId };
+    if (token) p.pageToken = token;
+    return api("playlistItems", p).then(function (j) {
+      return { items: (j.items || []).map(function (it) { return mapItem(it, sid, title); }).filter(function (v) { return v.id && v.at && v.title !== "Private video" && v.title !== "Deleted video"; }), next: j.nextPageToken || "" };
+    });
+  }
+  // Loads every page (up to 1,500 videos), showing the first page right away.
+  function loadAll(store, key, getId, sid, title, onUpdate) {
+    var st = store[key];
+    if (st) return st;
+    st = store[key] = { items: [], done: false, busy: true, pages: 0 };
+    var notify = function (d) { if (currentStore() === st && fol.mode !== "playlists") onUpdate(d); };
+    var useId = getId();
+    function step(token, fallbackOk) {
+      return pagePlaylist(useId, token, sid, title).then(function (r) {
+        return addStats(r.items).then(function () {
+          st.items = st.items.concat(r.items); st.pages++;
+          notify(false);
+          if (r.next && st.pages < 30) return step(r.next, false);
+        });
+      }, function (e) {
+        if (e.status === 404 && fallbackOk && /^UULF/.test(useId)) { useId = "UU" + useId.slice(4); return step(token, false); }
+        if (e.status === 404) return;
+        throw e;
+      });
+    }
+    step("", true).catch(function (e) { st.err = e.message; }).then(function () { st.done = true; st.busy = false; notify(true); });
+    return st;
+  }
+
+  // --- open / close
+  function openChannel(id) { fol = { id: id, mode: "videos", pl: null }; render(); window.scrollTo(0, 0); }
+  function closeChannel() { if (fol.mode === "pl") { fol.mode = "playlists"; fol.pl = null; } else fol = { id: null, mode: "videos", pl: null }; render(); window.scrollTo(0, 0); }
+  function sortLabel(m) { return { new: "Newest", old: "Oldest", views: "Most viewed", short: "Shortest", long: "Longest", unseen: "Unwatched first", order: "Playlist order", az: "A–Z", count: "Most videos" }[m] || m; }
+  function sortItems(items, m) {
+    var a = items.slice();
+    if (m === "old") a.sort(function (x, y) { return x.at < y.at ? -1 : 1; });
+    else if (m === "views") a.sort(function (x, y) { return (y.views || 0) - (x.views || 0); });
+    else if (m === "short") a.sort(function (x, y) { return (x.dur || 1e9) - (y.dur || 1e9); });
+    else if (m === "long") a.sort(function (x, y) { return (y.dur || 0) - (x.dur || 0); });
+    else if (m === "unseen") a.sort(function (x, y) { return (seen[x.id] ? 1 : 0) - (seen[y.id] ? 1 : 0) || (x.at < y.at ? 1 : -1); });
+    else if (m === "order") a.sort(function (x, y) { return (x.pos || 0) - (y.pos || 0); });
+    else a.sort(function (x, y) { return x.at < y.at ? 1 : -1; });
+    return a;
+  }
+  function currentStore() {
+    if (fol.mode === "pl") return plItemCache[fol.pl.id];
+    return upCache[fol.id];
+  }
+  function listFor(show) {
+    var st = currentStore(); if (!st) return [];
+    var items = st.items.filter(function (v) { return !hidden[v.id]; });
+    if (chHide) items = items.filter(function (v) { return !seen[v.id]; });
+    var q = $("search").value.trim().toLowerCase();
+    if (q) items = items.filter(function (v) { return v.title.toLowerCase().indexOf(q) >= 0; });
+    return sortItems(items, fol.mode === "pl" && !chSortTouched ? "order" : chSort);
+  }
+  var chSortTouched = false;
+
+  function openSheet(title, rows, toggle) {
+    var wrap = el("div", "sh-wrap"), veil = el("div", "sh-veil"), sh = el("div", "sh");
+    function close() { wrap.remove(); }
+    veil.addEventListener("click", close);
+    sh.appendChild(el("div", "sh-grab")); sh.appendChild(el("h4", null, title));
+    rows.forEach(function (r) {
+      var b = el("button", "sh-opt"); b.type = "button";
+      b.appendChild(el("span", null, r.label)); b.appendChild(el("span", "sh-ck", r.checked ? "✓" : ""));
+      b.addEventListener("click", function () { close(); r.pick(); });
+      sh.appendChild(b);
+    });
+    if (toggle) {
+      var t = el("button", "sh-opt sh-tg"); t.type = "button"; t.appendChild(el("span", null, toggle.label));
+      var sw = el("span", "sh-sw" + (toggle.on ? " on" : "")); t.appendChild(sw);
+      t.addEventListener("click", function () { close(); toggle.pick(); });
+      sh.appendChild(t);
+    }
+    wrap.appendChild(veil); wrap.appendChild(sh); document.body.appendChild(wrap);
+  }
+
+  function renderChannelHead() {
+    var hd = $("chHead"); hd.textContent = "";
+    var id = fol.id, title = subTitle(id), inPl = fol.mode === "pl";
+    var top = el("div", "ch-top");
+    var back = el("button", "icon-btn ch-back"); back.type = "button"; back.setAttribute("aria-label", "Back");
+    back.innerHTML = '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>';
+    back.addEventListener("click", closeChannel);
+    var more = el("button", "icon-btn ch-more"); more.type = "button"; more.setAttribute("aria-label", "More");
+    more.innerHTML = '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></svg>';
+    more.addEventListener("click", channelMenu);
+    var mid = el("div", "ch-id"); mid.appendChild(avatarEl(id, title, "f-av ch-av"));
+    var tx = el("div", "ch-tx");
+    tx.appendChild(el("div", "ch-name", inPl ? fol.pl.title : title));
+    var st = currentStore(), inf = chInfo[id], bits = [];
+    if (inPl) bits.push(title); else if (inf && inf.n) bits.push(inf.n + " videos");
+    if (st) { var w = st.items.filter(function (v) { return seen[v.id]; }).length; bits.push(w + " watched"); }
+    tx.appendChild(el("div", "ch-sub", bits.join(" · "))); mid.appendChild(tx);
+    top.appendChild(back); top.appendChild(mid); top.appendChild(more); hd.appendChild(top);
+    var bar = el("div", "ch-bar");
+    if (!inPl) {
+      var seg = el("div", "seg");
+      [["videos", "Videos"], ["playlists", "Playlists"]].forEach(function (m) {
+        var b = el("button", fol.mode === m[0] ? "on" : "", m[1]); b.type = "button";
+        b.addEventListener("click", function () { if (fol.mode !== m[0]) { fol.mode = m[0]; render(); } });
+        seg.appendChild(b);
+      });
+      bar.appendChild(seg);
+    }
+    var tools = el("div", "ch-tools");
+    var sc = el("button", "chip on", sortLabel(fol.mode === "playlists" ? plSort : (inPl && !chSortTouched ? "order" : chSort)) + " ▾"); sc.type = "button";
+    sc.addEventListener("click", sortMenu); tools.appendChild(sc);
+    var hc = el("button", "chip", "Hide watched"); hc.type = "button"; hc.setAttribute("aria-pressed", String(!!chHide));
+    hc.addEventListener("click", function () { chHide = !chHide; save("sf_chHide", chHide); render(); });
+    tools.appendChild(hc);
+    var cnt = el("span", "ch-count"); cnt.id = "chCount"; tools.appendChild(cnt);
+    bar.appendChild(tools); hd.appendChild(bar);
+  }
+  function sortMenu() {
+    var cur, modes;
+    if (fol.mode === "playlists") { cur = plSort; modes = ["new", "az", "count"]; }
+    else if (fol.mode === "pl") { cur = chSortTouched ? chSort : "order"; modes = ["order", "new", "old", "views", "short", "long", "unseen"]; }
+    else { cur = chSort; modes = ["new", "old", "views", "short", "long", "unseen"]; }
+    openSheet(fol.mode === "playlists" ? "Sort playlists" : "Sort videos", modes.map(function (m) {
+      return { label: sortLabel(m) + ({ new: 1, old: 1, short: 1, long: 1 }[m] ? " first" : ""), checked: m === cur, pick: function () {
+        if (fol.mode === "playlists") { plSort = m; save("sf_plSort", m); } else { chSort = m; chSortTouched = true; save("sf_chSort", m); }
+        render();
+      } };
+    }), { label: "Hide watched", on: chHide, pick: function () { chHide = !chHide; save("sf_chHide", chHide); render(); } });
+  }
+  function channelMenu() {
+    var st = currentStore(), rows = [];
+    if (st && st.items.length) {
+      rows.push({ label: "Mark all " + st.items.length + " watched", checked: false, pick: function () {
+        var title = fol.mode === "pl" ? fol.pl.title : subTitle(fol.id);
+        if (!window.confirm("Mark all " + st.items.length + " videos in " + title + " as watched?")) return;
+        var before = {}; st.items.forEach(function (v) { if (!seen[v.id]) { before[v.id] = 1; seen[v.id] = 1; } });
+        save("sf_seen", seen); render();
+        toast("Marked " + Object.keys(before).length + " watched.", "Undo", function () { Object.keys(before).forEach(function (k) { delete seen[k]; }); save("sf_seen", seen); render(); });
+      } });
+      rows.push({ label: "Unmark all as watched", checked: false, pick: function () { st.items.forEach(function (v) { delete seen[v.id]; }); save("sf_seen", seen); render(); } });
+    }
+    rows.push({ label: "Open on YouTube", checked: false, pick: function () { window.open("https://www.youtube.com/channel/" + encodeURIComponent(fol.id), "_blank", "noopener"); } });
+    openSheet("This channel", rows, null);
+  }
+
+  function renderChannelPage(box) {
+    renderChannelHead();
+    var id = fol.id, title = subTitle(id);
+    var upd = function (done) { if (!fol.id) return; if (done || (currentStore() && currentStore().pages <= 1)) renderChannelList(); else softUpdate(); };
+    if (fol.mode === "videos") {
+      loadAll(upCache, id, function () { return (cfg.hideShorts ? "UULF" : "UU") + id.slice(2); }, id, title, upd);
+      renderChannelList();
+    } else if (fol.mode === "playlists") {
+      renderPlaylists(box);
+    } else {
+      loadAll(plItemCache, fol.pl.id, function () { return fol.pl.id; }, id, title, upd);
+      renderChannelList();
+    }
+  }
+  // While more pages arrive, only the count changes; the list is rebuilt when loading finishes.
+  function softUpdate() {
+    var st = currentStore(), c = $("chCount"); if (!st || !c) return;
+    c.textContent = "Loading all videos (" + st.items.length + " so far)";
+  }
+  function renderChannelList() {
+    var box = $("feed"); box.textContent = ""; view = null;
+    var st = currentStore();
+    if (!st) { setStatus("Loading"); return; }
+    renderChannelHead();
+    var items = listFor(), c = $("chCount");
+    if (c) c.textContent = st.done ? items.length + (items.length === 1 ? " video" : " videos") : "Loading all videos (" + st.items.length + " so far)";
+    if (st.err && !st.items.length) { box.appendChild(el("p", "empty", "Could not load this channel: " + st.err)); return; }
+    if (!items.length) { box.appendChild(el("p", "empty", st.done ? (st.items.length ? "Nothing to show. Turn off Hide watched." : "No videos found.") : "Loading videos")); return; }
+    view = { items: items, pos: 0, ranked: true, counts: {}, day: null, list: null, marker: null };
+    appendMore();
+  }
+
+  // --- playlists
+  function loadPlaylists(id) {
+    if (plListCache[id]) return plListCache[id];
+    var st = plListCache[id] = { items: [], done: false };
+    function step(token, n) {
+      var p = { part: "snippet,contentDetails", channelId: id, maxResults: 50 }; if (token) p.pageToken = token;
+      return api("playlists", p).then(function (j) {
+        (j.items || []).forEach(function (it) {
+          var t = (it.snippet || {}).thumbnails || {};
+          st.items.push({ id: it.id, title: (it.snippet || {}).title || "Playlist", at: (it.snippet || {}).publishedAt || "", n: (it.contentDetails || {}).itemCount || 0, thumb: (t.medium || t.high || t.default || {}).url || "" });
+        });
+        if (j.nextPageToken && n < 3) return step(j.nextPageToken, n + 1);
+      });
+    }
+    step("", 0).catch(function (e) { st.err = e.message; }).then(function () { st.done = true; if (fol.id === id && fol.mode === "playlists") renderPlaylists($("feed")); progressFor(st.items, id); });
+    return st;
+  }
+  // Counts watched videos in each playlist, a few at a time, so the progress bars fill in.
+  function progressFor(list, id) {
+    list.reduce(function (p, pl) {
+      return p.then(function () {
+        if (pl.ids || fol.id !== id) return;
+        return api("playlistItems", { part: "contentDetails", maxResults: 50, playlistId: pl.id }).then(function (j) {
+          pl.ids = (j.items || []).map(function (it) { return (it.contentDetails || {}).videoId; });
+          var bar = document.querySelector('[data-pl="' + pl.id + '"]'); if (bar) updatePlProgress(bar, pl);
+        }).catch(function () { pl.ids = []; });
+      });
+    }, Promise.resolve());
+  }
+  function plWatched(pl) { return (pl.ids || []).filter(function (v) { return seen[v]; }).length; }
+  function updatePlProgress(card, pl) {
+    var w = plWatched(pl), n = pl.n || (pl.ids || []).length;
+    var m = card.querySelector(".f-meta"); if (m) m.textContent = w + " of " + n + " watched";
+    var b = card.querySelector(".prog i"); if (b) b.style.width = (n ? Math.min(100, Math.round(100 * w / n)) : 0) + "%";
+  }
+  function renderPlaylists(box) {
+    box.textContent = ""; view = null;
+    var st = loadPlaylists(fol.id), c = $("chCount");
+    var items = st.items.slice();
+    if (chHide) items = items.filter(function (p) { return !(p.ids && p.ids.length && plWatched(p) >= p.ids.length); });
+    if (plSort === "az") items.sort(function (a, b) { return a.title.toLowerCase() < b.title.toLowerCase() ? -1 : 1; });
+    else if (plSort === "count") items.sort(function (a, b) { return b.n - a.n; });
+    else items.sort(function (a, b) { return a.at < b.at ? 1 : -1; });
+    if (c) c.textContent = st.done ? items.length + (items.length === 1 ? " playlist" : " playlists") : "Loading";
+    if (!items.length) { box.appendChild(el("p", "empty", st.done ? (st.err ? "Could not load playlists: " + st.err : "No playlists to show.") : "Loading playlists")); return; }
+    var list = el("div", "pl-list");
+    items.forEach(function (pl) {
+      var wrap = el("button", "stk"); wrap.type = "button"; wrap.setAttribute("data-pl", pl.id);
+      wrap.appendChild(el("span", "back2")); wrap.appendChild(el("span", "back1"));
+      var card = el("div", "stk-card"), th = el("div", "thumb");
+      var img = el("img"); img.alt = ""; img.loading = "lazy"; img.referrerPolicy = "no-referrer"; if (pl.thumb) img.src = pl.thumb; th.appendChild(img);
+      th.appendChild(el("span", "badge", pl.n + (pl.n === 1 ? " video" : " videos"))); card.appendChild(th);
+      card.appendChild(el("div", "title", pl.title)); card.appendChild(el("div", "f-meta", pl.n + " videos"));
+      var pr = el("div", "prog"); pr.appendChild(el("i")); card.appendChild(pr); wrap.appendChild(card);
+      wrap.addEventListener("click", function () { fol.mode = "pl"; fol.pl = pl; chSortTouched = false; render(); window.scrollTo(0, 0); });
+      list.appendChild(wrap);
+      if (pl.ids) updatePlProgress(wrap, pl);
+    });
+    box.appendChild(list);
+  }
+
   // ---------- filters ----------
   function mutedWordList() { return (cfg.mutedWords || "").toLowerCase().split(",").map(function (s) { return s.trim(); }).filter(Boolean); }
   function topicList() { return (cfg.topics || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean); }
@@ -670,9 +1062,8 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     return resolveChannelId(cfg.channel).then(function (id) { return fetchSubs({ channelId: id }, null); });
   }
   function pruneMarks() {
-    var live = {};
-    feed.items.concat(disc.items).forEach(function (v) { live[v.id] = 1; });
-    [seen, hidden].forEach(function (m) { Object.keys(m).forEach(function (id) { if (!live[id]) delete m[id]; }); });
+    // Watch history now spans every channel page, so marks are kept; only a very long history is trimmed.
+    [seen, hidden].forEach(function (m) { var ks = Object.keys(m); if (ks.length > 6000) ks.slice(0, ks.length - 5000).forEach(function (id) { delete m[id]; }); });
     save("sf_seen", seen); save("sf_hidden", hidden);
   }
   function start() { busy = true; $("refreshBtn").classList.add("spin"); }
@@ -921,6 +1312,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
       subs.forEach(function (x) { var o = el("option"); o.value = x.title; dl.appendChild(o); });
     }
   }
+  function renderFollowLazy() { var box = $("feed"); box.textContent = ""; view = null; renderFollow(box); }
   function renderChannels(box) {
     renderSeeds();
     var items = rec.items.filter(function (c) { return !recNo[c.id] && !mutedCh[c.id]; });
@@ -1070,7 +1462,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
 
     var meta = el("div", "meta");
     meta.appendChild(el("h3", "title", v.title));
-    meta.appendChild(el("div", "sub", v.channel + " · " + ago(new Date(v.at).getTime()) + (v.topic ? " · " + v.topic : "")));
+    meta.appendChild(el("div", "sub", v.channel + " · " + ago(new Date(v.at).getTime()) + (v.views != null ? " · " + fmtCount(v.views) + " views" : "") + (v.topic ? " · " + v.topic : "")));
     a.appendChild(meta);
 
     var acts = el("div", "acts");
@@ -1110,14 +1502,24 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     var box = $("feed");
     box.textContent = "";
     view = null;
-    var isDisc = tab === "disc", isChan = tab === "chan";
+    var isDisc = tab === "disc", isChan = tab === "chan", isFol = tab === "follow";
     $("tabSubs").setAttribute("aria-selected", String(tab === "subs"));
     $("tabDisc").setAttribute("aria-selected", String(isDisc));
+    $("tabFollow").setAttribute("aria-selected", String(isFol));
     $("tabChan").setAttribute("aria-selected", String(isChan));
-    $("tools").hidden = isChan;
+    var inChannel = isFol && !!fol.id;
+    $("tools").hidden = isChan || inChannel;
+    $("chHead").hidden = !inChannel;
     $("chanPanel").hidden = !isChan;
+    $("search").placeholder = "Filter";
+    $("hideSeenBtn").hidden = false;
     renderLater(false);
     if (isChan) { renderChannels(box); return; }
+    if (isFol) {
+      if (inChannel) { setStatus(""); renderChannelPage(box); return; }
+      loadInfo().then(function () { if (tab === "follow" && !fol.id) renderFollowLazy(); });
+      renderFollow(box); return;
+    }
     $("sortBtn").hidden = isDisc;
     $("sortBtn").setAttribute("aria-pressed", String(sortMode === "you"));
     $("hideSeenBtn").setAttribute("aria-pressed", String(!!hideSeen));
@@ -1246,6 +1648,8 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   $("tabSubs").addEventListener("click", function () { if (tab === "subs") toTop(); else setTab("subs"); });
   $("tabDisc").addEventListener("click", function () { if (tab === "disc") toTop(); else setTab("disc"); });
   $("tabChan").addEventListener("click", function () { if (tab === "chan") toTop(); else setTab("chan"); });
+  $("tabFollow").addEventListener("click", function () { if (tab === "follow") { if (fol.id) closeChannelAll(); else toTop(); } else setTab("follow"); });
+  function closeChannelAll() { fol = { id: null, mode: "videos", pl: null }; render(); window.scrollTo(0, 0); }
   document.querySelector(".bar").addEventListener("click", function (e) { if (!e.target.closest("button")) toTop(); });
   $("topBtn").addEventListener("click", toTop);
   document.querySelector(".brand").addEventListener("click", function () {
@@ -1259,7 +1663,9 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   $("findChanBtn").addEventListener("click", findChannels);
   var searchTimer = null;
   $("search").addEventListener("input", function () { clearTimeout(searchTimer); searchTimer = setTimeout(render, 160); });
-  $("sortBtn").addEventListener("click", function () { sortMode = sortMode === "you" ? "new" : "you"; save("sf_sort", sortMode); render(); });
+  $("sortBtn").addEventListener("click", function () {
+    if (tab === "follow") { folSort = folSort === "az" ? "recent" : "az"; save("sf_folSort", folSort); render(); return; }
+    sortMode = sortMode === "you" ? "new" : "you"; save("sf_sort", sortMode); render(); });
   $("hideSeenBtn").addEventListener("click", function () { hideSeen = !hideSeen; save("sf_hideSeen", hideSeen); render(); });
   $("clearSeenBtn").addEventListener("click", function () { seen = {}; save("sf_seen", seen); setStatus("Watched marks cleared."); });
   $("resetLearnBtn").addEventListener("click", function () {
@@ -1269,7 +1675,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   });
   $("clearMutedBtn").addEventListener("click", function () { mutedCh = {}; save("sf_mutedCh", mutedCh); fillSettings(); setStatus("All channels unmuted."); });
   $("forgetBtn").addEventListener("click", function () {
-    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_later", "sf_chk"].forEach(drop);
+    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_later", "sf_chk", "sf_chinfo", "sf_folSort", "sf_chSort", "sf_chHide", "sf_plSort"].forEach(drop);
     chk = {};
     cfg = Object.assign({}, DEFAULT_CFG, { v2: 1 });
     subs = []; feed = { at: 0, items: [] }; disc = { at: 0, n: 0, items: [] };
@@ -1354,7 +1760,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 13;
+  var VERSION = 14;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
