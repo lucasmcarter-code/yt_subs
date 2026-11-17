@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-5iqIpkxXB5tqiPl96znsPjiOwnG90kS6h4cym/na1tA=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-vvUMsy7AWBuMtbjeCuG8cEVCHhH3Q5uzulTIfn45da0=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -181,7 +181,7 @@ body.light #feed { scroll-snap-type: none !important; }
 .f-h { font: italic 700 32px/1.1 Georgia, "Caveat", serif; color: var(--ink); margin: 10px 0 2px; }
 .f-sub { font-size: 13px; color: var(--muted); margin: 0 0 6px; }
 .f-grid { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 4px; grid-auto-flow: dense; column-gap: 16px; row-gap: 0; padding: 14px 0 20px; }
-.f-card { position: relative; display: block; align-self: start; margin: 0; text-align: left; width: 100%; padding: 8px 8px 11px; border: 0; border-radius: 6px; background: var(--paper); color: var(--pink); transform-origin: 50% 0; transform: rotate(calc(var(--tilt, 0) * 1deg)); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25), 0 16px 28px -14px rgba(0, 0, 0, 0.6); }
+.f-card { position: relative; display: block; align-self: start; margin: 0; text-align: left; width: 100%; padding: 8px 8px 11px; border: 0; border-radius: 6px; background: var(--paper); color: var(--pink); transform-origin: 50% 0; transform: rotate(calc(var(--tilt, 0) * 1deg)); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25), 0 8px 12px -8px rgba(0, 0, 0, 0.55); }
 .f-card::before { content: ""; position: absolute; top: -6px; left: 50%; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; z-index: 2; background: var(--accent); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); }
 .f-photo { position: relative; height: 128px; border-radius: 3px; display: grid; place-items: center; overflow: hidden; }
 .f-av { transform: translate(var(--ax, 0px), var(--ay, 0px)); }
@@ -462,7 +462,7 @@ body.light #feed { scroll-snap-type: none !important; }
     </div>
     <h3>Diagnostics</h3>
     <p>If something looks wrong, tap Copy and paste the result into chat. It has no API key, sign-in token or watch history.</p>
-    <div class="btn-row"><button class="btn ghost" id="diagBtn" type="button">Copy diagnostics</button></div>
+    <div class="btn-row"><button class="btn ghost" id="diagBtn" type="button">Copy diagnostics</button><button class="btn" id="crashBtn" type="button">Copy crash report</button></div>
     <textarea class="mtest" id="diagBox" rows="9" readonly hidden></textarea>
     <p id="versionLine"></p>
   </section>
@@ -745,6 +745,7 @@ body.light #feed { scroll-snap-type: none !important; }
     var f = load("sf_crash", null);
     if (f) {
       crashNote = "yes, while scrolling " + f.tab + " in " + f.mode + " at " + new Date(f.t).toLocaleString();
+      save("sf_lastcrash", f);
       if (!light.on) { light = { on: true, why: "crash while scrolling " + f.tab + " in " + f.mode }; save("sf_light", light); }
       drop("sf_crash");
     }
@@ -891,6 +892,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       A.forEach(function (n, i) { pool.push(n); if (i % 2 && bi < B.length) pool.push(B[bi++]); });
       while (bi < B.length) pool.push(B[bi++]);
     } else if (th.ids.length) pool = TOPICS[th.ids[0]][2].slice();
+    if (light.on) slots = slots.slice(0, 6);
     slots.forEach(function (p, j) {
       if (!pool.length) {
         var c = document.createElementNS(ns, "circle"); c.setAttribute("cx", p[0]); c.setAttribute("cy", p[1]); c.setAttribute("r", 2.6 + ((h >> j) & 1)); svg.appendChild(c); return;
@@ -974,8 +976,9 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     ph.style.setProperty("--ax", ax + "px"); ph.style.setProperty("--ay", ay + "px");
   }
   function masonry(grid) {
-    var cs = grid.children;
-    for (var i = 0; i < cs.length; i++) cs[i].style.gridRowEnd = "span " + Math.max(1, Math.ceil((cs[i].offsetHeight + 28) / 4));
+    var cs = grid.children, hs = [], i;
+    for (i = 0; i < cs.length; i++) hs.push(cs[i].offsetHeight);
+    for (i = 0; i < cs.length; i++) cs[i].style.gridRowEnd = "span " + Math.max(1, Math.ceil((hs[i] + 28) / 4));
   }
   window.addEventListener("resize", function () { var g = document.querySelector(".f-grid"); if (g) masonry(g); });
   function unseenCount(id) { var n = 0; feed.items.forEach(function (v) { if ((v.sid || v.chId) === id && !seen[v.id] && !hidden[v.id]) n++; }); return n; }
@@ -1011,8 +1014,15 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       box.appendChild(row); row.scrollLeft = chipScroll;
     }
     if (!list.length) { box.appendChild(el("p", "empty", "No channel matches that filter.")); return; }
-    var grid = el("div", "f-grid");
-    list.forEach(function (s) {
+    var grid = el("div", "f-grid"), fpos = 0, fobs = null, fmark = el("div", "more-marker");
+    function fchunk() {
+      var end = Math.min(list.length, fpos + (fpos ? 18 : 24));
+      for (; fpos < end; fpos++) grid.appendChild(fcard(list[fpos]));
+      if (fmark.parentNode) fmark.parentNode.removeChild(fmark);
+      masonry(grid);
+      if (fpos < list.length) { box.appendChild(fmark); if (fobs) fobs.observe(fmark); }
+    }
+    function fcard(s) {
       var h = hash(s.id), pal = PALETTE[h % PALETTE.length], n = unseenCount(s.id), inf = chInfo[s.id];
       var card = el("button", "f-card"); card.type = "button";
       card.style.setProperty("--tilt", String((((h >> 3) % 5) - 2) * 0.5));
@@ -1025,10 +1035,11 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       card.appendChild(el("div", "f-name", s.title));
       card.appendChild(el("div", "f-meta", inf && inf.n ? inf.n + (inf.n === 1 ? " video" : " videos") : " "));
       card.addEventListener("click", function () { openChannel(s.id); });
-      grid.appendChild(card);
-    });
+      return card;
+    }
+    if ("IntersectionObserver" in window) fobs = new IntersectionObserver(function (en) { if (en.some(function (e) { return e.isIntersecting; })) { fobs.disconnect(); fchunk(); } }, { rootMargin: "900px 0px" });
     box.appendChild(grid);
-    masonry(grid); requestAnimationFrame(function () { masonry(grid); });
+    fchunk(); requestAnimationFrame(function () { masonry(grid); });
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { masonry(grid); });
   }
 
@@ -2193,7 +2204,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   });
   $("clearMutedBtn").addEventListener("click", function () { mutedCh = {}; save("sf_mutedCh", mutedCh); fillSettings(); setStatus("All channels unmuted."); });
   $("forgetBtn").addEventListener("click", function () {
-    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_later", "sf_chk", "sf_chinfo", "sf_folSort", "sf_chSort", "sf_chHide", "sf_plSort", "sf_chTheme", "sf_topicsSeeded", "sf_dref", "sf_dq", "sf_dseen", "sf_dboost", "sf_topicAt", "sf_light", "sf_crash", "sf_sq", "sf_sc", "sf_sh", "sf_jb"].forEach(drop);
+    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_later", "sf_chk", "sf_chinfo", "sf_folSort", "sf_chSort", "sf_chHide", "sf_plSort", "sf_chTheme", "sf_topicsSeeded", "sf_dref", "sf_dq", "sf_dseen", "sf_dboost", "sf_topicAt", "sf_light", "sf_crash", "sf_sq", "sf_sc", "sf_sh", "sf_jb", "sf_lastcrash"].forEach(drop);
     chk = {};
     cfg = Object.assign({}, DEFAULT_CFG, { v2: 1 });
     subs = []; feed = { at: 0, items: [] }; disc = { at: 0, n: 0, items: [] };
@@ -2278,7 +2289,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 19;
+  var VERSION = 20;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -2354,8 +2365,14 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
   // Landscape strip: cards far behind you are taken out of the page and replaced by one exact-width spacer; they come back when you scroll back.
   var crashTimer = 0, crashSet = false;
+  var crashAt = 0;
   function markScroll() {
-    if (!crashSet) { crashSet = true; save("sf_crash", { t: Date.now(), tab: tab, mode: LAND.matches ? "landscape" : "portrait" }); }
+    var now = Date.now();
+    if (!crashSet || now - crashAt > 1500) {
+      crashSet = true; crashAt = now;
+      var fd = $("feed");
+      save("sf_crash", { t: now, tab: tab, mode: LAND.matches ? "landscape" : "portrait", cards: document.querySelectorAll(".vid, .f-card, .stk").length, y: Math.round(window.scrollY), x: Math.round(fd.scrollLeft), inChannel: !!fol.id, topic: folTopic || "", sort: sortMode, light: !!light.on, subs: subs.length, feed: feed.items.length, disc: (disc.items || []).length });
+    }
     clearTimeout(crashTimer);
     crashTimer = setTimeout(function () { drop("sf_crash"); crashSet = false; }, 4000);
   }
@@ -2408,7 +2425,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
   function onScrollPush() {
     topBtnState();
-    if (LAND.matches) { markScroll(); winSync(); }
+    markScroll(); if (LAND.matches) winSync();
     if (LAND.matches && view && view.pos < view.items.length) {
       var f = $("feed"); if (f.scrollLeft + f.clientWidth > f.scrollWidth - 1600) appendMore();
     }
@@ -2465,6 +2482,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       "cards in page: " + document.querySelectorAll(".vid, .f-card, .stk").length + (view && view.win ? " (windowed, " + view.win.lo + "-" + view.win.hi + " of " + view.items.length + ")" : ""),
       "cards on screen: " + liveSet.length + "   swing now: " + ph.a.toFixed(2) + " deg   physics running: " + !!ph.raf,
       "storage bytes: " + tot + " " + JSON.stringify(sz),
+      "last crash: " + (function () { var c = load("sf_lastcrash", null); return c ? JSON.stringify(c) + " (" + new Date(c.t).toLocaleString() + ")" : "none recorded"; })(),
       "recent errors: " + (errLog.length ? "\n  " + errLog.join("\n  ") : "none")
     ];
     return clean(L.join("\n"));
@@ -2472,6 +2490,11 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   $("diagBtn").addEventListener("click", function () {
     var t = diagText(), box = $("diagBox"); box.value = t; box.hidden = false;
     function done(ok) { toast(ok ? "Diagnostics copied. Paste them in chat." : "Select the text below and copy it."); if (!ok) { box.focus(); box.select(); } }
+    try { navigator.clipboard.writeText(t).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
+  });
+  $("crashBtn").addEventListener("click", function () {
+    var t = "CRASH REPORT\n" + diagText(), box = $("diagBox"); box.value = t; box.hidden = false;
+    function done(ok) { toast(ok ? "Crash report copied. Paste it in chat." : "Select the text below and copy it."); if (!ok) { box.focus(); box.select(); } }
     try { navigator.clipboard.writeText(t).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
   });
   // ---------- start ----------
