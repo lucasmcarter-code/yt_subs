@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-e3S8bhALQB+3U0yQXQvx6a/lHvrWx8ij1yjc31Im+7c=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-D1P5vAtz3QUVkJBRTyY7mgf2BKdo1ainan7wbGb+MI4=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -62,6 +62,9 @@ header.bar { position: sticky; top: 0; z-index: 5; background: var(--bg); border
 .check input { width: 20px; height: 20px; accent-color: var(--accent); }
 .btn { height: 46px; padding: 0 18px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); font-weight: 600; }
 .btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.ver { display: inline-block; margin: 0 0 10px; padding: 3px 10px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-size: 12px; font-weight: 700; }
+.mtest { margin: 0 0 14px; padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.06); font: 12px/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap; min-height: 1.5em; }
+.mtest:empty { display: none; }
 .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 20px; }
 details.help { border: 1px solid var(--line); background: var(--surface); padding: 12px 14px; margin-bottom: 14px; }
 details.help summary { font-weight: 600; cursor: pointer; }
@@ -162,7 +165,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
 .later-x { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; border: 0; background: rgba(24, 24, 27, 0.78); color: #fff; display: grid; place-items: center; padding: 0; }
 .later-x svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.6; stroke-linecap: round; }
 .vid { transform: rotate(calc(var(--tilt, 0) * 1deg)); }
-.vid.live { transform: rotate(calc(var(--tilt, 0) * 1deg + var(--sway, 0deg) * var(--k, 1))); will-change: transform; }
+.vid.live { transform: translateY(var(--bob, 0px)) rotate(calc(var(--tilt, 0) * 1deg + var(--sway, 0deg) * var(--k, 1))); will-change: transform; }
 .more-marker { height: 1px; }
 .brand { white-space: nowrap; overflow: hidden; }
 .tools { flex-wrap: nowrap; }
@@ -221,6 +224,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   <!-- Settings view -->
   <section id="settingsView" class="sheet" hidden>
     <h2>Connect your subscriptions</h2>
+    <p class="ver" id="versionTop"></p>
     <p>This page reads your subscription list from YouTube and shows the newest uploads, nothing else. Everything you enter stays in this browser.</p>
 
     <details class="help">
@@ -287,7 +291,8 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     <h3>Playback</h3>
     <label class="check"><input type="checkbox" id="hideShorts" checked> Leave out Shorts and live streams</label>
     <label class="check"><input type="checkbox" id="openInApp"> Use the direct app link (may show an "Open in YouTube?" prompt)</label>
-    <label class="check"><input type="checkbox" id="sway" checked> Let cards sway while you scroll</label>
+    <label class="check"><input type="checkbox" id="sway" checked> Cards swing when you scroll</label>
+    <label class="check"><input type="checkbox" id="tilt"> Cards lean when you tilt the phone</label>
     <p>Press and hold a video to save it to Watch later.</p>
 
     <div class="btn-row">
@@ -302,6 +307,11 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
       <button class="btn ghost" id="clearSeenBtn" type="button">Reset watched marks</button>
       <button class="btn ghost" id="forgetBtn" type="button">Forget everything on this device</button>
     </div>
+    <h3>Motion test</h3>
+    <p>Shows whether this phone is sending tilt readings.</p>
+    <div class="btn-row"><button class="btn ghost" id="motionBtn" type="button">Run motion test</button></div>
+    <pre class="mtest" id="mtest" aria-live="polite"></pre>
+    <p id="versionLine"></p>
   </section>
 </main>
 <div class="toast" id="toast" hidden><span id="toastMsg"></span><button type="button" id="toastAct"></button></div>
@@ -316,7 +326,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   function save(k, v) { mem[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   function drop(k) { delete mem[k]; try { localStorage.removeItem(k); } catch (e) {} }
 
-  var DEFAULT_CFG = { key: "", channel: "", clientId: "", hideShorts: true, openInApp: false, sway: true, topics: "", mutedWords: "", blockCats: ["25"] };
+  var DEFAULT_CFG = { key: "", channel: "", clientId: "", hideShorts: true, openInApp: false, sway: true, tilt: false, topics: "", mutedWords: "", blockCats: ["25"] };
   var cfg = Object.assign({}, DEFAULT_CFG, load("sf_cfg", {}));
   if (!cfg.v2) { cfg.openInApp = false; cfg.v2 = 1; save("sf_cfg", cfg); }
   var subs = load("sf_subs", []);
@@ -559,8 +569,12 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   }, { threshold: 0.6 }) : null;
 
   // Cards near the screen are "live": only those take part in the sway.
+  var liveSet = [];
   var liveObs = ("IntersectionObserver" in window) ? new IntersectionObserver(function (entries) {
-    entries.forEach(function (en) { en.target.classList.toggle("live", en.isIntersecting); });
+    entries.forEach(function (en) {
+      en.target.classList.toggle("live", en.isIntersecting);
+      if (en.isIntersecting) liveSet.push(en.target); else { var i = liveSet.indexOf(en.target); if (i > -1) liveSet.splice(i, 1); en.target.style.removeProperty("--sway"); en.target.style.removeProperty("--bob"); }
+    });
   }, { rootMargin: "200px 0px" }) : null;
   // The feed is drawn a page at a time; a marker near the bottom asks for the next page.
   var PAGE = 30, view = null;
@@ -1116,6 +1130,9 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     $("hideShorts").checked = cfg.hideShorts !== false;
     $("openInApp").checked = !!cfg.openInApp;
     $("sway").checked = cfg.sway !== false;
+    $("tilt").checked = !!cfg.tilt;
+    $("versionLine").textContent = "Version " + VERSION;
+    $("versionTop").textContent = "Version " + VERSION;
     $("originText").textContent = location.origin;
     $("closeBtn").hidden = !feed.items.length;
     var cats = $("cats"); cats.textContent = "";
@@ -1143,6 +1160,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
       hideShorts: $("hideShorts").checked,
       openInApp: $("openInApp").checked,
       sway: $("sway").checked,
+      tilt: $("tilt").checked,
       v2: 1
     };
     save("sf_cfg", cfg);
@@ -1160,6 +1178,10 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     refreshSubs({ reimport: r.channelChanged && !!cfg.channel });
   });
   $("googleBtn").addEventListener("click", function () { readSettings(); googleImport(); });
+  $("tilt").addEventListener("change", function () {
+    cfg.tilt = $("tilt").checked; save("sf_cfg", cfg);
+    if (cfg.tilt) tiltAsk(true); else { tiltStop(); setStatus("Tilt is off."); }
+  });
   $("refreshBtn").addEventListener("click", function () { refresh(); });
   $("fullBtn").addEventListener("click", function () { readSettings(); tab = "subs"; save("sf_tab", tab); refreshSubs({ full: true }); });
   $("tabSubs").addEventListener("click", function () { setTab("subs"); });
@@ -1265,24 +1287,109 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     if (keepPlace && h1 !== h0 && window.scrollY > 40) window.scrollBy(0, h1 - h0);
   }
 
-  // ---------- pin sway ----------
-  var reduceMotion = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
-  var sw = { a: 0, w: 0, y: window.scrollY || 0, t: 0, raf: 0 };
-  function swayOn() { return cfg.sway !== false && !reduceMotion; }
-  function swayFrame() {
-    sw.w += -0.07 * sw.a; sw.w *= 0.91; sw.a += sw.w;
-    sw.a = Math.max(-3.5, Math.min(3.5, sw.a));
-    var live = Math.abs(sw.a) > 0.01 || Math.abs(sw.w) > 0.01;
-    $("feed").style.setProperty("--sway", (live ? sw.a : 0).toFixed(3) + "deg");
-    sw.raf = live ? requestAnimationFrame(swayFrame) : 0;
+  // ---------- card physics: one pendulum, pushed by scrolling and leaning with phone tilt ----------
+  var VERSION = 8;
+  // a = current angle, w = angular speed, rest = where gravity wants the card (from tilt). Stepped at a fixed 60 per second.
+  var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0, tiltOn: false, asked: false };
+  var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 5, LAG = 4;
+  var SPRING = 0.008, DAMP = 0.90, PUSH_MAX = 6.5, PUSH_W = 0.62, TILT_GAIN = 0.45, TILT_MAX = 16;
+  function physStep() {
+    ph.w += SPRING * (ph.rest - ph.a);
+    ph.w *= DAMP;
+    ph.a += ph.w;
+    var lim = TILT_MAX + PUSH_MAX + 3;
+    if (ph.a < -lim) { ph.a = -lim; ph.w = 0; }
+    if (ph.a > lim) { ph.a = lim; ph.w = 0; }
+    // the rope bounce: a small up-and-down spring
+    ph.bv += -BOB_SPRING * ph.b; ph.bv *= BOB_DAMP; ph.b += ph.bv;
+    if (ph.b > BOB_MAX) { ph.b = BOB_MAX; ph.bv = 0; } if (ph.b < -BOB_MAX) { ph.b = -BOB_MAX; ph.bv = 0; }
+    ph.hist.push(ph.a, ph.b); if (ph.hist.length > 80) ph.hist.splice(0, 2);
   }
+  // Each card hangs further down the rope, so it feels the motion a few frames after the card above it.
+  function applyCards() {
+    var n = liveSet.length; if (!n) return;
+    var rows = liveSet.map(function (c) { return [c.getBoundingClientRect().top, c]; }).sort(function (x, y) { return x[0] - y[0]; });
+    var h = ph.hist, frames = h.length / 2;
+    rows.forEach(function (r, i) {
+      var f = Math.min(frames - 1, i * LAG); if (f < 0) return;
+      var k = (frames - 1 - f) * 2;
+      r[1].style.setProperty("--sway", h[k].toFixed(3) + "deg");
+      r[1].style.setProperty("--bob", h[k + 1].toFixed(2) + "px");
+    });
+  }
+  function physFrame(now) {
+    var dt = Math.min(100, now - (ph.last || now)); ph.last = now; ph.acc += dt;
+    while (ph.acc >= 16.667) { physStep(); ph.acc -= 16.667; }
+    var moving = Math.abs(ph.rest - ph.a) > 0.02 || Math.abs(ph.w) > 0.01 || Math.abs(ph.b) > 0.02 || Math.abs(ph.bv) > 0.01 || false;
+    ph.quiet = moving ? 0 : (ph.quiet || 0) + 1;
+    var live = ph.quiet < 40;
+    if (!live) { ph.a = ph.rest; ph.w = 0; ph.b = 0; ph.bv = 0; ph.hist.length = 0; }
+    $("feed").style.setProperty("--sway", ph.a.toFixed(3) + "deg");
+    if (live) applyCards(); else liveSet.forEach(function (c) { c.style.setProperty("--sway", ph.a.toFixed(3) + "deg"); c.style.setProperty("--bob", "0px"); });
+    if (live) ph.raf = requestAnimationFrame(physFrame); else { ph.raf = 0; ph.last = 0; ph.acc = 0; }
+  }
+  function physKick() { if (!ph.raf) { ph.last = 0; ph.raf = requestAnimationFrame(physFrame); } }
   window.addEventListener("scroll", function () {
-    if (!swayOn()) return;
-    var now = performance.now(), dy = window.scrollY - sw.y, dt = Math.max(8, now - sw.t);
-    sw.y = window.scrollY; sw.t = now;
-    sw.w += Math.max(-0.5, Math.min(0.5, -(dy / dt) * 0.12));
-    if (!sw.raf) sw.raf = requestAnimationFrame(swayFrame);
+    if (cfg.sway === false) return;
+    var now = performance.now(), dy = window.scrollY - ph.y, dt = Math.max(8, now - ph.t);
+    ph.y = window.scrollY; ph.t = now;
+    // A scroll push may raise the swing speed only up to PUSH_W, which tops out near PUSH_MAX degrees.
+    var w0 = Math.abs(ph.w);
+    ph.bv += Math.max(-0.5, Math.min(0.5, -(dy / dt) * 0.12));
+    ph.w += Math.max(-0.3, Math.min(0.3, -(dy / dt) * 0.13));
+    if (Math.abs(ph.w) > PUSH_W && Math.abs(ph.w) > w0) ph.w = (ph.w < 0 ? -1 : 1) * Math.max(w0, PUSH_W);
+    physKick();
   }, { passive: true });
+
+  // Tilt: a card hanging from a pin stays partly upright as the phone rolls left or right.
+  function onTilt(e) {
+    if (!cfg.tilt) return;
+    var ang = (screen.orientation && typeof screen.orientation.angle === "number") ? screen.orientation.angle : (window.orientation || 0);
+    var roll = ang === 90 ? e.beta : (ang === 270 || ang === -90) ? -e.beta : e.gamma;
+    if (roll == null || isNaN(roll)) return;
+    var target = Math.max(-TILT_MAX, Math.min(TILT_MAX, -roll * TILT_GAIN));
+    if (Math.abs(target - ph.rest) < 0.3) return;   // ignore sensor jitter
+    ph.rest = target;
+    physKick();
+  }
+  function tiltListen() { if (!ph.tiltOn) { ph.tiltOn = true; window.addEventListener("deviceorientation", onTilt); } }
+  function tiltStop() { ph.rest = 0; physKick(); }
+  // iPhone only hands out motion data after a tap-triggered permission request.
+  function tiltAsk(fromSettings) {
+    if (!cfg.tilt) return;
+    var D = window.DeviceOrientationEvent;
+    if (!D) { if (fromSettings) setStatus("This device does not report tilt.", true); return; }
+    if (typeof D.requestPermission !== "function") { tiltListen(); return; }
+    ph.asked = true;
+    D.requestPermission().then(function (r) {
+      if (r === "granted") { tiltListen(); if (fromSettings) setStatus("Tilt is on. Roll the phone left and right."); }
+      else if (fromSettings) setStatus("Motion access was declined. To allow it, clear this site's data in Safari settings and try again.", true);
+    }).catch(function () { ph.asked = false; });
+  }
+  function tiltOnTap() { if (cfg.tilt && !ph.tiltOn && !ph.asked) tiltAsk(false); }
+  function motionTest() {
+    var out = $("mtest"), D = window.DeviceOrientationEvent, n = 0, last = null;
+    function show(extra) {
+      out.textContent = "Sensor API: " + (D ? "present" : "missing") + "\nPermission: " + (ph.perm || "not asked") + "\nReadings: " + n +
+        (last ? "\nTilt (gamma): " + (last.gamma == null ? "none" : last.gamma.toFixed(1)) + "\nFront-back (beta): " + (last.beta == null ? "none" : last.beta.toFixed(1)) : "") +
+        "\nCard swing: " + ph.a.toFixed(2) + " deg\nTilt setting: " + (cfg.tilt ? "on" : "off") + "\nScroll swing setting: " + (cfg.sway !== false ? "on" : "off") + (extra ? "\n" + extra : "");
+    }
+    if (!D) { show("This device does not report tilt."); return; }
+    function listen() {
+      window.addEventListener("deviceorientation", function (e) { n++; last = e; }); 
+      var t = setInterval(function () { show(n ? "" : "No readings yet. Move the phone."); }, 300);
+      setTimeout(function () { clearInterval(t); show(n ? "Tilt is working." : "No readings arrived. Open this page from the home screen icon and try again."); }, 8000);
+      show("Move the phone for a few seconds.");
+    }
+    if (typeof D.requestPermission === "function") {
+      D.requestPermission().then(function (r) { ph.perm = r; if (r === "granted") listen(); else show("Motion access was " + r + ". Clear this site's data in Safari settings to be asked again."); })
+        .catch(function (e) { ph.perm = "error"; show("Permission request failed: " + (e && e.message || e)); });
+    } else { ph.perm = "not needed"; listen(); }
+  }
+  $("motionBtn").addEventListener("click", motionTest);
+  document.addEventListener("click", tiltOnTap, true);
+  document.addEventListener("touchend", tiltOnTap, true);
+  if (cfg.tilt && window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission !== "function") tiltListen();
 
   // ---------- start ----------
   if (cfg.key && subs.length) {
