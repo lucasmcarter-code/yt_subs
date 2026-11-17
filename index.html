@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-/Rt7J/zMN67B6kaTJaI0v63kpDxjUUWFZ4+7lZNg3XI=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MwPsCGCy8rfv57GM3mxbqOxje9TUu4yLUPZ8EZBytIc=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -171,6 +171,20 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
 .vid { transform: rotate(calc(var(--tilt, 0) * 1deg)); }
 .vid.live { transform: translateY(var(--bob, 0px)) rotate(calc(var(--tilt, 0) * 1deg + var(--sway, 0deg) * var(--k, 1))); will-change: transform; }
 .more-marker { height: 1px; }
+@media (orientation: landscape) and (max-height: 520px) {
+  #feed { display: flex; flex-direction: row; align-items: flex-start; overflow-x: auto; overflow-y: hidden; width: 100vw; margin-left: calc(50% - 50vw); padding: 16px 28px 30px; box-sizing: border-box; scroll-snap-type: x proximity; scroll-padding: 0 28px; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; background: linear-gradient(rgba(236, 223, 206, 0.42), rgba(236, 223, 206, 0.42)) 0 16px / 100% 2px no-repeat; background-attachment: local; }
+  #feed::-webkit-scrollbar { display: none; }
+  #feed .list { display: contents; }
+  #feed .vid { flex: none; box-sizing: border-box; width: max(220px, calc((60vh - 118px) * 1.7778 + 20px)); margin: 0 14px; scroll-snap-align: center; scroll-snap-stop: normal; }
+  #feed .day { flex: none; writing-mode: vertical-rl; margin: 14px 6px 0; white-space: nowrap; align-self: flex-start; font-size: 24px; }
+  #feed .day small { display: block; margin-top: 8px; }
+  #feed .more-marker { flex: none; width: 1px; }
+  .tools, #status { display: none; }
+  .tab { height: 38px; }
+  .tabs { bottom: calc(env(safe-area-inset-bottom) + 8px); max-width: 420px; }
+  body { padding-bottom: 0; }
+  #feed { padding-bottom: 64px; }
+}
 .brand { white-space: nowrap; overflow: hidden; }
 .tools { flex-wrap: nowrap; }
 .tools input[type="search"] { flex: 1 1 0; min-width: 0; padding: 0 14px; }
@@ -298,7 +312,6 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     <label class="check"><input type="checkbox" id="hideShorts" checked> Leave out Shorts and live streams</label>
     <label class="check"><input type="checkbox" id="openInApp"> Use the direct app link (may show an "Open in YouTube?" prompt)</label>
     <label class="check"><input type="checkbox" id="sway" checked> Cards swing when you scroll</label>
-    <label class="check"><input type="checkbox" id="tilt"> Cards lean when you tilt the phone</label>
     <p>Press and hold a video to save it to Watch later.</p>
 
     <div class="btn-row">
@@ -317,10 +330,6 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     <p>If something looks wrong, tap Copy and paste the result into chat. It has no API key, sign-in token or watch history.</p>
     <div class="btn-row"><button class="btn ghost" id="diagBtn" type="button">Copy diagnostics</button></div>
     <textarea class="mtest" id="diagBox" rows="9" readonly hidden></textarea>
-    <h3>Motion test</h3>
-    <p>Shows whether this phone is sending tilt readings.</p>
-    <div class="btn-row"><button class="btn ghost" id="motionBtn" type="button">Run motion test</button></div>
-    <pre class="mtest" id="mtest" aria-live="polite"></pre>
     <p id="versionLine"></p>
   </section>
 </main>
@@ -343,8 +352,8 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   function save(k, v) { mem[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   function drop(k) { delete mem[k]; try { localStorage.removeItem(k); } catch (e) {} }
 
-  var DEFAULT_CFG = { key: "", channel: "", clientId: "", hideShorts: true, openInApp: false, sway: true, tilt: false, topics: "", mutedWords: "", blockCats: ["25"] };
-  var cfg = Object.assign({}, DEFAULT_CFG, load("sf_cfg", {}));
+  var DEFAULT_CFG = { key: "", channel: "", clientId: "", hideShorts: true, openInApp: false, sway: true, topics: "", mutedWords: "", blockCats: ["25"] };
+  var cfg = Object.assign({}, DEFAULT_CFG, load("sf_cfg", {})); delete cfg.tilt;
   if (!cfg.v2) { cfg.openInApp = false; cfg.v2 = 1; save("sf_cfg", cfg); }
   var subs = load("sf_subs", []);
   var feed = load("sf_feed", { at: 0, items: [] });
@@ -597,7 +606,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   var PAGE = 30, view = null;
   var moreObs = ("IntersectionObserver" in window) ? new IntersectionObserver(function (entries) {
     if (entries.some(function (en) { return en.isIntersecting; })) appendMore();
-  }, { rootMargin: "900px 0px" }) : null;
+  }, { rootMargin: "900px 900px" }) : null;
   function appendMore() {
     if (!view || view.pos >= view.items.length) return;
     var box = $("feed"), end = moreObs ? Math.min(view.items.length, view.pos + PAGE) : view.items.length;
@@ -1148,7 +1157,6 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     $("hideShorts").checked = cfg.hideShorts !== false;
     $("openInApp").checked = !!cfg.openInApp;
     $("sway").checked = cfg.sway !== false;
-    $("tilt").checked = !!cfg.tilt;
     $("versionLine").textContent = "Version " + VERSION;
     $("versionTop").textContent = "Version " + VERSION;
     $("originText").textContent = location.origin;
@@ -1178,7 +1186,6 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
       hideShorts: $("hideShorts").checked,
       openInApp: $("openInApp").checked,
       sway: $("sway").checked,
-      tilt: $("tilt").checked,
       v2: 1
     };
     save("sf_cfg", cfg);
@@ -1196,10 +1203,6 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     refreshSubs({ reimport: r.channelChanged && !!cfg.channel });
   });
   $("googleBtn").addEventListener("click", function () { readSettings(); googleImport(); });
-  $("tilt").addEventListener("change", function () {
-    cfg.tilt = $("tilt").checked; save("sf_cfg", cfg);
-    if (cfg.tilt) tiltAsk(true); else { tiltStop(); setStatus("Tilt is off."); }
-  });
   $("refreshBtn").addEventListener("click", function () { refresh(); });
   $("fullBtn").addEventListener("click", function () { readSettings(); tab = "subs"; save("sf_tab", tab); refreshSubs({ full: true }); });
   $("tabSubs").addEventListener("click", function () { setTab("subs"); });
@@ -1305,12 +1308,12 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     if (keepPlace && h1 !== h0 && window.scrollY > 40) window.scrollBy(0, h1 - h0);
   }
 
-  // ---------- card physics: one pendulum, pushed by scrolling and leaning with phone tilt ----------
-  var VERSION = 10;
-  // a = current angle, w = angular speed, rest = where gravity wants the card (from tilt). Stepped at a fixed 60 per second.
-  var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0, tiltOn: false, asked: false };
+  // ---------- card physics: one pendulum, pushed by scrolling ----------
+  var VERSION = 11;
+  // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
+  var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
-  var SPRING = 0.006, DAMP = 0.90, PUSH_MAX = 2.6, PUSH_W = 0.2, TILT_GAIN = 0.18, TILT_MAX = 6.5;
+  var SPRING = 0.006, DAMP = 0.90, PUSH_MAX = 2.6, PUSH_W = 0.2;
   function physStep() {
     ph.w += SPRING * (ph.rest - ph.a);
     ph.w *= DAMP;
@@ -1330,7 +1333,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     return c._s = { a: 0, w: 0, b: 0, v: 0, sp: 0.05 + (h % 6) * 0.012, dm: 0.76 + ((h >> 3) % 6) * 0.025, am: 0.6 + ((h >> 5) % 7) * 0.1, lag: (h >> 8) % 9, bs: 0.04 + ((h >> 11) % 5) * 0.012 };
   }
   function rankCards() {
-    liveSet.map(function (c) { return [c.getBoundingClientRect().top, c]; }).sort(function (x, y) { return x[0] - y[0]; })
+    liveSet.map(function (c) { var r = c.getBoundingClientRect(); return [LAND.matches ? r.left : r.top, c]; }).sort(function (x, y) { return x[0] - y[0]; })
       .forEach(function (r, i) { r[1]._r = i; });
   }
   function stepCards() {
@@ -1369,81 +1372,26 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     if (live) ph.raf = requestAnimationFrame(physFrame); else { ph.raf = 0; ph.last = 0; ph.acc = 0; }
   }
   function physKick() { if (!ph.raf) { ph.last = 0; ph.raf = requestAnimationFrame(physFrame); } }
-  window.addEventListener("scroll", function () {
+  // Sideways phone: the cards become one strip that scrolls left to right.
+  var LAND = window.matchMedia("(orientation: landscape) and (max-height: 520px)");
+  function scrollPos() { return LAND.matches ? $("feed").scrollLeft : window.scrollY; }
+  function onScrollPush() {
+    if (LAND.matches && view && view.pos < view.items.length) {
+      var f = $("feed"); if (f.scrollLeft + f.clientWidth > f.scrollWidth - 1600) appendMore();
+    }
     if (cfg.sway === false) return;
-    var now = performance.now(), dy = window.scrollY - ph.y, dt = Math.max(8, now - ph.t);
-    ph.y = window.scrollY; ph.t = now;
-    // A scroll push may raise the swing speed only up to PUSH_W, which tops out near PUSH_MAX degrees.
+    var pos = scrollPos(), now = performance.now(), dy = pos - ph.y, dt = Math.max(8, now - ph.t);
+    ph.y = pos; ph.t = now;
     var w0 = Math.abs(ph.w);
-    ph.bv += Math.max(-0.2, Math.min(0.2, -(dy / dt) * 0.05));
+    if (!LAND.matches) ph.bv += Math.max(-0.2, Math.min(0.2, -(dy / dt) * 0.05));
     ph.w += Math.max(-0.12, Math.min(0.12, -(dy / dt) * 0.05));
     if (Math.abs(ph.w) > PUSH_W && Math.abs(ph.w) > w0) ph.w = (ph.w < 0 ? -1 : 1) * Math.max(w0, PUSH_W);
     physKick();
-  }, { passive: true });
-
-  // Tilt: a card hanging from a pin stays partly upright as the phone rolls left or right.
-  function onTilt(e) {
-    ph.reads = (ph.reads || 0) + 1; ph.lastG = e.gamma; ph.lastB = e.beta;
-    if (!cfg.tilt) return;
-    var ang = (screen.orientation && typeof screen.orientation.angle === "number") ? screen.orientation.angle : (window.orientation || 0);
-    var roll = ang === 90 ? e.beta : (ang === 270 || ang === -90) ? -e.beta : e.gamma;
-    if (roll == null || isNaN(roll)) return;
-    var target = Math.max(-TILT_MAX, Math.min(TILT_MAX, -roll * TILT_GAIN));
-    if (Math.abs(target - ph.rest) < 0.3) return;   // ignore sensor jitter
-    ph.rest = target;
-    physKick();
   }
-  function tiltListen() { if (!ph.tiltOn) { ph.tiltOn = true; window.addEventListener("deviceorientation", onTilt); } }
-  function tiltStop() { ph.rest = 0; physKick(); }
-  // iPhone only hands out motion data after a tap-triggered permission request.
-  function tiltAsk(fromSettings) {
-    if (!cfg.tilt) return;
-    var D = window.DeviceOrientationEvent;
-    if (!D) { if (fromSettings) setStatus("This device does not report tilt.", true); return; }
-    if (typeof D.requestPermission !== "function") { tiltListen(); return; }
-    ph.asked = true;
-    D.requestPermission().then(function (r) {
-      if (r === "granted") { tiltListen(); if (fromSettings) setStatus("Tilt is on. Roll the phone left and right."); }
-      else if (fromSettings) setStatus("Motion access was declined. To allow it, clear this site's data in Safari settings and try again.", true);
-    }).catch(function () { ph.asked = false; });
-  }
-  function tiltOnTap() { if (cfg.tilt && !ph.tiltOn && !ph.asked) tiltAsk(false); }
-  function motionTest() {
-    var out = $("mtest"), D = window.DeviceOrientationEvent, n = 0, last = null;
-    function show(extra) {
-      out.textContent = "Sensor API: " + (D ? "present" : "missing") + "\nPermission: " + (ph.perm || "not asked") + "\nReadings: " + n +
-        (last ? "\nTilt (gamma): " + (last.gamma == null ? "none" : last.gamma.toFixed(1)) + "\nFront-back (beta): " + (last.beta == null ? "none" : last.beta.toFixed(1)) : "") +
-        "\nCard swing: " + ph.a.toFixed(2) + " deg\nTilt setting: " + (cfg.tilt ? "on" : "off") + "\nScroll swing setting: " + (cfg.sway !== false ? "on" : "off") + (extra ? "\n" + extra : "");
-    }
-    if (!D) { show("This device does not report tilt."); return; }
-    function listen() {
-      window.addEventListener("deviceorientation", function (e) { n++; last = e; }); 
-      var t = setInterval(function () { show(n ? "" : "No readings yet. Move the phone."); }, 300);
-      setTimeout(function () { clearInterval(t); show(n ? "Tilt is working." : "No readings arrived. Open this page from the home screen icon and try again."); }, 8000);
-      show("Move the phone for a few seconds.");
-    }
-    if (typeof D.requestPermission === "function") {
-      D.requestPermission().then(function (r) { ph.perm = r; if (r === "granted") listen(); else show("Motion access was " + r + ". Clear this site's data in Safari settings to be asked again."); })
-        .catch(function (e) { ph.perm = "error"; show("Permission request failed: " + (e && e.message || e)); });
-    } else { ph.perm = "not needed"; listen(); }
-  }
-  $("motionBtn").addEventListener("click", motionTest);
-  // Show / Copy buttons beside the key fields
-  Array.prototype.forEach.call(document.querySelectorAll("[data-show]"), function (b) {
-    b.addEventListener("click", function () {
-      var f = $(b.getAttribute("data-show")), on = f.type === "password";
-      f.type = on ? "text" : "password"; b.textContent = on ? "Hide" : "Show";
-    });
-  });
-  Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function (b) {
-    b.addEventListener("click", function () {
-      var f = $(b.getAttribute("data-copy")), t = f.value;
-      if (!t) { toast("Nothing to copy yet."); return; }
-      var was = f.type; f.type = "text";
-      function done(ok) { f.type = was; toast(ok ? "Copied." : "Select the text and copy it."); }
-      try { navigator.clipboard.writeText(t).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
-    });
-  });
+  window.addEventListener("scroll", function () { if (!LAND.matches) onScrollPush(); }, { passive: true });
+  $("feed").addEventListener("scroll", function () { if (LAND.matches) onScrollPush(); }, { passive: true });
+  var onLand = function () { ph.y = scrollPos(); if (view && view.pos < view.items.length) appendMore(); };
+  if (LAND.addEventListener) LAND.addEventListener("change", onLand); else if (LAND.addListener) LAND.addListener(onLand);
 
   // ---------- newer-version check (own file only) ----------
   var upd = "not checked";
@@ -1461,7 +1409,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   // ---------- diagnostics (no key, token or watch history) ----------
   function clean(t) { return String(t).replace(/AIza[\w-]+/g, "[key]").replace(/ya29\.[\w.-]+/g, "[token]").replace(/([?&](?:key|access_token)=)[^&\s"]+/g, "$1[x]"); }
   function diagText() {
-    var D = window.DeviceOrientationEvent, sz = {}, tot = 0;
+    var sz = {}, tot = 0;
     try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i), n = (localStorage.getItem(k) || "").length; if (k.indexOf("sf_") === 0) { sz[k.slice(3)] = n; tot += n; } } } catch (e) {}
     var mq = function (q) { try { return matchMedia(q).matches; } catch (e) { return "?"; } };
     var L = [
@@ -1474,9 +1422,8 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
       "screen: " + screen.width + "x" + screen.height + " @" + window.devicePixelRatio + "x, window " + innerWidth + "x" + innerHeight,
       "language: " + navigator.language + "   online: " + navigator.onLine,
       "reduce motion: " + mq("(prefers-reduced-motion: reduce)") + "   dark: " + mq("(prefers-color-scheme: dark)"),
-      "motion API: " + (D ? (typeof D.requestPermission === "function" ? "needs permission" : "open") : "missing") + "   permission: " + (ph.perm || (ph.asked ? "asked" : "not asked")),
-      "tilt listener on: " + ph.tiltOn + "   readings: " + (ph.reads || 0) + "   gamma: " + (ph.lastG == null ? "none" : (+ph.lastG).toFixed(1)) + "   beta: " + (ph.lastB == null ? "none" : (+ph.lastB).toFixed(1)),
-      "settings: sway " + (cfg.sway !== false) + ", tilt " + !!cfg.tilt + ", app link " + !!cfg.openInApp + ", hide shorts " + (cfg.hideShorts !== false),
+      "layout: " + (LAND.matches ? "landscape strip" : "portrait") + "   feed scroll: " + Math.round($("feed").scrollLeft) + "/" + Math.round($("feed").scrollWidth - $("feed").clientWidth),
+      "settings: sway " + (cfg.sway !== false) + ", app link " + !!cfg.openInApp + ", hide shorts " + (cfg.hideShorts !== false),
       "set up: key " + (cfg.key ? "yes" : "no") + ", handle " + (cfg.channel ? "yes" : "no") + ", client id " + (cfg.clientId ? "yes" : "no"),
       "counts: subs " + subs.length + ", feed " + feed.items.length + ", discover " + (disc.items || []).length + ", suggestions " + (rec.items || []).length + ", watch later " + later.length + ", watched " + Object.keys(seen).length,
       "feed updated: " + (feed.at ? new Date(feed.at).toISOString() : "never"),
@@ -1491,10 +1438,6 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     function done(ok) { toast(ok ? "Diagnostics copied. Paste them in chat." : "Select the text below and copy it."); if (!ok) { box.focus(); box.select(); } }
     try { navigator.clipboard.writeText(t).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
   });
-  document.addEventListener("click", tiltOnTap, true);
-  document.addEventListener("touchend", tiltOnTap, true);
-  if (cfg.tilt && window.DeviceOrientationEvent && typeof window.DeviceOrientationEvent.requestPermission !== "function") tiltListen();
-
   // ---------- start ----------
   if (cfg.key && subs.length) {
     show("feed");
