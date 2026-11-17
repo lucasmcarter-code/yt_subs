@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Subs Feed</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Subs">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#f3f5f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101615" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAACT0lEQVR42u3dPU7DQBCA0UmUDo7GUUBUaaCmooq4CkfjAHRUFCDZOz9+7wCRlf28MbZHnO5eHgN+c/YVIA7EgTgQB+JAHIgDcSAOxAHiQByIA3EgDsSBOBAH4kAcIA7EgTgQB+JAHIgDcSAOxAHiQByIA3EgDsSBOBAH4kAciAPEgTgQB+JAHIgDcSAOxMHxXNKP4OvtY4+PvX99srq9d46dytj1k4/jlPjfIRes37/2j8/na52Febi9HzeOZWf2X/oolUWdRFyQ1i0j/djOynCE4kAcs7aN3OO0cyAOxIE4YsyNpsrHaedAHG03j8QjtHOU7iP32C7i+FkDD97CU1ka/KzsvXLK6H3Nsd/6KaP3zwp2DsSBOBAHiANxIA7EgTgQB2HKPkzZ2zlM2YcHb6bsY+orzabs00bKuiTigjTh7cAuY5im7K9hTFcciKPN6Vt/87BzIA7EgThiwP2G+nc77ByIo9jp2+ImqZ0jYZ263D43Zb90yt6DtzBl75rDlL04TNmHl33AXyuIA3EgDsSBOBAH4kAciAPClD2m7Anvc6RN2fd6hceUfcKU/bxEXJBu9nZgl9l5ceSs6LA+7ByIY9WJPmnzsHMgDsSBOKLs/Nmkux12DsSx5EQfdpPUzrHZis67fW7KfoMpew/ewpS9a44wZY8pe0zZ468VxIE4EAfiQByIA3EgDhAH4kAciANxIA7EgTgQB+IAcSAOxIE4EAfiQByIA3EgDhAH4kAciANxIA7EgTgQB+JAHL4CxIE4EAfiQByIA3EgDqb7BthnnpWRjX62AAAAAElFTkSuQmCC">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: one quiet column, newest first, grouped by day. Thumb left, words right. */
+:root {
+  --bg: #f3f5f4;
+  --surface: #ffffff;
+  --ink: #16201e;
+  --muted: #5f6d6a;
+  --line: #dbe1df;
+  --accent: #0b7a6c;
+  --accent-ink: #ffffff;
+  --warn: #a8480f;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Figtree", -apple-system, "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #101615;
+    --surface: #18211f;
+    --ink: #e8efed;
+    --muted: #93a39f;
+    --line: #27332f;
+    --accent: #4cc9b4;
+    --accent-ink: #06201c;
+    --warn: #f0a070;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); }
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-text-size-adjust: 100%;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 32px);
+}
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+.wrap { max-width: 720px; margin: 0 auto; padding: 0 16px; }
+
+header.bar {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  padding-top: env(safe-area-inset-top);
+}
+.bar-row { display: flex; align-items: center; gap: 8px; height: 56px; }
+.brand {
+  font-family: var(--font-display); font-weight: 700; font-size: 24px;
+  letter-spacing: -0.02em; margin: 0; flex: 1;
+}
+.brand span { color: var(--accent); }
+.icon-btn {
+  width: 44px; height: 44px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--surface);
+  display: grid; place-items: center; padding: 0;
+}
+.icon-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.icon-btn.spin svg { animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .icon-btn.spin svg { animation: none; } }
+
+.tools { display: flex; gap: 8px; padding: 10px 0 12px; align-items: center; }
+.tools input[type="search"] {
+  flex: 1; min-width: 0; height: 40px; padding: 0 12px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
+}
+.chip {
+  height: 40px; padding: 0 12px; border-radius: 10px; white-space: nowrap;
+  border: 1px solid var(--line); background: var(--surface); font-weight: 500; font-size: 14px;
+}
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+.status { font-size: 14px; color: var(--muted); padding: 10px 0 0; min-height: 30px; }
+.status.err { color: var(--warn); }
+
+.day {
+  font-family: var(--font-display); font-weight: 600; font-size: 15px;
+  color: var(--muted); margin: 22px 0 8px; display: flex; gap: 8px; align-items: baseline;
+}
+.day small { font-family: var(--font-body); font-weight: 400; font-size: 13px; }
+
+.list { display: flex; flex-direction: column; gap: 4px; }
+.vid {
+  display: grid; grid-template-columns: 42% 1fr auto; gap: 12px; align-items: start;
+  padding: 8px; margin: 0 -8px; border-radius: 14px;
+  text-decoration: none; color: inherit;
+}
+.vid:active { background: var(--surface); }
+.thumb {
+  position: relative; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden;
+  background: var(--line);
+}
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.badge {
+  position: absolute; right: 5px; bottom: 5px;
+  background: rgba(8, 14, 13, 0.82); color: #fff;
+  font-size: 12px; font-weight: 600; padding: 1px 5px; border-radius: 5px;
+  font-variant-numeric: tabular-nums;
+}
+.badge.live { background: var(--accent); color: var(--accent-ink); }
+.meta { min-width: 0; }
+.title {
+  font-weight: 600; font-size: 15px; line-height: 1.3; margin: 0 0 4px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.sub { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.seen-btn {
+  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line);
+  background: transparent; display: grid; place-items: center; padding: 0; color: var(--muted);
+}
+.seen-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.vid.seen .thumb, .vid.seen .meta { opacity: 0.45; }
+.vid.seen .seen-btn { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+.empty { text-align: center; color: var(--muted); padding: 48px 0; }
+
+/* Setup / settings sheet */
+.sheet { padding: 20px 0 8px; }
+.sheet h2 { font-family: var(--font-display); font-size: 22px; letter-spacing: -0.01em; margin: 0 0 6px; text-wrap: balance; }
+.sheet p { color: var(--muted); margin: 0 0 16px; max-width: 60ch; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.field label { font-weight: 600; font-size: 14px; }
+.field input[type="text"], .field input[type="password"] {
+  height: 46px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface); width: 100%;
+}
+.field .hint { font-size: 13px; color: var(--muted); }
+.check { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; font-size: 15px; }
+.check input { width: 20px; height: 20px; accent-color: var(--accent); }
+.btn {
+  height: 46px; padding: 0 18px; border-radius: 10px; border: 1px solid var(--accent);
+  background: var(--accent); color: var(--accent-ink); font-weight: 600;
+}
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 20px; }
+details.help { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 12px 14px; margin-bottom: 14px; }
+details.help summary { font-weight: 600; cursor: pointer; }
+details.help ol { padding-left: 20px; margin: 10px 0 0; color: var(--muted); font-size: 14px; }
+details.help li { margin-bottom: 6px; }
+details.help code { font-size: 13px; background: var(--bg); padding: 1px 5px; border-radius: 5px; overflow-wrap: anywhere; }
+.or { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin: 4px 0 14px; }
+
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-top: 12px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.tab { height: 38px; border: 0; border-radius: 9px; background: transparent; font-weight: 600; font-size: 15px; color: var(--muted); }
+.tab[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+.tools { flex-wrap: wrap; }
+.tools input[type="search"] { flex: 1 1 140px; }
+.acts { display: flex; flex-direction: column; gap: 6px; }
+.act-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line);
+  background: transparent; display: grid; place-items: center; padding: 0; color: var(--muted); }
+.act-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.vid.seen .act-btn.seen-toggle { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.toast { position: fixed; left: 16px; right: 16px; bottom: calc(env(safe-area-inset-bottom) + 16px); z-index: 9;
+  max-width: 560px; margin: 0 auto; background: var(--ink); color: var(--bg); border-radius: 12px;
+  padding: 10px 12px 10px 16px; display: flex; gap: 12px; align-items: center; font-size: 14px; }
+.toast span { flex: 1; overflow-wrap: anywhere; }
+.toast button { border: 0; background: transparent; color: var(--bg); font-weight: 700; text-decoration: underline; padding: 8px; }
+.sheet h3 { font-family: var(--font-display); font-size: 17px; margin: 26px 0 10px; }
+.cats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <div class="bar-row">
+      <h1 class="brand">Subs<span>.</span></h1>
+      <button class="icon-btn" id="refreshBtn" type="button" aria-label="Refresh feed">
+        <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 4v5h-5"/></svg>
+      </button>
+      <button class="icon-btn" id="settingsBtn" type="button" aria-label="Open settings">
+        <svg viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h8M16 18h4"/><circle cx="16" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="14" cy="18" r="2"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- Feed view -->
+  <section id="feedView" hidden>
+    <div class="tabs" role="tablist">
+      <button class="tab" id="tabSubs" type="button" role="tab" aria-selected="true">Subscriptions</button>
+      <button class="tab" id="tabDisc" type="button" role="tab" aria-selected="false">Discover</button>
+    </div>
+    <div class="tools">
+      <input type="search" id="search" placeholder="Filter by title or channel" aria-label="Filter by title or channel">
+      <button class="chip" id="sortBtn" type="button" aria-pressed="false">For you</button>
+      <button class="chip" id="hideSeenBtn" type="button" aria-pressed="false">Hide watched</button>
+    </div>
+    <div class="status" id="status" role="status"></div>
+    <div id="feed"></div>
+  </section>
+
+  <!-- Settings view -->
+  <section id="settingsView" class="sheet" hidden>
+    <h2>Connect your subscriptions</h2>
+    <p>This page reads your subscription list from YouTube and shows the newest uploads, nothing else. Everything you enter stays in this browser.</p>
+
+    <details class="help">
+      <summary>How to get an API key (one time, free)</summary>
+      <ol>
+        <li>Go to <code>console.cloud.google.com</code> and create a project.</li>
+        <li>Open APIs &amp; Services, then Library, and enable <strong>YouTube Data API v3</strong>.</li>
+        <li>Open Credentials, choose Create credentials, then API key.</li>
+        <li>Restrict the key to YouTube Data API v3, and to this page's web address under Website restrictions.</li>
+      </ol>
+    </details>
+
+    <div class="field">
+      <label for="apiKey">YouTube API key</label>
+      <input type="password" id="apiKey" autocomplete="off" autocapitalize="off" spellcheck="false">
+    </div>
+
+    <div class="field">
+      <label for="channel">Your channel handle or ID</label>
+      <input type="text" id="channel" placeholder="@yourhandle" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <span class="hint">Works when your subscriptions are public: in YouTube, open Settings, then Privacy, and turn off "Keep all my subscriptions private".</span>
+    </div>
+
+    <div class="or">or keep them private</div>
+
+    <details class="help">
+      <summary>Sign in with Google instead</summary>
+      <ol>
+        <li>In the same Google Cloud project, set up the OAuth consent screen and add yourself as a test user.</li>
+        <li>Create an OAuth client ID of type Web application.</li>
+        <li>Add this page's address as an Authorized JavaScript origin: <code id="originText"></code></li>
+        <li>Paste the client ID below, save, then choose Import with Google. You only sign in when you want to re-import your channel list.</li>
+      </ol>
+    </details>
+
+    <div class="field">
+      <label for="clientId">Google OAuth client ID (optional)</label>
+      <input type="text" id="clientId" autocomplete="off" autocapitalize="off" spellcheck="false">
+    </div>
+
+    <h3>Discover</h3>
+    <div class="field">
+      <label for="topics">Topics to look for</label>
+      <input type="text" id="topics" placeholder="NASCAR, astronomy, physics, synth music" autocomplete="off" autocapitalize="off">
+      <span class="hint">Separate with commas. Each refresh searches up to 5 topics and rotates through the rest. The free quota covers about 90 topic searches a day.</span>
+    </div>
+    <div class="field">
+      <label>Never show these categories in Discover</label>
+      <div class="cats" id="cats"></div>
+    </div>
+
+    <h3>Filters and learning</h3>
+    <div class="field">
+      <label for="mutedWords">Muted words</label>
+      <input type="text" id="mutedWords" placeholder="election, debate" autocomplete="off" autocapitalize="off">
+      <span class="hint">Videos with any of these in the title or channel name are hidden on both tabs.</span>
+    </div>
+    <p id="learnInfo"></p>
+    <div class="btn-row">
+      <button class="btn ghost" id="resetLearnBtn" type="button">Reset what it has learned</button>
+      <button class="btn ghost" id="clearMutedBtn" type="button">Unmute all channels</button>
+    </div>
+
+    <h3>Playback</h3>
+    <label class="check"><input type="checkbox" id="hideShorts" checked> Leave out Shorts and live streams</label>
+    <label class="check"><input type="checkbox" id="openInApp" checked> Open videos in the YouTube app</label>
+
+    <div class="btn-row">
+      <button class="btn" id="saveBtn" type="button">Save and load feed</button>
+      <button class="btn ghost" id="googleBtn" type="button">Import with Google</button>
+      <button class="btn ghost" id="closeBtn" type="button">Back to feed</button>
+    </div>
+    <div class="status" id="setupStatus" role="status"></div>
+
+    <div class="btn-row">
+      <button class="btn ghost" id="clearSeenBtn" type="button">Reset watched marks</button>
+      <button class="btn ghost" id="forgetBtn" type="button">Forget everything on this device</button>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast" hidden><span id="toastMsg"></span><button type="button" id="toastAct"></button></div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+(function () {
+  "use strict";
+
+  // ---------- storage ----------
+  var mem = {};
+  function load(k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return k in mem ? mem[k] : d; } }
+  function save(k, v) { mem[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function drop(k) { delete mem[k]; try { localStorage.removeItem(k); } catch (e) {} }
+
+  var DEFAULT_CFG = { key: "", channel: "", clientId: "", hideShorts: true, openInApp: true, topics: "", mutedWords: "", blockCats: ["25"] };
+  var cfg = Object.assign({}, DEFAULT_CFG, load("sf_cfg", {}));
+  var subs = load("sf_subs", []);
+  var feed = load("sf_feed", { at: 0, items: [] });
+  var disc = load("sf_disc", { at: 0, n: 0, items: [] });
+  var seen = load("sf_seen", {});
+  var hidden = load("sf_hidden", {});
+  var mutedCh = load("sf_mutedCh", {});
+  var model = load("sf_model", { ch: {}, cat: {}, w: {}, n: 0 });
+  var shown = load("sf_shown", {});
+  var hideSeen = load("sf_hideSeen", false);
+  var tab = load("sf_tab", "subs");
+  var sortMode = load("sf_sort", "new");
+  var busy = false;
+
+  var CATS = [["25", "News & Politics"], ["20", "Gaming"], ["17", "Sports"], ["24", "Entertainment"], ["22", "People & Blogs"], ["23", "Comedy"], ["26", "Howto & Style"], ["2", "Autos & Vehicles"]];
+
+  // ---------- dom ----------
+  function $(id) { return document.getElementById(id); }
+  function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+  var feedView = $("feedView"), settingsView = $("settingsView");
+
+  function show(view) {
+    feedView.hidden = view !== "feed";
+    settingsView.hidden = view !== "settings";
+    window.scrollTo(0, 0);
+  }
+  function setStatus(msg, isErr) {
+    [$("status"), $("setupStatus")].forEach(function (s) { s.textContent = msg || ""; s.classList.toggle("err", !!isErr); });
+  }
+  var toastTimer = null;
+  function toast(msg, actLabel, fn) {
+    $("toastMsg").textContent = msg;
+    var b = $("toastAct");
+    b.hidden = !actLabel; b.textContent = actLabel || "";
+    b.onclick = function () { $("toast").hidden = true; if (fn) fn(); };
+    $("toast").hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { $("toast").hidden = true; }, 7000);
+  }
+  function decodeEntities(s) {
+    if (!s || s.indexOf("&") < 0) return s || "";
+    var d = new DOMParser().parseFromString(s, "text/html");
+    return d.documentElement.textContent || s;
+  }
+
+  // ---------- quota (rough, per Pacific day) ----------
+  function pacificDay() { try { return new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" }); } catch (e) { return new Date().toISOString().slice(0, 10); } }
+  function quota() { var q = load("sf_quota", { day: "", used: 0 }); if (q.day !== pacificDay()) q = { day: pacificDay(), used: 0 }; return q; }
+  function spend(n) { var q = quota(); q.used += n; save("sf_quota", q); }
+  function quotaLeft() { return Math.max(0, 10000 - quota().used); }
+
+  // ---------- YouTube API ----------
+  function api(path, params, token, cost) {
+    var u = new URL("https://www.googleapis.com/youtube/v3/" + path);
+    Object.keys(params).forEach(function (k) { u.searchParams.set(k, params[k]); });
+    var opts = {};
+    if (token) opts.headers = { Authorization: "Bearer " + token };
+    else u.searchParams.set("key", cfg.key);
+    spend(cost || 1);
+    return fetch(u.toString(), opts).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        if (!r.ok) {
+          var e = new Error((j.error && j.error.message) || ("Request failed (" + r.status + ")"));
+          e.status = r.status;
+          e.reason = j.error && j.error.errors && j.error.errors[0] && j.error.errors[0].reason;
+          throw e;
+        }
+        return j;
+      });
+    });
+  }
+
+  function resolveChannelId(input) {
+    input = input.trim();
+    if (/^UC[\w-]{22}$/.test(input)) return Promise.resolve(input);
+    var m = input.match(/channel\/(UC[\w-]{22})/);
+    if (m) return Promise.resolve(m[1]);
+    var h = input.match(/@[\w.\-]+/);
+    var handle = h ? h[0] : "@" + input.replace(/^@/, "");
+    return api("channels", { part: "id", forHandle: handle }).then(function (j) {
+      if (!j.items || !j.items.length) throw new Error("No channel found for " + handle + ". Check the handle.");
+      return j.items[0].id;
+    });
+  }
+
+  function fetchSubs(base, token) {
+    var out = [];
+    function page(pt) {
+      var p = Object.assign({ part: "snippet", maxResults: 50, order: "alphabetical" }, base);
+      if (pt) p.pageToken = pt;
+      return api("subscriptions", p, token).then(function (j) {
+        (j.items || []).forEach(function (it) {
+          var id = it.snippet && it.snippet.resourceId && it.snippet.resourceId.channelId;
+          if (id) out.push({ id: id, title: it.snippet.title });
+        });
+        setStatus("Reading your subscriptions: " + out.length + " so far");
+        return j.nextPageToken ? page(j.nextPageToken) : out;
+      });
+    }
+    return page(null);
+  }
+
+  function fetchChannelUploads(sub, shortsFree) {
+    var prefix = shortsFree ? "UULF" : "UU";
+    return api("playlistItems", {
+      part: "snippet,contentDetails", maxResults: 8, playlistId: prefix + sub.id.slice(2)
+    }).then(function (j) {
+      return (j.items || []).map(function (it) {
+        var s = it.snippet || {}, c = it.contentDetails || {};
+        var t = s.thumbnails || {};
+        return {
+          id: c.videoId,
+          title: s.title || "",
+          channel: s.videoOwnerChannelTitle || sub.title,
+          chId: s.videoOwnerChannelId || sub.id,
+          at: c.videoPublishedAt || s.publishedAt,
+          thumb: (t.medium || t.high || t.default || {}).url || ("https://i.ytimg.com/vi/" + c.videoId + "/mqdefault.jpg")
+        };
+      }).filter(function (v) { return v.id && v.at && v.title !== "Private video" && v.title !== "Deleted video"; });
+    }).catch(function (e) {
+      if (e.status === 404 && shortsFree) return fetchChannelUploads(sub, false);
+      if (e.status === 404) return [];
+      throw e;
+    });
+  }
+
+  function pool(items, size, worker, onProgress) {
+    var i = 0, done = 0, results = [], failed = null;
+    return new Promise(function (resolve, reject) {
+      function next() {
+        if (failed) return;
+        if (i >= items.length) { if (done === items.length) resolve(results); return; }
+        var idx = i++;
+        worker(items[idx]).then(function (r) {
+          results[idx] = r; done++; onProgress(done); next();
+        }, function (e) { failed = e; reject(e); });
+      }
+      if (!items.length) resolve(results);
+      for (var k = 0; k < Math.min(size, items.length); k++) next();
+    });
+  }
+
+  function parseDur(iso) {
+    var m = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(iso || "");
+    if (!m) return 0;
+    return (+m[1] || 0) * 3600 + (+m[2] || 0) * 60 + (+m[3] || 0);
+  }
+  function fmtDur(s) {
+    if (!s) return "";
+    var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(sec).padStart(2, "0");
+  }
+
+  // Adds length, live state and category to each item. Category drives the Discover filter and the learning.
+  function addDetails(items) {
+    var chunks = [];
+    for (var i = 0; i < items.length; i += 50) chunks.push(items.slice(i, i + 50));
+    var byId = {};
+    items.forEach(function (v) { byId[v.id] = v; });
+    return chunks.reduce(function (p, chunk) {
+      return p.then(function () {
+        return api("videos", { part: "contentDetails,snippet", id: chunk.map(function (v) { return v.id; }).join(","), maxResults: 50 })
+          .then(function (j) {
+            (j.items || []).forEach(function (it) {
+              var v = byId[it.id]; if (!v) return;
+              v.dur = parseDur(it.contentDetails && it.contentDetails.duration);
+              v.live = (it.snippet && it.snippet.liveBroadcastContent) || "none";
+              v.cat = (it.snippet && it.snippet.categoryId) || "";
+              v.det = 1;
+            });
+          });
+      });
+    }, Promise.resolve());
+  }
+
+  function explain(e) {
+    if (e.reason === "subscriptionForbidden") return "Your subscriptions are private. Make them public in YouTube's privacy settings, or use Import with Google.";
+    if (e.reason === "quotaExceeded" || e.reason === "dailyLimitExceeded") return "Today's free API quota is used up. It resets at midnight Pacific time.";
+    if (e.reason === "keyInvalid" || /API key not valid/i.test(e.message)) return "That API key was not accepted. Check it in settings.";
+    if (e.status === 403 && /referer|referrer|blocked/i.test(e.message)) return "The API key's website restriction does not include this page's address.";
+    if (e instanceof TypeError) return "Could not reach YouTube. Check your connection and try again.";
+    return e.message;
+  }
+
+  // ---------- learning ----------
+  var STOP = {}; ("the and for with from that this you your are was were what when why how who has have had not but can will just into out about over more most new all its our his her their them they than then too very one two official video full part episode live feat ft vs").split(" ").forEach(function (w) { STOP[w] = 1; });
+  function words(title) {
+    var m = (title || "").toLowerCase().match(/[\p{L}\p{N}]{3,}/gu) || [];
+    var out = [], got = {};
+    for (var i = 0; i < m.length && out.length < 8; i++) {
+      if (STOP[m[i]] || got[m[i]] || /^\d+$/.test(m[i])) continue;
+      got[m[i]] = 1; out.push(m[i]);
+    }
+    return out;
+  }
+  function bump(map, key, d) {
+    if (!key) return;
+    var v = (map[key] || 0) + d;
+    map[key] = Math.max(-6, Math.min(8, Math.round(v * 100) / 100));
+  }
+  function learn(v, k) {
+    bump(model.ch, v.chId, 1 * k);
+    bump(model.cat, v.cat, 0.5 * k);
+    words(v.title).forEach(function (w) { bump(model.w, w, 0.3 * k); });
+    model.n = (model.n || 0) + 1;
+    var keys = Object.keys(model.w);
+    if (keys.length > 1500) keys.forEach(function (w) { if (Math.abs(model.w[w]) < 0.35) delete model.w[w]; });
+    save("sf_model", model);
+  }
+  function affinity(v) {
+    var s = (model.ch[v.chId] || 0) + 0.6 * (model.cat[v.cat] || 0);
+    var ws = words(v.title), t = 0;
+    ws.forEach(function (w) { t += model.w[w] || 0; });
+    if (ws.length) s += 0.8 * t / Math.sqrt(ws.length);
+    return s;
+  }
+  function ageDays(v) { return Math.max(0, (Date.now() - new Date(v.at).getTime()) / 86400000); }
+  // Videos that were on screen but never opened count slightly against their channel.
+  function settleSkips() {
+    var all = feed.items.concat(disc.items), changed = false;
+    all.forEach(function (v) {
+      if (shown[v.id] && !seen[v.id] && !hidden[v.id]) { bump(model.ch, v.chId, -0.05); changed = true; }
+    });
+    shown = {}; save("sf_shown", shown);
+    if (changed) save("sf_model", model);
+  }
+  var observer = ("IntersectionObserver" in window) ? new IntersectionObserver(function (entries) {
+    var dirty = false;
+    entries.forEach(function (en) {
+      if (en.isIntersecting) { var id = en.target.getAttribute("data-id"); if (id && !shown[id]) { shown[id] = 1; dirty = true; } observer.unobserve(en.target); }
+    });
+    if (dirty) save("sf_shown", shown);
+  }, { threshold: 0.6 }) : null;
+
+  // ---------- filters ----------
+  function mutedWordList() { return (cfg.mutedWords || "").toLowerCase().split(",").map(function (s) { return s.trim(); }).filter(Boolean); }
+  function topicList() { return (cfg.topics || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean); }
+  function passes(v, forDiscover, mw, subIds) {
+    if (hidden[v.id] || mutedCh[v.chId]) return false;
+    var hay = (v.title + " " + v.channel).toLowerCase();
+    for (var i = 0; i < mw.length; i++) if (hay.indexOf(mw[i]) >= 0) return false;
+    if (forDiscover) {
+      if (!v.det) return false;
+      if ((cfg.blockCats || []).indexOf(v.cat) >= 0) return false;
+      if (subIds[v.chId]) return false;
+      if (v.live && v.live !== "none") return false;
+      if (cfg.hideShorts && v.dur && v.dur < 180) return false;
+    }
+    return true;
+  }
+
+  // ---------- flows ----------
+  function importSubs(token) {
+    if (token) return fetchSubs({ mine: "true" }, token);
+    if (!cfg.channel) return Promise.reject(new Error("Add your channel handle, or use Import with Google."));
+    return resolveChannelId(cfg.channel).then(function (id) { return fetchSubs({ channelId: id }, null); });
+  }
+  function pruneMarks() {
+    var live = {};
+    feed.items.concat(disc.items).forEach(function (v) { live[v.id] = 1; });
+    [seen, hidden].forEach(function (m) { Object.keys(m).forEach(function (id) { if (!live[id]) delete m[id]; }); });
+    save("sf_seen", seen); save("sf_hidden", hidden);
+  }
+  function start() { busy = true; $("refreshBtn").classList.add("spin"); }
+  function finish() { busy = false; $("refreshBtn").classList.remove("spin"); }
+
+  function refreshSubs(opts) {
+    opts = opts || {};
+    if (busy) return;
+    if (!cfg.key) { show("settings"); setStatus("Add an API key to start.", true); return; }
+    start();
+    var needSubs = opts.reimport || !subs.length;
+    var p = needSubs ? importSubs(opts.token).then(function (list) {
+      if (!list.length) throw new Error("No subscriptions found on that account.");
+      subs = list; save("sf_subs", subs);
+    }) : Promise.resolve();
+
+    p.then(function () {
+      show("feed");
+      return pool(subs, 6, function (s) { return fetchChannelUploads(s, cfg.hideShorts); }, function (n) {
+        setStatus("Checking channel " + n + " of " + subs.length);
+      });
+    }).then(function (lists) {
+      var all = [], ids = {};
+      lists.forEach(function (l) { (l || []).forEach(function (v) { if (!ids[v.id]) { ids[v.id] = 1; all.push(v); } }); });
+      all.sort(function (a, b) { return a.at < b.at ? 1 : a.at > b.at ? -1 : 0; });
+      all = all.slice(0, 200);
+      setStatus("Getting video lengths");
+      return addDetails(all).catch(function () {}).then(function () { return all; });
+    }).then(function (all) {
+      settleSkips();
+      feed = { at: Date.now(), items: all };
+      save("sf_feed", feed);
+      pruneMarks();
+      render();
+    }).catch(function (e) { setStatus(explain(e), true); }).then(finish);
+  }
+
+  function refreshDiscover() {
+    if (busy) return;
+    if (!cfg.key) { show("settings"); setStatus("Add an API key to start.", true); return; }
+    var topics = topicList();
+    if (!topics.length) { render(); return; }
+    var picks = [], n = Math.min(5, topics.length);
+    for (var i = 0; i < n; i++) picks.push(topics[(disc.n * 5 + i) % topics.length]);
+    if (quotaLeft() < picks.length * 100 + 20) { setStatus("Not enough of today's free quota left for another Discover search. It resets at midnight Pacific time.", true); return; }
+    start();
+    var have = {}; disc.items.forEach(function (v) { have[v.id] = 1; });
+    var fresh = [];
+    var after = new Date(Date.now() - 30 * 86400000).toISOString();
+    var lang = (navigator.language || "en").slice(0, 2);
+
+    picks.reduce(function (p, topic, idx) {
+      return p.then(function () {
+        setStatus("Searching " + topic + " (" + (idx + 1) + " of " + picks.length + ")");
+        var params = { part: "snippet", type: "video", q: topic, maxResults: 25, order: "relevance", publishedAfter: after, relevanceLanguage: lang, safeSearch: "moderate" };
+        if (cfg.hideShorts) params.videoDuration = (disc.n + idx) % 2 ? "long" : "medium";
+        return api("search", params, null, 100).then(function (j) {
+          (j.items || []).forEach(function (it) {
+            var id = it.id && it.id.videoId, s = it.snippet || {};
+            if (!id || have[id]) return;
+            have[id] = 1;
+            var t = s.thumbnails || {};
+            fresh.push({
+              id: id, title: decodeEntities(s.title), channel: decodeEntities(s.channelTitle), chId: s.channelId,
+              at: s.publishedAt, topic: topic,
+              thumb: (t.medium || t.high || t.default || {}).url || ("https://i.ytimg.com/vi/" + id + "/mqdefault.jpg")
+            });
+          });
+        });
+      });
+    }, Promise.resolve()).then(function () {
+      setStatus("Checking categories");
+      return addDetails(fresh);
+    }).then(function () {
+      settleSkips();
+      var all = disc.items.concat(fresh).filter(function (v) { return ageDays(v) <= 45; });
+      all.sort(function (a, b) { return a.at < b.at ? 1 : a.at > b.at ? -1 : 0; });
+      disc = { at: Date.now(), n: disc.n + 1, items: all.slice(0, 180) };
+      save("sf_disc", disc);
+      pruneMarks();
+      render();
+    }).catch(function (e) { setStatus(explain(e), true); }).then(finish);
+  }
+
+  function refresh(opts) { if (tab === "disc" && !(opts && (opts.reimport || opts.token))) refreshDiscover(); else refreshSubs(opts); }
+
+  function googleImport() {
+    if (!cfg.clientId) { setStatus("Paste an OAuth client ID first, then save.", true); return; }
+    if (!(window.google && google.accounts && google.accounts.oauth2)) { setStatus("Google sign-in has not loaded yet. Try again in a moment.", true); return; }
+    var client = google.accounts.oauth2.initTokenClient({
+      client_id: cfg.clientId,
+      scope: "https://www.googleapis.com/auth/youtube.readonly",
+      callback: function (resp) {
+        if (resp && resp.access_token) { tab = "subs"; refreshSubs({ reimport: true, token: resp.access_token }); }
+        else setStatus("Google sign-in was cancelled or refused.", true);
+      },
+      error_callback: function () { setStatus("Google sign-in did not complete. If you are using the home-screen app, try it in Safari first.", true); }
+    });
+    client.requestAccessToken();
+  }
+
+  // ---------- render ----------
+  function dayKey(d) { return d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate(); }
+  function dayLabel(d) {
+    var now = new Date(), y = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    if (dayKey(d) === dayKey(now)) return "Today";
+    if (dayKey(d) === dayKey(y)) return "Yesterday";
+    var o = { weekday: "long", month: "short", day: "numeric" };
+    if (d.getFullYear() !== now.getFullYear()) o.year = "numeric";
+    return d.toLocaleDateString(undefined, o);
+  }
+  function ago(ms) {
+    var m = Math.round((Date.now() - ms) / 60000);
+    if (m < 1) return "just now";
+    if (m < 60) return m + " min ago";
+    var h = Math.round(m / 60);
+    if (h < 24) return h + (h === 1 ? " hour ago" : " hours ago");
+    var d = Math.round(h / 24);
+    return d + (d === 1 ? " day ago" : " days ago");
+  }
+  function videoHref(id) {
+    return (cfg.openInApp ? "youtube://www.youtube.com/watch?v=" : "https://www.youtube.com/watch?v=") + encodeURIComponent(id);
+  }
+
+  var CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  var CROSS = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+
+  function row(v) {
+    var a = el("a", "vid" + (seen[v.id] ? " seen" : ""));
+    a.href = videoHref(v.id);
+    a.rel = "noopener";
+    a.setAttribute("data-id", v.id);
+    a.addEventListener("click", function () {
+      if (!seen[v.id]) learn(v, 1);
+      mark(v.id, true, a);
+    });
+
+    var th = el("div", "thumb");
+    var img = el("img"); img.loading = "lazy"; img.alt = ""; img.src = v.thumb;
+    th.appendChild(img);
+    if (v.live === "live") th.appendChild(el("span", "badge live", "LIVE"));
+    else if (v.live === "upcoming") th.appendChild(el("span", "badge", "Soon"));
+    else if (v.dur) th.appendChild(el("span", "badge", fmtDur(v.dur)));
+    a.appendChild(th);
+
+    var meta = el("div", "meta");
+    meta.appendChild(el("h3", "title", v.title));
+    meta.appendChild(el("div", "sub", v.channel + " · " + ago(new Date(v.at).getTime()) + (v.topic ? " · " + v.topic : "")));
+    a.appendChild(meta);
+
+    var acts = el("div", "acts");
+    var b = el("button", "act-btn seen-toggle");
+    b.type = "button"; b.innerHTML = CHECK;
+    b.setAttribute("aria-label", "Mark watched");
+    b.setAttribute("aria-pressed", String(!!seen[v.id]));
+    b.addEventListener("click", function (ev) {
+      ev.preventDefault(); ev.stopPropagation();
+      mark(v.id, !seen[v.id], a);
+      b.setAttribute("aria-pressed", String(!!seen[v.id]));
+      if (hideSeen) render();
+    });
+    var x = el("button", "act-btn");
+    x.type = "button"; x.innerHTML = CROSS;
+    x.setAttribute("aria-label", "Not interested");
+    x.addEventListener("click", function (ev) {
+      ev.preventDefault(); ev.stopPropagation();
+      hidden[v.id] = 1; save("sf_hidden", hidden);
+      learn(v, -1.5);
+      render();
+      toast("Hidden. You will see less like it.", "Mute " + v.channel, function () {
+        mutedCh[v.chId] = v.channel; save("sf_mutedCh", mutedCh); render();
+      });
+    });
+    acts.appendChild(b); acts.appendChild(x);
+    a.appendChild(acts);
+    if (observer && !shown[v.id] && !seen[v.id]) observer.observe(a);
+    return a;
+  }
+
+  function render() {
+    var box = $("feed");
+    box.textContent = "";
+    var isDisc = tab === "disc";
+    $("tabSubs").setAttribute("aria-selected", String(!isDisc));
+    $("tabDisc").setAttribute("aria-selected", String(isDisc));
+    $("sortBtn").hidden = isDisc;
+    $("sortBtn").setAttribute("aria-pressed", String(sortMode === "you"));
+    $("hideSeenBtn").setAttribute("aria-pressed", String(!!hideSeen));
+
+    var q = $("search").value.trim().toLowerCase();
+    var mw = mutedWordList(), subIds = {};
+    subs.forEach(function (s) { subIds[s.id] = 1; });
+    var src = isDisc ? disc : feed;
+    var items = src.items.filter(function (v) {
+      if (!passes(v, isDisc, mw, subIds)) return false;
+      if (hideSeen && seen[v.id]) return false;
+      if (q && (v.title + " " + v.channel).toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+
+    if (isDisc && !topicList().length) {
+      setStatus("");
+      box.appendChild(el("p", "empty", "Add a few topics in settings, such as astronomy or synth music, and Discover will find recent videos on them."));
+      return;
+    }
+    if (isDisc) {
+      if (src.at) setStatus(items.length + " picks from your topics. Updated " + ago(src.at) + ". About " + Math.floor(quotaLeft() / 100) + " topic searches left today.");
+      else setStatus("Tap refresh to search your topics.");
+    } else if (src.at) {
+      setStatus(items.length + " videos from " + subs.length + " channels. Updated " + ago(src.at) + ".");
+    }
+    if (!items.length) {
+      box.appendChild(el("p", "empty", src.items.length ? "Nothing to show. Clear the filter or show watched videos." : "No videos yet. Tap refresh."));
+      return;
+    }
+
+    var ranked = isDisc || sortMode === "you";
+    if (ranked) {
+      var half = isDisc ? 10 : 3;
+      items.forEach(function (v) { v._r = affinity(v) + 4 * Math.exp(-ageDays(v) / half); });
+      items.sort(function (a, b) { return b._r - a._r; });
+      var list = el("div", "list");
+      list.style.marginTop = "12px";
+      items.forEach(function (v) { list.appendChild(row(v)); });
+      box.appendChild(list);
+      return;
+    }
+
+    var groups = [], cur = null;
+    items.forEach(function (v) {
+      var d = new Date(v.at), k = dayKey(d);
+      if (!cur || cur.key !== k) { cur = { key: k, label: dayLabel(d), items: [] }; groups.push(cur); }
+      cur.items.push(v);
+    });
+    groups.forEach(function (g) {
+      var h = el("h2", "day", g.label);
+      h.appendChild(el("small", null, g.items.length + (g.items.length === 1 ? " video" : " videos")));
+      box.appendChild(h);
+      var list = el("div", "list");
+      g.items.forEach(function (v) { list.appendChild(row(v)); });
+      box.appendChild(list);
+    });
+  }
+
+  function mark(id, on, node) {
+    if (on) seen[id] = 1; else delete seen[id];
+    save("sf_seen", seen);
+    if (node) node.classList.toggle("seen", !!on);
+  }
+  function setTab(t) {
+    tab = t; save("sf_tab", tab);
+    render();
+    if (t === "disc" && !disc.items.length && topicList().length) refreshDiscover();
+  }
+
+  // ---------- settings ----------
+  function fillSettings() {
+    $("apiKey").value = cfg.key || "";
+    $("channel").value = cfg.channel || "";
+    $("clientId").value = cfg.clientId || "";
+    $("topics").value = cfg.topics || "";
+    $("mutedWords").value = cfg.mutedWords || "";
+    $("hideShorts").checked = cfg.hideShorts !== false;
+    $("openInApp").checked = cfg.openInApp !== false;
+    $("originText").textContent = location.origin;
+    $("closeBtn").hidden = !feed.items.length;
+    var cats = $("cats"); cats.textContent = "";
+    CATS.forEach(function (c) {
+      var l = el("label", "check");
+      var i = el("input"); i.type = "checkbox"; i.id = "cat" + c[0]; i.value = c[0];
+      i.checked = (cfg.blockCats || []).indexOf(c[0]) >= 0;
+      l.appendChild(i); l.appendChild(document.createTextNode(" " + c[1]));
+      cats.appendChild(l);
+    });
+    var mc = Object.keys(mutedCh).length;
+    $("learnInfo").textContent = "Learned from " + (model.n || 0) + " taps so far. " + mc + (mc === 1 ? " channel muted." : " channels muted.");
+  }
+  function readSettings() {
+    var oldChannel = cfg.channel;
+    var blocked = [];
+    CATS.forEach(function (c) { var i = $("cat" + c[0]); if (i && i.checked) blocked.push(c[0]); });
+    cfg = {
+      key: $("apiKey").value.trim(),
+      channel: $("channel").value.trim(),
+      clientId: $("clientId").value.trim(),
+      topics: $("topics").value.trim(),
+      mutedWords: $("mutedWords").value.trim(),
+      blockCats: blocked,
+      hideShorts: $("hideShorts").checked,
+      openInApp: $("openInApp").checked
+    };
+    save("sf_cfg", cfg);
+    return { channelChanged: oldChannel !== cfg.channel };
+  }
+
+  $("settingsBtn").addEventListener("click", function () { fillSettings(); setStatus(""); show("settings"); });
+  $("closeBtn").addEventListener("click", function () { readSettings(); show("feed"); render(); });
+  $("saveBtn").addEventListener("click", function () {
+    var r = readSettings();
+    if (!cfg.key) { setStatus("Add an API key to start.", true); return; }
+    if (!cfg.channel && !subs.length) { setStatus("Add your channel handle, or use Import with Google.", true); return; }
+    setStatus("Loading");
+    tab = "subs"; save("sf_tab", tab);
+    refreshSubs({ reimport: r.channelChanged && !!cfg.channel });
+  });
+  $("googleBtn").addEventListener("click", function () { readSettings(); googleImport(); });
+  $("refreshBtn").addEventListener("click", function () { refresh(); });
+  $("tabSubs").addEventListener("click", function () { setTab("subs"); });
+  $("tabDisc").addEventListener("click", function () { setTab("disc"); });
+  $("search").addEventListener("input", render);
+  $("sortBtn").addEventListener("click", function () { sortMode = sortMode === "you" ? "new" : "you"; save("sf_sort", sortMode); render(); });
+  $("hideSeenBtn").addEventListener("click", function () { hideSeen = !hideSeen; save("sf_hideSeen", hideSeen); render(); });
+  $("clearSeenBtn").addEventListener("click", function () { seen = {}; save("sf_seen", seen); setStatus("Watched marks cleared."); });
+  $("resetLearnBtn").addEventListener("click", function () {
+    model = { ch: {}, cat: {}, w: {}, n: 0 }; save("sf_model", model);
+    hidden = {}; save("sf_hidden", hidden); shown = {}; save("sf_shown", shown);
+    fillSettings(); setStatus("Learning reset.");
+  });
+  $("clearMutedBtn").addEventListener("click", function () { mutedCh = {}; save("sf_mutedCh", mutedCh); fillSettings(); setStatus("All channels unmuted."); });
+  $("forgetBtn").addEventListener("click", function () {
+    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota"].forEach(drop);
+    cfg = Object.assign({}, DEFAULT_CFG);
+    subs = []; feed = { at: 0, items: [] }; disc = { at: 0, n: 0, items: [] };
+    seen = {}; hidden = {}; mutedCh = {}; shown = {}; model = { ch: {}, cat: {}, w: {}, n: 0 };
+    hideSeen = false; tab = "subs"; sortMode = "new";
+    fillSettings(); setStatus("Everything on this device was removed.");
+  });
+
+  // ---------- start ----------
+  if (cfg.key && subs.length) {
+    show("feed");
+    render();
+    if (tab === "subs" && Date.now() - feed.at > 20 * 60 * 1000) refreshSubs();
+  } else {
+    tab = "subs";
+    fillSettings();
+    show("settings");
+  }
+})();
+</script>
+</body>
+</html>
