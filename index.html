@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MwPsCGCy8rfv57GM3mxbqOxje9TUu4yLUPZ8EZBytIc=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-8Ys+HYOZnw0FV7Wv5v+jCLNgXqOr+FC8Sh4jZMRWiuI=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -171,6 +171,10 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
 .vid { transform: rotate(calc(var(--tilt, 0) * 1deg)); }
 .vid.live { transform: translateY(var(--bob, 0px)) rotate(calc(var(--tilt, 0) * 1deg + var(--sway, 0deg) * var(--k, 1))); will-change: transform; }
 .more-marker { height: 1px; }
+.top-btn { position: fixed; right: 18px; bottom: calc(env(safe-area-inset-bottom) + 92px); z-index: 6; width: 46px; height: 46px; border-radius: 50%; border: 0; display: grid; place-items: center; padding: 0; background: var(--accent); color: var(--accent-ink); box-shadow: 0 8px 22px -8px rgba(0, 0, 0, 0.7); }
+.top-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.top-btn[hidden] { display: none; }
+.bar { cursor: pointer; }
 @media (orientation: landscape) and (max-height: 520px) {
   #feed { display: flex; flex-direction: row; align-items: flex-start; overflow-x: auto; overflow-y: hidden; width: 100vw; margin-left: calc(50% - 50vw); padding: 16px 28px 30px; box-sizing: border-box; scroll-snap-type: x proximity; scroll-padding: 0 28px; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; background: linear-gradient(rgba(236, 223, 206, 0.42), rgba(236, 223, 206, 0.42)) 0 16px / 100% 2px no-repeat; background-attachment: local; }
   #feed::-webkit-scrollbar { display: none; }
@@ -182,6 +186,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   .tools, #status { display: none; }
   .tab { height: 38px; }
   .tabs { bottom: calc(env(safe-area-inset-bottom) + 8px); max-width: 420px; }
+  .top-btn { bottom: calc(env(safe-area-inset-bottom) + 66px); width: 40px; height: 40px; }
   body { padding-bottom: 0; }
   #feed { padding-bottom: 64px; }
 }
@@ -210,6 +215,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
 <main class="wrap">
   <!-- Feed view -->
   <section id="feedView" hidden>
+    <button class="top-btn" id="topBtn" type="button" aria-label="Back to top" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button>
     <div class="tabs" role="tablist">
       <button class="tab" id="tabSubs" type="button" role="tab" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z"/></svg>Subs</button>
       <button class="tab" id="tabDisc" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Discover</button>
@@ -1205,9 +1211,11 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   $("googleBtn").addEventListener("click", function () { readSettings(); googleImport(); });
   $("refreshBtn").addEventListener("click", function () { refresh(); });
   $("fullBtn").addEventListener("click", function () { readSettings(); tab = "subs"; save("sf_tab", tab); refreshSubs({ full: true }); });
-  $("tabSubs").addEventListener("click", function () { setTab("subs"); });
-  $("tabDisc").addEventListener("click", function () { setTab("disc"); });
-  $("tabChan").addEventListener("click", function () { setTab("chan"); });
+  $("tabSubs").addEventListener("click", function () { if (tab === "subs") toTop(); else setTab("subs"); });
+  $("tabDisc").addEventListener("click", function () { if (tab === "disc") toTop(); else setTab("disc"); });
+  $("tabChan").addEventListener("click", function () { if (tab === "chan") toTop(); else setTab("chan"); });
+  document.querySelector(".bar").addEventListener("click", function (e) { if (!e.target.closest("button")) toTop(); });
+  $("topBtn").addEventListener("click", toTop);
   $("seedAddBtn").addEventListener("click", addSeedFromInput);
   $("seedInput").addEventListener("change", addSeedFromInput);
   $("seedAutoBtn").addEventListener("click", autoSeeds);
@@ -1309,7 +1317,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 11;
+  var VERSION = 12;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -1375,7 +1383,16 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   // Sideways phone: the cards become one strip that scrolls left to right.
   var LAND = window.matchMedia("(orientation: landscape) and (max-height: 520px)");
   function scrollPos() { return LAND.matches ? $("feed").scrollLeft : window.scrollY; }
+  function toTop() {
+    var smooth = { top: 0, left: 0, behavior: "smooth" };
+    if (LAND.matches) $("feed").scrollTo(smooth); else window.scrollTo(smooth);
+  }
+  function topBtnState() {
+    var far = LAND.matches ? $("feed").scrollLeft > 1200 : window.scrollY > 900;
+    $("topBtn").hidden = !far || feedView.hidden;
+  }
   function onScrollPush() {
+    topBtnState();
     if (LAND.matches && view && view.pos < view.items.length) {
       var f = $("feed"); if (f.scrollLeft + f.clientWidth > f.scrollWidth - 1600) appendMore();
     }
