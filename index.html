@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-2ZhPN6TenKCp9rEx64LZSI1l5vUbXhqS+3XNjZ+3xRg=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-GpwUUqfUuB4aUQ80hP3H7WJv5pOgNdmyTNvP5SrYeTk=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -172,6 +172,9 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
 .stk { transform-origin: 50% 0; transform: rotate(calc(var(--tilt, 0) * 1deg)); }
 .vid.live { transform: translateY(var(--bob, 0px)) rotate(calc(var(--tilt, 0) * 1deg + var(--sway, 0deg) * var(--k, 1))); will-change: transform; }
 .more-marker { height: 1px; }
+.win-spacer { flex: none; height: 1px; }
+body.light .vid, body.light .f-card, body.light .stk-card, body.light .later-card { box-shadow: none !important; will-change: auto !important; }
+body.light #feed { scroll-snap-type: none !important; }
 .tab { flex-direction: column; gap: 2px; font-size: 11px; height: 52px; }
 .tab svg { width: 18px; height: 18px; }
 .f-head { margin: 4px 0 0; }
@@ -253,7 +256,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
 .top-btn[hidden] { display: none; }
 .bar { cursor: pointer; }
 @media (orientation: landscape) and (max-height: 520px) {
-  #feed { display: flex; flex-direction: row; align-items: flex-start; overflow-x: auto; overflow-y: hidden; width: 100vw; margin-left: calc(50% - 50vw); padding: 16px 28px 30px; box-sizing: border-box; scroll-snap-type: x proximity; scroll-padding: 0 28px; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; background: linear-gradient(rgba(236, 223, 206, 0.42), rgba(236, 223, 206, 0.42)) 0 16px / 100% 2px no-repeat; background-attachment: local; }
+  #feed { display: flex; flex-direction: row; align-items: flex-start; overflow-x: auto; overflow-y: hidden; width: 100vw; margin-left: calc(50% - 50vw); padding: 16px 28px 30px; box-sizing: border-box; scroll-snap-type: x proximity; scroll-padding: 0 28px; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; background: linear-gradient(rgba(236, 223, 206, 0.42), rgba(236, 223, 206, 0.42)) 0 16px / 100% 2px no-repeat; }
   #feed::-webkit-scrollbar { display: none; }
   #feed .list { display: contents; }
   #feed .vid { flex: none; box-sizing: border-box; width: max(220px, calc((60vh - 118px) * 1.7778 + 20px)); margin: 0 14px; scroll-snap-align: center; scroll-snap-stop: normal; }
@@ -415,6 +418,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     <label class="check"><input type="checkbox" id="hideShorts" checked> Leave out Shorts and live streams</label>
     <label class="check"><input type="checkbox" id="openInApp"> Use the direct app link (may show an "Open in YouTube?" prompt)</label>
     <label class="check"><input type="checkbox" id="sway" checked> Cards swing when you scroll</label>
+    <label class="check"><input type="checkbox" id="lightMode"> Light mode: no swing, flat shadows, fewer cards drawn at once (turns on by itself after a crash)</label>
     <p>Press and hold a video to save it to Watch later.</p>
 
     <div class="btn-row">
@@ -707,13 +711,30 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     });
   }, { rootMargin: "200px 0px" }) : null;
   // The feed is drawn a page at a time; a marker near the bottom asks for the next page.
+  // If the page dies while scrolling, a flag is left behind. The next start sees it and switches on light mode.
+  var light = load("sf_light", { on: false, why: "" }), crashNote = "none";
+  (function () {
+    var f = load("sf_crash", null);
+    if (f) {
+      crashNote = "yes, while scrolling " + f.tab + " in " + f.mode + " at " + new Date(f.t).toLocaleString();
+      if (!light.on) { light = { on: true, why: "crash while scrolling " + f.tab + " in " + f.mode }; save("sf_light", light); }
+      drop("sf_crash");
+    }
+    document.body.classList.toggle("light", !!light.on);
+  })();
   var PAGE = 30, view = null;
+  function pageSize() { return LAND.matches ? (light.on ? 8 : 12) : (light.on ? 15 : PAGE); }
   var moreObs = ("IntersectionObserver" in window) ? new IntersectionObserver(function (entries) {
     if (entries.some(function (en) { return en.isIntersecting; })) appendMore();
   }, { rootMargin: "900px 900px" }) : null;
+  var appending = false;
   function appendMore() {
-    if (!view || view.pos >= view.items.length) return;
-    var box = $("feed"), end = moreObs ? Math.min(view.items.length, view.pos + PAGE) : view.items.length;
+    if (!view || view.pos >= view.items.length || appending) return;
+    appending = true;
+    try { appendMoreNow(); } finally { appending = false; }
+  }
+  function appendMoreNow() {
+    var box = $("feed"), end = moreObs ? Math.min(view.items.length, view.pos + pageSize()) : view.items.length;
     if (view.marker && view.marker.parentNode) view.marker.parentNode.removeChild(view.marker);
     for (var i = view.pos; i < end; i++) {
       var v = view.items[i];
@@ -1857,8 +1878,8 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     }
     var counts = {};
     if (!ranked) items.forEach(function (v) { var k = dayKey(new Date(v.at)); counts[k] = (counts[k] || 0) + 1; });
-    view = { items: items, pos: 0, ranked: ranked, counts: counts, day: null, list: null, marker: null };
-    appendMore();
+    view = { items: items, pos: 0, ranked: ranked, counts: counts, day: null, list: null, marker: null, win: null };
+    if (LAND.matches && ranked) winInit(); else appendMore();
   }
 
   function mark(id, on, node) {
@@ -1884,6 +1905,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     $("hideShorts").checked = cfg.hideShorts !== false;
     $("openInApp").checked = !!cfg.openInApp;
     $("sway").checked = cfg.sway !== false;
+    $("lightMode").checked = !!light.on;
     $("versionLine").textContent = "Version " + VERSION;
     $("versionTop").textContent = "Version " + VERSION;
     $("originText").textContent = location.origin;
@@ -1904,6 +1926,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var blocked = [];
     CATS.forEach(function (c) { var i = $("cat" + c[0]); if (i && i.checked) blocked.push(c[0]); });
     noteTopics($("topics").value);
+    light = { on: $("lightMode").checked, why: $("lightMode").checked ? (light.why || "turned on by you") : "" }; save("sf_light", light); document.body.classList.toggle("light", light.on);
     cfg = {
       key: $("apiKey").value.trim(),
       channel: $("channel").value.trim(),
@@ -1964,7 +1987,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   });
   $("clearMutedBtn").addEventListener("click", function () { mutedCh = {}; save("sf_mutedCh", mutedCh); fillSettings(); setStatus("All channels unmuted."); });
   $("forgetBtn").addEventListener("click", function () {
-    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_later", "sf_chk", "sf_chinfo", "sf_folSort", "sf_chSort", "sf_chHide", "sf_plSort", "sf_chTheme", "sf_topicsSeeded", "sf_dref", "sf_dq", "sf_dseen", "sf_dboost", "sf_topicAt"].forEach(drop);
+    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_later", "sf_chk", "sf_chinfo", "sf_folSort", "sf_chSort", "sf_chHide", "sf_plSort", "sf_chTheme", "sf_topicsSeeded", "sf_dref", "sf_dq", "sf_dseen", "sf_dboost", "sf_topicAt", "sf_light", "sf_crash"].forEach(drop);
     chk = {};
     cfg = Object.assign({}, DEFAULT_CFG, { v2: 1 });
     subs = []; feed = { at: 0, items: [] }; disc = { at: 0, n: 0, items: [] };
@@ -2049,7 +2072,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 16;
+  var VERSION = 17;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -2123,12 +2146,67 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var far = LAND.matches ? $("feed").scrollLeft > 1200 : window.scrollY > 900;
     $("topBtn").hidden = !far || feedView.hidden;
   }
+  // Landscape strip: cards far behind you are taken out of the page and replaced by one exact-width spacer; they come back when you scroll back.
+  var crashTimer = 0, crashSet = false;
+  function markScroll() {
+    if (!crashSet) { crashSet = true; save("sf_crash", { t: Date.now(), tab: tab, mode: LAND.matches ? "landscape" : "portrait" }); }
+    clearTimeout(crashTimer);
+    crashTimer = setTimeout(function () { drop("sf_crash"); crashSet = false; }, 4000);
+  }
+  function clearCrashFlag() { clearTimeout(crashTimer); if (crashSet) { drop("sf_crash"); crashSet = false; } }
+  window.addEventListener("pagehide", clearCrashFlag);
+  document.addEventListener("visibilitychange", function () { if (document.hidden) clearCrashFlag(); });
+  // Landscape strip for ranked lists (Discover, "For you"): the strip is as wide as the whole list from the start, but only the cards
+  // near the screen exist. Everything else is one empty spacer on each side, so the page never holds hundreds of cards at once.
+  function winInit() {
+    var box = $("feed"), n = view.items.length;
+    var list = el("div", "list"); list.style.marginTop = "18px"; box.appendChild(list);
+    var L = el("div", "win-spacer"), R = el("div", "win-spacer");
+    list.appendChild(L); list.appendChild(R);
+    view.list = list; view.pos = n;
+    view.win = { lo: 0, hi: 0, L: L, R: R, els: {}, slot: 0 };
+    winFill(0, Math.min(n, 6));
+    var w = view.win, first = w.els[0];
+    w.slot = first ? parseFloat(getComputedStyle(first).width) + 28 : 0;
+    winSet();
+    winSync();
+  }
+  function winSet() { var w = view.win, n = view.items.length; w.L.style.width = (w.lo * w.slot) + "px"; w.R.style.width = (Math.max(0, n - w.hi) * w.slot) + "px"; }
+  // make the cards exist for indexes a up to b (not including b), and drop the rest
+  function winFill(a, b) {
+    var w = view.win, i;
+    Object.keys(w.els).forEach(function (k) {
+      k = +k; if (k >= a && k < b) return;
+      var c = w.els[k]; if (liveObs) liveObs.unobserve(c); if (observer) observer.unobserve(c);
+      var li = liveSet.indexOf(c); if (li > -1) liveSet.splice(li, 1);
+      c.remove(); delete w.els[k];
+    });
+    for (i = a; i < b; i++) {
+      if (w.els[i]) continue;
+      var c2 = row(view.items[i]); w.els[i] = c2;
+      var next = null;
+      for (var j = i + 1; j < b && !next; j++) next = w.els[j] || null;
+      view.list.insertBefore(c2, next || w.R);
+    }
+    w.lo = a; w.hi = b;
+  }
+  function winSync() {
+    var w = view && view.win; if (!w || !w.slot) return;
+    var f = $("feed"), vw = f.clientWidth || window.innerWidth, n = view.items.length;
+    var first = Math.floor((f.scrollLeft - 28) / w.slot), see = Math.ceil(vw / w.slot);
+    var back = light.on ? 3 : 6, ahead = light.on ? 4 : 8;
+    if (first - 2 >= w.lo && first + see + 3 <= w.hi) return;
+    var a = Math.max(0, first - back), b = Math.min(n, first + see + ahead);
+    if (b <= a) { a = Math.max(0, b - 1); }
+    winFill(a, b); winSet();
+  }
   function onScrollPush() {
     topBtnState();
+    if (LAND.matches) { markScroll(); winSync(); }
     if (LAND.matches && view && view.pos < view.items.length) {
       var f = $("feed"); if (f.scrollLeft + f.clientWidth > f.scrollWidth - 1600) appendMore();
     }
-    if (cfg.sway === false) return;
+    if (cfg.sway === false || light.on) return;
     var pos = scrollPos(), now = performance.now(), dy = pos - ph.y, dt = Math.max(8, now - ph.t);
     ph.y = pos; ph.t = now;
     var w0 = Math.abs(ph.w);
@@ -2139,7 +2217,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
   window.addEventListener("scroll", function () { if (!LAND.matches) onScrollPush(); }, { passive: true });
   $("feed").addEventListener("scroll", function () { if (LAND.matches) onScrollPush(); }, { passive: true });
-  var onLand = function () { ph.y = scrollPos(); if (view && view.pos < view.items.length) appendMore(); };
+  var onLand = function () { ph.y = scrollPos(); crashSet = false; render(); };
   if (LAND.addEventListener) LAND.addEventListener("change", onLand); else if (LAND.addListener) LAND.addListener(onLand);
 
   // ---------- newer-version check (own file only) ----------
@@ -2176,6 +2254,8 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       "set up: key " + (cfg.key ? "yes" : "no") + ", handle " + (cfg.channel ? "yes" : "no") + ", client id " + (cfg.clientId ? "yes" : "no"),
       "counts: subs " + subs.length + ", feed " + feed.items.length + ", discover " + (disc.items || []).length + ", suggestions " + (rec.items || []).length + ", watch later " + later.length + ", watched " + Object.keys(seen).length,
       "feed updated: " + (feed.at ? new Date(feed.at).toISOString() : "never"),
+      "light mode: " + (light.on ? "on (" + (light.why || "no reason noted") + ")" : "off") + "   crash flag found at start: " + crashNote,
+      "cards in page: " + document.querySelectorAll(".vid, .f-card, .stk").length + (view && view.win ? " (windowed, " + view.win.lo + "-" + view.win.hi + " of " + view.items.length + ")" : ""),
       "cards on screen: " + liveSet.length + "   swing now: " + ph.a.toFixed(2) + " deg   physics running: " + !!ph.raf,
       "storage bytes: " + tot + " " + JSON.stringify(sz),
       "recent errors: " + (errLog.length ? "\n  " + errLog.join("\n  ") : "none")
