@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-jmfXtEipvradR5b0zgwrg4ynk7T0fWtE92cuQdzx/cg=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-/Rt7J/zMN67B6kaTJaI0v63kpDxjUUWFZ4+7lZNg3XI=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -68,6 +68,7 @@ header.bar { position: sticky; top: 0; z-index: 5; background: var(--bg); border
 .verbar .btn { margin-left: auto; color: var(--accent-ink); border-color: currentColor; }
 .mtest { margin: 0 0 14px; padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.06); font: 12px/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap; min-height: 1.5em; }
 .mtest:empty { display: none; }
+.btn-row.kb { margin: 0; }
 .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 20px; }
 details.help { border: 1px solid var(--line); background: var(--surface); padding: 12px 14px; margin-bottom: 14px; }
 details.help summary { font-weight: 600; cursor: pointer; }
@@ -243,6 +244,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     <div class="field">
       <label for="apiKey">YouTube API key</label>
       <input type="password" id="apiKey" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <div class="btn-row kb"><button class="btn ghost" type="button" data-show="apiKey">Show</button><button class="btn ghost" type="button" data-copy="apiKey">Copy</button></div>
     </div>
 
     <div class="field">
@@ -266,6 +268,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     <div class="field">
       <label for="clientId">Google OAuth client ID (optional)</label>
       <input type="text" id="clientId" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <div class="btn-row kb"><button class="btn ghost" type="button" data-copy="clientId">Copy</button></div>
     </div>
 
     <h3>Discover</h3>
@@ -1303,7 +1306,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling and leaning with phone tilt ----------
-  var VERSION = 9;
+  var VERSION = 10;
   // a = current angle, w = angular speed, rest = where gravity wants the card (from tilt). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0, tiltOn: false, asked: false };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -1425,6 +1428,22 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
     } else { ph.perm = "not needed"; listen(); }
   }
   $("motionBtn").addEventListener("click", motionTest);
+  // Show / Copy buttons beside the key fields
+  Array.prototype.forEach.call(document.querySelectorAll("[data-show]"), function (b) {
+    b.addEventListener("click", function () {
+      var f = $(b.getAttribute("data-show")), on = f.type === "password";
+      f.type = on ? "text" : "password"; b.textContent = on ? "Hide" : "Show";
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-copy]"), function (b) {
+    b.addEventListener("click", function () {
+      var f = $(b.getAttribute("data-copy")), t = f.value;
+      if (!t) { toast("Nothing to copy yet."); return; }
+      var was = f.type; f.type = "text";
+      function done(ok) { f.type = was; toast(ok ? "Copied." : "Select the text and copy it."); }
+      try { navigator.clipboard.writeText(t).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
+    });
+  });
 
   // ---------- newer-version check (own file only) ----------
   var upd = "not checked";
