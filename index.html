@@ -260,8 +260,8 @@ details.help code { font-size: 13px; background: var(--bg); padding: 1px 5px; bo
     <h3>Discover</h3>
     <div class="field">
       <label for="topics">Topics to look for</label>
-      <input type="text" id="topics" placeholder="NASCAR, astronomy, physics, synth music" autocomplete="off" autocapitalize="off">
-      <span class="hint">Separate with commas. Each refresh searches up to 5 topics and rotates through the rest. The free quota covers about 90 topic searches a day.</span>
+      <input type="text" id="topics" placeholder="hobby machining, guitar building, physics" autocomplete="off" autocapitalize="off">
+      <span class="hint">Separate with commas. Each refresh searches up to 8 topics and rotates through the rest. Discover gives every topic an equal share. The free quota covers about 90 topic searches a day.</span>
     </div>
     <div class="field">
       <label>Never show these categories in Discover</label>
@@ -614,8 +614,8 @@ details.help code { font-size: 13px; background: var(--bg); padding: 1px 5px; bo
     if (!cfg.key) { show("settings"); setStatus("Add an API key to start.", true); return; }
     var topics = topicList();
     if (!topics.length) { render(); return; }
-    var picks = [], n = Math.min(5, topics.length);
-    for (var i = 0; i < n; i++) picks.push(topics[(disc.n * 5 + i) % topics.length]);
+    var picks = [], n = Math.min(8, topics.length);
+    for (var i = 0; i < n; i++) picks.push(topics[(disc.n * 8 + i) % topics.length]);
     if (quotaLeft() < picks.length * 100 + 20) { setStatus("Not enough of today's free quota left for another Discover search. It resets at midnight Pacific time.", true); return; }
     start();
     var have = {}; disc.items.forEach(function (v) { have[v.id] = 1; });
@@ -765,8 +765,11 @@ details.help code { font-size: 13px; background: var(--bg); padding: 1px 5px; bo
     var mw = mutedWordList(), subIds = {};
     subs.forEach(function (s) { subIds[s.id] = 1; });
     var src = isDisc ? disc : feed;
+    var topicSet = {};
+    topicList().forEach(function (t) { topicSet[t.toLowerCase()] = 1; });
     var items = src.items.filter(function (v) {
       if (!passes(v, isDisc, mw, subIds)) return false;
+      if (isDisc && !topicSet[(v.topic || "").toLowerCase()]) return false;
       if (hideSeen && seen[v.id]) return false;
       if (q && (v.title + " " + v.channel).toLowerCase().indexOf(q) < 0) return false;
       return true;
@@ -793,6 +796,15 @@ details.help code { font-size: 13px; background: var(--bg); padding: 1px 5px; bo
       var half = isDisc ? 10 : 3;
       items.forEach(function (v) { v._r = affinity(v) + 4 * Math.exp(-ageDays(v) / half); });
       items.sort(function (a, b) { return b._r - a._r; });
+      if (isDisc) {
+        var by = {}, order = [], mixed = [], more = true;
+        items.forEach(function (v) { var t = (v.topic || "").toLowerCase(); if (!by[t]) { by[t] = []; order.push(t); } by[t].push(v); });
+        for (var i = 0; more; i++) {
+          more = false;
+          order.forEach(function (t) { if (by[t][i]) { mixed.push(by[t][i]); more = true; } });
+        }
+        items = mixed;
+      }
       var list = el("div", "list");
       list.style.marginTop = "12px";
       items.forEach(function (v) { list.appendChild(row(v)); });
