@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-GpwUUqfUuB4aUQ80hP3H7WJv5pOgNdmyTNvP5SrYeTk=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-fxMwyJEj8DoBxyx+/r7XucrnBMTMZpZLwd3hBODChaQ=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -289,6 +289,23 @@ body.light #feed { scroll-snap-type: none !important; }
 .tools { flex-wrap: nowrap; }
 .tools input[type="search"] { flex: 1 1 0; min-width: 0; padding: 0 14px; }
 .chip { padding: 0 12px; font-size: 13px; flex: none; }
+.note { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; margin: 0 0 5px; padding: 2px 9px 2px 6px; border-radius: 4px 9px 9px 4px; font: 700 11px/1.5 "Manrope", system-ui, sans-serif; letter-spacing: 0.02em; color: #fff; background: var(--nb, #6E7F8A); transform: rotate(-1.2deg); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); white-space: nowrap; overflow: hidden; }
+.note span { overflow: hidden; text-overflow: ellipsis; }
+.note svg { width: 13px; height: 13px; flex: none; fill: currentColor; stroke: none; opacity: 0.9; }
+.note.plain { background: rgba(42, 38, 34, 0.14); color: var(--pmuted); box-shadow: none; }
+.d-tog { display: flex; gap: 8px; margin: 10px 0 0; }
+.srch-form { display: flex; gap: 8px; }
+.srch-form input { flex: 1; min-width: 0; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 0 12px; font-size: 16px; }
+.srch-opts, .srch-saved { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0 2px; -webkit-overflow-scrolling: touch; }
+.srch-opts .chip, .srch-saved .sv { flex: none; }
+.sv { display: inline-flex; align-items: center; height: 34px; border-radius: 17px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 13px; overflow: hidden; }
+.sv button { border: 0; background: none; color: inherit; height: 100%; padding: 0 8px; font-size: 13px; }
+.sv .sv-q { padding-left: 12px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sv .sv-p[aria-pressed="true"] { color: var(--accent); }
+.sv .sv-x { color: var(--muted); padding-right: 10px; }
+#srchCost { font-size: 13px; color: var(--muted); margin: 8px 0 4px; }
+#srchMoreBox { text-align: center; padding: 16px 0 24px; }
+#srchMoreBox .btn { min-width: 220px; }
 </style>
 </head>
 <body>
@@ -316,7 +333,14 @@ body.light #feed { scroll-snap-type: none !important; }
       <button class="tab" id="tabSubs" type="button" role="tab" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z"/></svg>Subs</button>
       <button class="tab" id="tabDisc" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/></svg>Discover</button>
       <button class="tab" id="tabFollow" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><circle cx="17.5" cy="8" r="2.5"/><path d="M17.5 13.5c2.2.2 3.7 1.7 4.2 4.5"/></svg>Following</button>
-      <button class="tab" id="tabChan" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Find</button>
+      <button class="tab" id="tabSrch" type="button" role="tab" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Search</button>
+    </div>
+    <div class="d-tog" id="discTog" hidden><button class="chip" id="dtVid" type="button" aria-pressed="true">Videos</button><button class="chip" id="dtChan" type="button" aria-pressed="false">Find channels</button></div>
+    <div class="panel" id="srchPanel" hidden>
+      <form id="srchForm" class="srch-form" action="#"><input type="search" id="srchQ" placeholder="Search YouTube" enterkeyhint="search" autocomplete="off" autocapitalize="off" aria-label="Search YouTube"><button class="btn small" id="srchGo" type="submit">Search</button></form>
+      <div class="srch-opts" id="srchOpts"></div>
+      <div class="srch-saved" id="srchSaved"></div>
+      <div class="hint" id="srchCost"></div>
     </div>
     <div class="panel" id="chanPanel" hidden>
       <h2>Find channels like the ones you follow</h2>
@@ -341,6 +365,7 @@ body.light #feed { scroll-snap-type: none !important; }
     <div class="status" id="status" role="status"></div>
     <div id="laterBox" hidden></div>
     <div id="feed"></div>
+    <div id="srchMoreBox" hidden><button class="btn" id="srchMore" type="button">Load more (100 units)</button></div>
   </section>
 
   <!-- Settings view -->
@@ -415,6 +440,8 @@ body.light #feed { scroll-snap-type: none !important; }
     </div>
 
     <h3>Playback</h3>
+    <label class="check"><input type="checkbox" id="srchInf" checked> Let my pinned and repeated searches steer Discover (up to 20% of picks)</label>
+    <div class="btn-row"><button class="btn ghost small" id="srchClear" type="button">Clear remembered searches</button></div>
     <label class="check"><input type="checkbox" id="hideShorts" checked> Leave out Shorts and live streams</label>
     <label class="check"><input type="checkbox" id="openInApp"> Use the direct app link (may show an "Open in YouTube?" prompt)</label>
     <label class="check"><input type="checkbox" id="sway" checked> Cards swing when you scroll</label>
@@ -471,7 +498,8 @@ body.light #feed { scroll-snap-type: none !important; }
   var model = load("sf_model", { ch: {}, cat: {}, w: {}, n: 0 });
   var shown = load("sf_shown", {});
   var hideSeen = load("sf_hideSeen", false);
-  var tab = load("sf_tab", "subs");
+  var tab = load("sf_tab", "subs"); if (tab === "chan") tab = "srch";
+  var discFind = false;
   var sortMode = load("sf_sort", "new");
   var seeds = load("sf_seeds", []);
   var rec = load("sf_rec", { at: 0, items: [] });
@@ -1381,6 +1409,8 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     live.filter(function (t) { return boost[t.toLowerCase()]; }).sort(function (a, b) { return boost[b.toLowerCase()] - boost[a.toLowerCase()]; }).slice(0, 2).forEach(take);
     var rest = live.map(function (t, i) { return [t, i]; }).sort(function (a, b) { return (tags[b[0].toLowerCase()] || 0) - (tags[a[0].toLowerCase()] || 0) || a[1] - b[1]; }).map(function (x) { return x[0]; }).filter(function (t) { return !used[t.toLowerCase()]; });
     for (var i = 0; i < rest.length && out.length < PER_REFRESH; i++) take(rest[(i + disc.n * 6) % rest.length]);
+    var st = searchTopics().filter(function (q) { var d = dq[q.toLowerCase()]; return !(d && d.rest > now) && !used[q.toLowerCase()]; }), cap = Math.floor(out.length * 0.2);
+    for (var j = 0; j < cap && st.length; j++) { var q = st[(j + disc.n) % st.length]; st.splice((j + disc.n) % st.length, 1); out[out.length - 1 - j] = q; used[q.toLowerCase()] = 1; }
     return out;
   }
   function refreshDiscover() {
@@ -1472,6 +1502,168 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     }
     rows.push({ label: "Mute " + v.channel, checked: false, pick: function () { mutedCh[v.chId] = v.channel; save("sf_mutedCh", mutedCh); render(); } });
     openSheet("This video", rows, null);
+  }
+
+
+  // ---------- card notes: a topic and a format on each video ----------
+  var NOTE_SPEC = [[/nascar|cup series|daytona 500|talladega|xfinity series/i, "NASCAR", "Cars"], [/formula ?1|\bf1\b|grand prix/i, "Formula 1", "Cars"], [/indycar|indy 500/i, "IndyCar", "Cars"], [/\bimsa\b|le mans|\bwec\b|sports car/i, "Sports cars", "Cars"], [/motogp|superbike|motocross/i, "Motorcycles", "Cars"],
+    [/\bnfl\b/i, "NFL", "Sports"], [/\bnba\b/i, "NBA", "Sports"], [/\bmlb\b/i, "MLB", "Sports"], [/\bnhl\b/i, "NHL", "Sports"], [/\bufc\b/i, "UFC", "Martial arts"], [/minecraft/i, "Minecraft", "Gaming"], [/pok[eé]mon/i, "Pokémon", "Gaming"],
+    [/tiny desk/i, "Tiny Desk", "Music"], [/spacex|starship|\bnasa\b/i, "Space", "Space"], [/arduino|esp32|raspberry pi/i, "Microcontrollers", "Electronics"], [/\bf-?150\b|\bmustang\b|\bcorvette\b/i, "American cars", "Cars"], [/lego/i, "LEGO", "Crafts"], [/sourdough|baking|recipe/i, "Cooking", "Crafts"]];
+  var noteMemo = {};
+  function fmtOf(v) {
+    var t = (v.title || "") + " " + (v.channel || "");
+    if (v.live === "live") return "Live stream";
+    if (/tiny desk|live session|live performance|live at |live from|concert|\(live\)|\blive\b.*(set|session)/i.test(t)) return "Live set";
+    if (v.cat === "10") return /official (music )?video|music video|\bmv\b|official video|lyric video/i.test(t) ? "Music video" : "Music";
+    if (/podcast|\bep\.? ?\d+|episode \d+|full episode|interview|conversation with|\bw\/ /i.test(t)) return "Podcast";
+    if (/how to|tutorial|guide|\bdiy\b|beginner|learn /i.test(t)) return "Tutorial";
+    if (/review|unboxing|hands.?on|\bvs\.? |comparison|tested/i.test(t)) return "Review";
+    if (/explained|how .{2,30} works|documentary|history of/i.test(t)) return "Explainer";
+    if (/trailer|teaser/i.test(t)) return "Trailer";
+    if (/highlights|recap|best moments/i.test(t)) return "Highlights";
+    if (v.dur && v.dur <= 60) return "Short";
+    if (v.dur && v.dur > 5400) return "Long watch";
+    return "";
+  }
+  function noteTopic(v) {
+    var t = (v.title || "") + " " + (v.channel || ""), i;
+    for (i = 0; i < NOTE_SPEC.length; i++) if (NOTE_SPEC[i][0].test(t)) return { label: NOTE_SPEC[i][1], idx: topicIdx(NOTE_SPEC[i][2]) };
+    var ti = norm(v.title), ci = norm(v.channel), best = -1, bs = 2;
+    TOPICS.forEach(function (tp, k) {
+      var sc = 0; tp[3].forEach(function (kw) { sc += countIn(ti, kw, 1) * 3 + countIn(ci, kw, 1) * 2; });
+      if (sc > bs) { bs = sc; best = k; }
+    });
+    if (best >= 0) return { label: TOPICS[best][0], idx: best };
+    var th = v.chId ? themeOf(v.chId) : null;
+    if (th && th.ids.length) return { label: TOPICS[th.ids[0]][0], idx: th.ids[0] };
+    if (v.topic) { var k2 = topicIdx(v.topic); return { label: v.topic.replace(/^./, function (c) { return c.toUpperCase(); }), idx: k2 }; }
+    return null;
+  }
+  function noteEl(v) {
+    var m = noteMemo[v.id];
+    if (!m) { m = noteMemo[v.id] = { t: noteTopic(v), f: fmtOf(v) }; }
+    if (!m.t && !m.f) return null;
+    var n = el("div", "note" + (m.t && m.t.idx >= 0 ? "" : " plain"));
+    if (m.t && m.t.idx >= 0) {
+      n.style.setProperty("--nb", FAMS[TOPICS[m.t.idx][1]][1]);
+      var ic = TOPICS[m.t.idx][2][0]; ensureSym(ic);
+      n.insertAdjacentHTML("beforeend", '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ic-' + ic + '"/></svg>');
+    }
+    n.appendChild(el("span", null, [m.t && m.t.label, m.f].filter(Boolean).join(" · ")));
+    return n;
+  }
+
+  // ---------- search ----------
+  var sq = load("sf_sq", { q: "", o: "relevance", d: "any", l: "any", t: "video" });
+  var sres = { key: "", items: [], tok: "", pages: 0, at: 0 };
+  var S_ORD = [["relevance", "Relevance"], ["date", "Newest"], ["viewCount", "Most views"], ["rating", "Top rated"], ["title", "Title A to Z"]];
+  var S_DATE = [["any", "Any time"], ["1", "Today"], ["7", "This week"], ["30", "This month"], ["365", "This year"]];
+  var S_LEN = [["any", "Any length"], ["short", "Under 4 min"], ["medium", "4 to 20 min"], ["long", "Over 20 min"]];
+  var S_TYPE = [["video", "Videos"], ["live", "Live now"]];
+  function sKey() { return [sq.q.trim().toLowerCase(), sq.o, sq.d, sq.l, sq.t].join("|"); }
+  function lab(list, v) { for (var i = 0; i < list.length; i++) if (list[i][0] === v) return list[i][1]; return v; }
+  function searchHist() { return load("sf_sh", []); }
+  function noteSearch(q) {
+    var sh = searchHist(), k = q.toLowerCase(), hit = null;
+    sh.forEach(function (e) { if (e.q.toLowerCase() === k) hit = e; });
+    if (hit) { hit.n = (hit.n || 1) + 1; hit.at = Date.now(); hit.o = sq.o; hit.d = sq.d; hit.l = sq.l; hit.t = sq.t; }
+    else sh.unshift({ q: q, at: Date.now(), n: 1, pin: false, o: sq.o, d: sq.d, l: sq.l, t: sq.t });
+    sh.sort(function (a, b) { return b.at - a.at; });
+    var loose = 0; sh = sh.filter(function (e) { if (e.pin) return true; loose++; return loose <= 20; });
+    save("sf_sh", sh);
+  }
+  function searchTopics() {
+    if (cfg.srchInf === false) return [];
+    return searchHist().filter(function (e) { return e.pin || (e.n || 1) >= 2; }).map(function (e) { return e.q; });
+  }
+  function runSearch(more, force) {
+    if (busy) return;
+    var q = sq.q.trim();
+    if (!q) { setStatus("Type something to search.", true); return; }
+    if (!cfg.key) { show("settings"); setStatus("Add an API key to start.", true); return; }
+    var key = sKey(), cache = load("sf_sc", {}), ent = cache[key];
+    if (!more && ent && !force) { sres = ent; noteSearch(q); render(); return; }
+    if (more && (!sres.tok || sres.pages >= 4)) return;
+    if (quotaLeft() < 120) { setStatus("Not enough of today's free quota left for a search. It resets at midnight Pacific time.", true); return; }
+    start();
+    var base = more ? sres : { key: key, items: [], tok: "", pages: 0, at: 0 };
+    var params = { part: "snippet", type: "video", q: q, maxResults: 25, order: sq.o, relevanceLanguage: (navigator.language || "en").slice(0, 2), safeSearch: "moderate" };
+    if (sq.d !== "any") params.publishedAfter = new Date(Date.now() - (+sq.d) * 86400000).toISOString();
+    if (sq.l !== "any") params.videoDuration = sq.l;
+    if (sq.t === "live") params.eventType = "live";
+    if (more) params.pageToken = base.tok;
+    setStatus("Searching for " + q);
+    var fresh = [], have = {};
+    base.items.forEach(function (v) { have[v.id] = 1; });
+    api("search", params, null, 100).then(function (j) {
+      base.tok = j.nextPageToken || ""; base.pages++; base.at = Date.now(); base.key = key;
+      (j.items || []).forEach(function (it) {
+        var id = it.id && it.id.videoId, sn = it.snippet || {};
+        if (!id || have[id]) return; have[id] = 1;
+        var t = sn.thumbnails || {};
+        fresh.push({ id: id, title: decodeEntities(sn.title), channel: decodeEntities(sn.channelTitle), chId: sn.channelId, at: sn.publishedAt, topic: "", thumb: (t.medium || t.high || t.default || {}).url || ("https://i.ytimg.com/vi/" + id + "/mqdefault.jpg") });
+      });
+      return addDetails(fresh).catch(function () {});
+    }).then(function () {
+      base.items = base.items.concat(fresh);
+      sres = base;
+      var c = load("sf_sc", {}); c[key] = base;
+      var ks = Object.keys(c).sort(function (a, b) { return c[b].at - c[a].at; });
+      ks.slice(20).forEach(function (k) { delete c[k]; });
+      save("sf_sc", c);
+      if (!more) noteSearch(q);
+      settleSkips();
+      render();
+    }).catch(function (e) { setStatus(explain(e), true); }).then(finish);
+  }
+  function srchPick(title, list, field) {
+    openSheet(title, list.map(function (o) { return { label: o[1], checked: sq[field] === o[0], pick: function () { sq[field] = o[0]; save("sf_sq", sq); renderSrchPanel(); } }; }), null);
+  }
+  function renderSrchPanel() {
+    var box = $("srchOpts"); box.textContent = "";
+    [["Sort", S_ORD, "o", "Sort by"], ["Date", S_DATE, "d", "Uploaded"], ["Length", S_LEN, "l", "Length"], ["Type", S_TYPE, "t", "Type"]].forEach(function (g) {
+      var b = el("button", "chip", g[0] + ": " + lab(g[1], sq[g[2]]) + " ▾"); b.type = "button";
+      b.setAttribute("aria-pressed", String(g[2] === "o" ? sq.o !== "relevance" : sq[g[2]] !== (g[2] === "t" ? "video" : "any")));
+      b.addEventListener("click", function () { srchPick(g[3], g[1], g[2]); });
+      box.appendChild(b);
+    });
+    var sv = $("srchSaved"); sv.textContent = "";
+    searchHist().forEach(function (e) {
+      var c = el("span", "sv"), b = el("button", "sv-q", e.q); b.type = "button";
+      b.addEventListener("click", function () { sq = { q: e.q, o: e.o || "relevance", d: e.d || "any", l: e.l || "any", t: e.t || "video" }; save("sf_sq", sq); $("srchQ").value = e.q; runSearch(false); });
+      var p = el("button", "sv-p", e.pin ? "★" : "☆"); p.type = "button"; p.setAttribute("aria-pressed", String(!!e.pin)); p.setAttribute("aria-label", e.pin ? "Unpin " + e.q : "Pin " + e.q);
+      p.addEventListener("click", function () { var h = searchHist(); h.forEach(function (x) { if (x.q === e.q) x.pin = !x.pin; }); save("sf_sh", h); renderSrchPanel(); });
+      var x = el("button", "sv-x", "×"); x.type = "button"; x.setAttribute("aria-label", "Forget " + e.q);
+      x.addEventListener("click", function () { save("sf_sh", searchHist().filter(function (y) { return y.q !== e.q; })); renderSrchPanel(); });
+      c.appendChild(b); c.appendChild(p); c.appendChild(x); sv.appendChild(c);
+    });
+    var key = sKey(), cached = !!load("sf_sc", {})[key];
+    $("srchCost").textContent = !sq.q.trim() ? "A search costs 100 of your 10,000 daily units. Saved searches reopen free." : cached ? "Saved from earlier, so this reopens free." : "A new search costs 100 units. About " + Math.floor(quotaLeft() / 100) + " left today.";
+    $("srchGo").textContent = cached ? "Open" : "Search";
+  }
+  function renderSearch(box) {
+    $("srchQ").value = sq.q;
+    renderSrchPanel();
+    var mw = mutedWordList(), subIds = {}; subs.forEach(function (x) { subIds[x.id] = 1; });
+    var ok = sres.key === sKey();
+    var items = ok ? sres.items.filter(function (v) { return passes(v, false, mw, subIds); }) : [];
+    $("srchMoreBox").hidden = !(ok && sres.tok && sres.pages < 4 && sres.items.length);
+    $("srchMore").textContent = "Load more (100 units) · page " + (sres.pages + 1) + " of 4";
+    if (!ok) { setStatus(sq.q.trim() ? "" : "Search YouTube. Anything you tap ✗ on stays hidden everywhere."); return; }
+    setStatus(items.length + " results for “" + sq.q.trim() + "”. " + (sres.pages >= 4 ? "That is the last page." : "Updated " + ago(sres.at) + "."));
+    if (!items.length) { box.appendChild(el("p", "empty", "Nothing to show. Try other words or filters.")); return; }
+    view = { items: items, pos: 0, ranked: true, counts: {}, day: null, list: null, marker: null, win: null };
+    if (LAND.matches) winInit(); else appendMore();
+  }
+
+  // ---------- Jukebox seeds: music already loaded, free ----------
+  function seedJukebox() {
+    var got = {}, out = [];
+    [feed.items, disc.items, sres.items].forEach(function (a) { (a || []).forEach(function (v) { if (v.cat === "10" && !got[v.id]) { got[v.id] = 1; out.push({ id: v.id, title: v.title, channel: v.channel, chId: v.chId, at: v.at }); } }); });
+    var old = load("sf_jb", { seeds: [] }).seeds, m = {};
+    out.forEach(function (x) { m[x.id] = 1; });
+    old.forEach(function (x) { if (!m[x.id]) { m[x.id] = 1; out.push(x); } });
+    save("sf_jb", { seeds: out.slice(0, 200) });
   }
 
   // ---------- similar channels ----------
@@ -1648,7 +1840,8 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
 
   function refresh(opts) {
-    if (tab === "chan" && !(opts && (opts.reimport || opts.token))) { findChannels(); return; } if (tab === "disc" && !(opts && (opts.reimport || opts.token))) refreshDiscover(); else refreshSubs(opts); }
+    if (tab === "srch") { runSearch(false, true); return; }
+    if (tab === "disc" && discFind && !(opts && (opts.reimport || opts.token))) { findChannels(); return; } if (tab === "disc" && !(opts && (opts.reimport || opts.token))) refreshDiscover(); else refreshSubs(opts); }
 
   function googleImport() {
     if (!cfg.clientId) { setStatus("Paste an OAuth client ID first, then save.", true); return; }
@@ -1761,6 +1954,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
 
     var meta = el("div", "meta");
     meta.appendChild(el("h3", "title", v.title));
+    var nt = noteEl(v); if (nt) meta.appendChild(nt);
     meta.appendChild(el("div", "sub", v.channel + " · " + ago(new Date(v.at).getTime()) + (v.views != null ? " · " + fmtCount(v.views) + " views" : "") + (v.topic ? " · " + v.topic : "")));
     a.appendChild(meta);
 
@@ -1807,19 +2001,23 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var box = $("feed");
     box.textContent = "";
     view = null;
-    var isDisc = tab === "disc", isChan = tab === "chan", isFol = tab === "follow";
+    var isDisc = tab === "disc", isChan = isDisc && discFind, isSrch = tab === "srch", isFol = tab === "follow";
+    seedJukebox();
     $("tabSubs").setAttribute("aria-selected", String(tab === "subs"));
     $("tabDisc").setAttribute("aria-selected", String(isDisc));
     $("tabFollow").setAttribute("aria-selected", String(isFol));
-    $("tabChan").setAttribute("aria-selected", String(isChan));
+    $("tabSrch").setAttribute("aria-selected", String(isSrch));
+    $("discTog").hidden = !isDisc; $("dtVid").setAttribute("aria-pressed", String(!isChan)); $("dtChan").setAttribute("aria-pressed", String(isChan));
+    $("srchPanel").hidden = !isSrch; $("srchMoreBox").hidden = true;
     var inChannel = isFol && !!fol.id;
-    $("tools").hidden = isChan || inChannel;
+    $("tools").hidden = isChan || isSrch || inChannel;
     $("chHead").hidden = !inChannel;
     $("chanPanel").hidden = !isChan;
     $("search").placeholder = "Filter";
     $("hideSeenBtn").hidden = false;
     renderLater(false);
     if (isChan) { renderChannels(box); return; }
+    if (isSrch) { renderSearch(box); return; }
     if (isFol) {
       if (inChannel) { setStatus(""); renderChannelPage(box); return; }
       loadInfo().then(function () { if (tab === "follow" && !fol.id) renderFollowLazy(); });
@@ -1834,7 +2032,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     subs.forEach(function (s) { subIds[s.id] = 1; });
     var src = isDisc ? disc : feed;
     var topicSet = {};
-    topicList().forEach(function (t) { topicSet[t.toLowerCase()] = 1; });
+    topicList().concat(searchTopics()).forEach(function (t) { topicSet[t.toLowerCase()] = 1; });
     var items = src.items.filter(function (v) {
       if (!passes(v, isDisc, mw, subIds)) return false;
       if (isDisc && !topicSet[(v.topic || "").toLowerCase()]) return false;
@@ -1845,7 +2043,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
 
     $("refreshBtn").classList.toggle("off", isDisc && refreshesLeft() === 0);
     if (isDisc) discBar(box);
-    if (isDisc && !topicList().length) {
+    if (isDisc && !topicList().length && !searchTopics().length) {
       setStatus("");
       box.appendChild(el("p", "empty", "Add a few topics in settings, such as astronomy or synth music, and Discover will find recent videos on them."));
       return;
@@ -1904,7 +2102,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     $("mutedWords").value = cfg.mutedWords || "";
     $("hideShorts").checked = cfg.hideShorts !== false;
     $("openInApp").checked = !!cfg.openInApp;
-    $("sway").checked = cfg.sway !== false;
+    $("sway").checked = cfg.sway !== false; $("srchInf").checked = cfg.srchInf !== false;
     $("lightMode").checked = !!light.on;
     $("versionLine").textContent = "Version " + VERSION;
     $("versionTop").textContent = "Version " + VERSION;
@@ -1937,7 +2135,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       blockCats: blocked,
       hideShorts: $("hideShorts").checked,
       openInApp: $("openInApp").checked,
-      sway: $("sway").checked,
+      sway: $("sway").checked, srchInf: $("srchInf").checked,
       v2: 1
     };
     save("sf_cfg", cfg);
@@ -1959,7 +2157,13 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   $("fullBtn").addEventListener("click", function () { readSettings(); tab = "subs"; save("sf_tab", tab); refreshSubs({ full: true }); });
   $("tabSubs").addEventListener("click", function () { if (tab === "subs") toTop(); else setTab("subs"); });
   $("tabDisc").addEventListener("click", function () { if (tab === "disc") toTop(); else setTab("disc"); });
-  $("tabChan").addEventListener("click", function () { if (tab === "chan") toTop(); else setTab("chan"); });
+  $("tabSrch").addEventListener("click", function () { if (tab === "srch") toTop(); else setTab("srch"); });
+  $("dtVid").addEventListener("click", function () { discFind = false; render(); });
+  $("dtChan").addEventListener("click", function () { discFind = true; render(); });
+  $("srchForm").addEventListener("submit", function (e) { e.preventDefault(); sq.q = $("srchQ").value; save("sf_sq", sq); $("srchQ").blur(); runSearch(false); });
+  $("srchQ").addEventListener("input", function () { sq.q = $("srchQ").value; save("sf_sq", sq); renderSrchPanel(); });
+  $("srchMore").addEventListener("click", function () { runSearch(true); });
+  $("srchClear").addEventListener("click", function () { save("sf_sh", []); save("sf_sc", {}); toast("Remembered searches cleared.", null, null); });
   $("tabFollow").addEventListener("click", function () { if (tab === "follow") { if (fol.id) closeChannelAll(); else toTop(); } else setTab("follow"); });
   function closeChannelAll() { fol = { id: null, mode: "videos", pl: null }; render(); window.scrollTo(0, 0); }
   document.querySelector(".bar").addEventListener("click", function (e) { if (!e.target.closest("button")) toTop(); });
@@ -1987,7 +2191,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   });
   $("clearMutedBtn").addEventListener("click", function () { mutedCh = {}; save("sf_mutedCh", mutedCh); fillSettings(); setStatus("All channels unmuted."); });
   $("forgetBtn").addEventListener("click", function () {
-    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_later", "sf_chk", "sf_chinfo", "sf_folSort", "sf_chSort", "sf_chHide", "sf_plSort", "sf_chTheme", "sf_topicsSeeded", "sf_dref", "sf_dq", "sf_dseen", "sf_dboost", "sf_topicAt", "sf_light", "sf_crash"].forEach(drop);
+    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_later", "sf_chk", "sf_chinfo", "sf_folSort", "sf_chSort", "sf_chHide", "sf_plSort", "sf_chTheme", "sf_topicsSeeded", "sf_dref", "sf_dq", "sf_dseen", "sf_dboost", "sf_topicAt", "sf_light", "sf_crash", "sf_sq", "sf_sc", "sf_sh", "sf_jb"].forEach(drop);
     chk = {};
     cfg = Object.assign({}, DEFAULT_CFG, { v2: 1 });
     subs = []; feed = { at: 0, items: [] }; disc = { at: 0, n: 0, items: [] };
@@ -2072,7 +2276,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 17;
+  var VERSION = 18;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -2235,6 +2439,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
 
   // ---------- diagnostics (no key, token or watch history) ----------
   function clean(t) { return String(t).replace(/AIza[\w-]+/g, "[key]").replace(/ya29\.[\w.-]+/g, "[token]").replace(/([?&](?:key|access_token)=)[^&\s"]+/g, "$1[x]"); }
+  if (load("sf_testhook", false)) window.__sf = { noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
   function diagText() {
     var sz = {}, tot = 0;
     try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i), n = (localStorage.getItem(k) || "").length; if (k.indexOf("sf_") === 0) { sz[k.slice(3)] = n; tot += n; } } } catch (e) {}
