@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-vvUMsy7AWBuMtbjeCuG8cEVCHhH3Q5uzulTIfn45da0=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-htuLxCeHKXKivDvKHQWz7+R8i6UYCD+nY2m1VAAgPuY=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -458,6 +458,7 @@ body.light #feed { scroll-snap-type: none !important; }
     <div class="btn-row">
       <button class="btn ghost" id="fullBtn" type="button">Check every channel now</button>
       <button class="btn ghost" id="clearSeenBtn" type="button">Reset watched marks</button>
+      <button class="btn ghost" id="restoreUnfBtn" type="button">Bring back unfollowed channels</button>
       <button class="btn ghost" id="forgetBtn" type="button">Forget everything on this device</button>
     </div>
     <h3>Diagnostics</h3>
@@ -489,7 +490,8 @@ body.light #feed { scroll-snap-type: none !important; }
   var DEFAULT_CFG = { key: "", channel: "", clientId: "", hideShorts: true, openInApp: false, sway: true, topics: "", mutedWords: "", blockCats: ["25"], minViews: 25000, refreshCap: 4 };
   var cfg = Object.assign({}, DEFAULT_CFG, load("sf_cfg", {})); delete cfg.tilt;
   if (!cfg.v2) { cfg.openInApp = false; cfg.v2 = 1; save("sf_cfg", cfg); }
-  var subs = load("sf_subs", []);
+  var subs = load("sf_subs", []), unf = load("sf_unf", {}), chTags = load("sf_chTags", {});
+  subs = subs.filter(function (x) { return !unf[x.id]; });
   var feed = load("sf_feed", { at: 0, items: [] });
   var disc = load("sf_disc", { at: 0, n: 0, items: [] });
   var seen = load("sf_seen", {});
@@ -934,6 +936,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   "the and for with you your our are this that from have has was were will not but all can out one new how what why when who get got just about like more most best top real into over then than them they their its it's his her him she him i'm don't video videos channel official subscribe subscribers welcome here there some very make made making using use used also back first last part full episode watch live review reviews".split(" ").forEach(function (w) { STOPW[w] = 1; });
   var kwMemo = {};
   function chKeywords(id) {
+    if (chTags[id] && chTags[id].length) return chTags[id];
     var inf = chInfo[id] || {}, sig = (inf.at || 0) + ":" + feed.items.length + ":" + (chTheme[id] || ""), m = kwMemo[id];
     if (m && m.sig === sig) return m.k;
     var out = [], used = {};
@@ -1198,6 +1201,23 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       } };
     }), { label: "Hide watched", on: chHide, pick: function () { chHide = !chHide; save("sf_chHide", chHide); render(); } });
   }
+  function editTags() {
+    var id = fol.id, cur = chKeywords(id).join(", ");
+    var r = window.prompt("Tags on this card, separated by commas (up to 5). Clear the box to go back to automatic tags.", cur);
+    if (r === null) return;
+    var list = r.split(",").map(function (x) { return x.trim().toLowerCase(); }).filter(function (x, i, a) { return x && a.indexOf(x) === i; }).slice(0, 5);
+    if (list.length) chTags[id] = list; else delete chTags[id];
+    save("sf_chTags", chTags); kwMemo = {}; render();
+  }
+  function unfollowHere() {
+    var id = fol.id, title = subTitle(id);
+    if (!window.confirm("Unfollow " + title + " in North Star? It disappears from Subs and Following here. It stays subscribed on YouTube (that needs the YouTube app).")) return;
+    var entry = null; subs.forEach(function (x) { if (x.id === id) entry = x; });
+    unf[id] = entry || { id: id, title: title }; save("sf_unf", unf);
+    subs = subs.filter(function (x) { return x.id !== id; }); save("sf_subs", subs);
+    fol = { id: null, mode: "videos", pl: null }; render(); window.scrollTo(0, 0);
+    toast("Unfollowed " + title + ".", "Undo", function () { var e = unf[id]; delete unf[id]; save("sf_unf", unf); subs.push(e); save("sf_subs", subs); render(); });
+  }
   function channelMenu() {
     var st = currentStore(), rows = [];
     if (st && st.items.length) {
@@ -1212,6 +1232,8 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     }
     rows.push({ label: "Open on YouTube", checked: false, pick: function () { window.open("https://www.youtube.com/channel/" + encodeURIComponent(fol.id), "_blank", "noopener"); } });
     rows.push({ label: "Card theme…", checked: false, pick: themeSheet });
+    rows.push({ label: "Edit card tags…", checked: false, pick: editTags });
+    rows.push({ label: "Unfollow in this app…", checked: false, pick: unfollowHere });
     openSheet("This channel", rows, null);
   }
 
@@ -1314,7 +1336,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   function mutedWordList() { return (cfg.mutedWords || "").toLowerCase().split(",").map(function (s) { return s.trim(); }).filter(Boolean); }
   function topicList() { return (cfg.topics || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean); }
   function passes(v, forDiscover, mw, subIds) {
-    if (hidden[v.id] || mutedCh[v.chId]) return false;
+    if (hidden[v.id] || mutedCh[v.chId] || unf[v.sid || v.chId]) return false;
     var hay = (v.title + " " + v.channel).toLowerCase();
     for (var i = 0; i < mw.length; i++) if (hay.indexOf(mw[i]) >= 0) return false;
     if (forDiscover) {
@@ -1359,7 +1381,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var needSubs = opts.reimport || !subs.length;
     var p = needSubs ? importSubs(opts.token).then(function (list) {
       if (!list.length) throw new Error("No subscriptions found on that account.");
-      subs = list; save("sf_subs", subs);
+      subs = list.filter(function (x) { return !unf[x.id]; }); save("sf_subs", subs);
     }) : Promise.resolve();
 
     var now = Date.now(), mode = cfg.hideShorts ? "UULF" : "UU", todo = [], kept = [];
@@ -2204,7 +2226,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   });
   $("clearMutedBtn").addEventListener("click", function () { mutedCh = {}; save("sf_mutedCh", mutedCh); fillSettings(); setStatus("All channels unmuted."); });
   $("forgetBtn").addEventListener("click", function () {
-    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_later", "sf_chk", "sf_chinfo", "sf_folSort", "sf_chSort", "sf_chHide", "sf_plSort", "sf_chTheme", "sf_topicsSeeded", "sf_dref", "sf_dq", "sf_dseen", "sf_dboost", "sf_topicAt", "sf_light", "sf_crash", "sf_sq", "sf_sc", "sf_sh", "sf_jb", "sf_lastcrash"].forEach(drop);
+    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_later", "sf_chk", "sf_chinfo", "sf_folSort", "sf_chSort", "sf_chHide", "sf_plSort", "sf_chTheme", "sf_topicsSeeded", "sf_dref", "sf_dq", "sf_dseen", "sf_dboost", "sf_topicAt", "sf_light", "sf_crash", "sf_sq", "sf_sc", "sf_sh", "sf_jb", "sf_lastcrash", "sf_unf", "sf_chTags"].forEach(drop);
     chk = {};
     cfg = Object.assign({}, DEFAULT_CFG, { v2: 1 });
     subs = []; feed = { at: 0, items: [] }; disc = { at: 0, n: 0, items: [] };
@@ -2289,7 +2311,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 20;
+  var VERSION = 21;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -2491,6 +2513,10 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var t = diagText(), box = $("diagBox"); box.value = t; box.hidden = false;
     function done(ok) { toast(ok ? "Diagnostics copied. Paste them in chat." : "Select the text below and copy it."); if (!ok) { box.focus(); box.select(); } }
     try { navigator.clipboard.writeText(t).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
+  });
+  $("restoreUnfBtn").addEventListener("click", function () {
+    var ks = Object.keys(unf); if (!ks.length) { toast("No unfollowed channels.", null, null); return; }
+    ks.forEach(function (k) { subs.push(unf[k]); }); unf = {}; save("sf_unf", unf); save("sf_subs", subs); toast(ks.length + " channels are back.", null, null);
   });
   $("crashBtn").addEventListener("click", function () {
     var t = "CRASH REPORT\n" + diagText(), box = $("diagBox"); box.value = t; box.hidden = false;
