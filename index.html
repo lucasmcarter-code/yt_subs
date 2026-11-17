@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-dj6QjUfXBZThBXrl+HJuMf/DaPCU6i6oFwggAil8TQc=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-TMaGIqCwfd6ROKcaAdvWf8YoX1/FzZLAiPNIHEu8Idk=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -801,9 +801,9 @@ body.light .jk-turn { animation: none; }
     if (f) {
       crashNote = "yes, while scrolling " + f.tab + " in " + f.mode + " at " + new Date(f.t).toLocaleString();
       save("sf_lastcrash", f);
-      if (!light.on) { light = { on: true, why: "crash while scrolling " + f.tab + " in " + f.mode }; save("sf_light", light); }
+      if (!light.on || light.auto) { light = { on: true, auto: 1, why: "crash while scrolling " + f.tab + " in " + f.mode }; save("sf_light", light); }
       drop("sf_crash");
-    }
+    } else if (light.on && light.auto) { light = { on: false, why: "" }; save("sf_light", light); }
     document.body.classList.toggle("light", !!light.on);
   })();
   var PAGE = 30, view = null;
@@ -1766,7 +1766,18 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var mw = mutedWordList(), si = {}, got = {}, out = [];
     subs.forEach(function (x) { si[x.id] = 1; });
     jb.items.concat(jb.seeds.filter(function (v) { return !si[v.chId]; })).forEach(function (v) { if (got[v.id]) return; got[v.id] = 1; if (passes(v, false, mw, si)) out.push(v); });
-    return out.slice(0, 120);
+    return jkSpread(out).slice(0, 120);
+  }
+  // One artist at most once per 6 slots, so no band floods the first page.
+  function jkSpread(list) {
+    var rest = list.slice(), out = [], recent = [];
+    while (rest.length) {
+      var at = -1;
+      for (var i = 0; i < rest.length; i++) { if (recent.indexOf(artistOf(rest[i].channel).toLowerCase()) < 0) { at = i; break; } }
+      if (at < 0) { out = out.concat(rest); break; }
+      var v = rest.splice(at, 1)[0]; out.push(v); recent.push(artistOf(v.channel).toLowerCase()); if (recent.length > 5) recent.shift();
+    }
+    return out;
   }
   function jkThumb(id) { return "https://i.ytimg.com/vi/" + encodeURIComponent(id) + "/mqdefault.jpg"; }
   function jkMeta(v) { return [fmtOf(v) || "Music", v.channel, v.dur ? fmtDur(v.dur) : ""].filter(Boolean).join(" · "); }
@@ -1875,14 +1886,15 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   function jukeQueries() {
     var pool = jukePool(), n = jb.n || 0;
     if (!pool.length) return ["new bands live session", "Tiny Desk concert"];
-    var t1 = pool[n % pool.length], t2 = pool[(n + 1) % pool.length];
-    var g1 = new RegExp(GENRE_RE.source, "i").test(t1);
-    return [g1 ? t1 + " live session new artists" : "bands like " + t1, "Tiny Desk " + t2];
+    var pick = function (k) { return pool[(n * 3 + k * 7) % pool.length]; };
+    var t1 = pick(0), t2 = pick(1), t3 = pick(2);
+    var isG = function (t) { return new RegExp(GENRE_RE.source, "i").test(t); };
+    return [isG(t1) ? t1 + " new artists live session" : "bands like " + t1, isG(t2) ? t2 + " underrated bands" : "artists similar to " + t2, "Tiny Desk " + t3];
   }
   function jukeRefill() {
     if (busy) return;
     if (!cfg.key) { show("settings"); setStatus("Add an API key to start.", true); return; }
-    if (quotaLeft() < 240) { toast("Not enough of today's free quota left for a refill.", null, null); return; }
+    if (quotaLeft() < 340) { toast("Not enough of today's free quota left for a refill.", null, null); return; }
     var qs = jukeQueries(); jb.n = (jb.n || 0) + 1;
     var favs = favTerms().map(function (x) { return x.toLowerCase(); });
     start();
@@ -1901,12 +1913,12 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
         });
       });
     }, Promise.resolve()).then(function () { return addDetails(fresh).catch(function () {}); }).then(function () {
-      var mw = mutedWordList(), known = 0;
+      var mw = mutedWordList(), known = 0, cnt = {};
       var keep = fresh.filter(function (v) { return v.det && v.dur >= 120 && (!v.live || v.live === "none") && passes(v, false, mw, si); }).filter(function (v) {
         var a = artistOf(v.channel).toLowerCase(), isFav = favs.some(function (f) { return a.indexOf(f) >= 0 || (jbl.t[a] || 0) > 1; });
         if (isFav) { known++; return known <= 3; }
         return true;
-      }).map(jbItem);
+      }).filter(function (v) { var a = artistOf(v.channel).toLowerCase(); cnt[a] = (cnt[a] || 0) + 1; return cnt[a] <= 2; }).map(jbItem);
       jb.items = keep.concat(jb.items).slice(0, 150); save("sf_jb", jb);
       jkSel = 0; jkPage = 0;
       toast(keep.length ? "Added " + keep.length + " to the jukebox." : "Nothing new this time.", null, null);
@@ -2527,7 +2539,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 24;
+  var VERSION = 25;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
