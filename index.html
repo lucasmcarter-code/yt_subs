@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ppVs8icQ239AhwQd9mf11FrtkpzliRYxv56dSTRoLYA=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-enOQZx0N9UWVMTlBOgB78TNlePZujR2cbI9ZrKOatfU=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -406,6 +406,44 @@ body.shOn .sh-wrap { z-index: 60; }
 body.shOn { overflow: hidden; }
 body.shOn .toast { z-index: 40; bottom: auto; top: calc(env(safe-area-inset-top) + 64px); }
 #tabSrch[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+.pv { position: fixed; inset: 0; z-index: 70; background: rgba(0, 0, 0, 0.78); display: grid; place-items: center; padding: 24px; }
+.pv-box { width: min(1180px, 100%, calc((100vh - 190px) * 16 / 9)); }
+.pv-frame { position: relative; aspect-ratio: 16 / 9; background: #000; border-radius: 10px; overflow: hidden; box-shadow: 0 30px 80px -20px #000; }
+.pv-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.pv-row { display: flex; align-items: flex-start; gap: 16px; margin-top: 14px; color: #fff; }
+.pv-meta { flex: 1; min-width: 0; }
+.pv-meta b { display: block; font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
+.pv-meta span { display: block; font-size: 14px; opacity: .75; margin-top: 3px; }
+.pv-acts { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+.pv-acts button, .pv-acts a, .pv-next button { height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,.28); background: rgba(255,255,255,.08); color: #fff; font-weight: 600; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; }
+.pv-acts button:hover, .pv-acts a:hover, .pv-next button:hover { background: rgba(255,255,255,.18); }
+.pv-acts button.on { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.pv-next { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: rgba(255,255,255,.1); color: #fff; font-size: 14px; }
+.pv-next span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body.pvOn { overflow: hidden; }
+body.pvOn .toast { z-index: 80; }
+@media (min-width: 900px) and (min-height: 521px) {
+  body { padding-bottom: 40px; }
+  .wrap { max-width: none; padding-left: 248px; padding-right: 32px; }
+  .brand { position: fixed; left: 22px; top: calc(env(safe-area-inset-top) + 16px); z-index: 8; flex: none; font-size: 30px; }
+  .bar-row { justify-content: flex-end; }
+  header.bar { margin-left: 216px; z-index: 8; }
+  header.bar .wrap { padding-left: 32px; }
+  .tabs { left: 0; right: auto; top: 0; bottom: 0; width: 216px; max-width: none; margin: 0; z-index: 7; flex-direction: column; justify-content: flex-start; gap: 6px; padding: 84px 14px 20px; border-radius: 0; border-right: 1px solid var(--line); box-shadow: none; }
+  .tab { flex: none; flex-direction: row; justify-content: flex-start; gap: 14px; height: 48px; padding: 0 16px; font-size: 15px; border-radius: 14px; }
+  .tab svg { width: 20px; height: 20px; }
+  .list { grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 38px 28px; }
+  .chans { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+  .f-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); column-gap: 22px; }
+  .sh-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 16px; padding-bottom: 40px; }
+  .later-row { margin: 0; padding-left: 4px; padding-right: 4px; }
+  .toast { left: 248px; right: auto; max-width: 520px; bottom: 24px; }
+  .top-btn { bottom: 28px; right: 28px; }
+  .vid, .f-card, .later-card, .sh-card, .stk { cursor: pointer; }
+  .vid:hover { z-index: 1; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 26px 40px -14px rgba(0, 0, 0, 0.75); }
+  #settingsView, body.juke #feed, #srchPanel, #chanPanel { max-width: 760px; }
+  .sh-ov { left: 50%; right: auto; width: min(100vw, calc(100vh * 9 / 16)); transform: translateX(-50%); box-shadow: 0 0 0 100vmax #000; }
+}
 </style>
 </head>
 <body>
@@ -582,6 +620,19 @@ body.shOn .toast { z-index: 40; bottom: auto; top: calc(env(safe-area-inset-top)
     <p id="versionLine"></p>
   </section>
 </main>
+<div class="pv" id="pv" hidden>
+  <div class="pv-box" role="dialog" aria-modal="true" aria-label="Video player">
+    <div class="pv-frame" id="pvFrame"></div>
+    <div class="pv-row">
+      <div class="pv-meta"><b id="pvTi"></b><span id="pvCh"></span></div>
+      <div class="pv-acts">
+        <button type="button" id="pvKeep">Keeper</button><button type="button" id="pvNah">Nah</button><button type="button" id="pvLater">Watch later</button>
+        <a id="pvYt" target="_blank" rel="noopener">Open on YouTube</a><button type="button" id="pvX" aria-label="Close player">Close</button>
+      </div>
+    </div>
+    <div class="pv-next" id="pvNext" hidden><span id="pvNextT"></span><button type="button" id="pvNextB">Play next</button></div>
+  </div>
+</div>
 <div class="sh-ov" id="shOv" hidden>
   <div class="sh-vid" id="shVid"></div>
   <img class="sh-poster" id="shPoster" alt="" hidden>
@@ -2710,6 +2761,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       if (holdFired) { holdFired = false; ev.preventDefault(); return; }
       if (!seen[v.id]) learn(v, 1);
       mark(v.id, true, a);
+      deskPlay(ev, v);
     });
     attachHold(a, v);
 
@@ -3047,7 +3099,8 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       later.forEach(function (v) {
         var c = el("a", "later-card");
         c.href = videoHref(v.id); c.rel = "noopener";
-        c.addEventListener("click", function () {
+        c.addEventListener("click", function (ev) {
+          deskPlay(ev, v);
           if (!seen[v.id]) learn(v, 1);
           seen[v.id] = 1; save("sf_seen", seen);
           var m = document.querySelectorAll('.vid[data-id="' + cssId(v.id) + '"]');
@@ -3073,7 +3126,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 36;
+  var VERSION = 37;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -3287,7 +3340,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
 
   // ---------- diagnostics (no key, token or watch history) ----------
   function clean(t) { return String(t).replace(/AIza[\w-]+/g, "[key]").replace(/ya29\.[\w.-]+/g, "[token]").replace(/([?&](?:key|access_token)=)[^&\s"]+/g, "$1[x]"); }
-  if (load("sf_testhook", false)) window.__sf = { shLog: SHLOG, shSet: function (t, d) { shT = t; shDur = d; }, noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
+  if (load("sf_testhook", false)) window.__sf = { pvEnd: function () { pvEnded(); }, pvState: function () { return { id: pvV && pvV.id, st: pvSt }; }, shLog: SHLOG, shSet: function (t, d) { shT = t; shDur = d; }, noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
   function diagText() {
     var sz = {}, tot = 0;
     try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i), n = (localStorage.getItem(k) || "").length; if (k.indexOf("sf_") === 0) { sz[k.slice(3)] = n; tot += n; } } } catch (e) {}
@@ -3349,6 +3402,103 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       if (!inp.value) { toast("Nothing to copy yet.", null, null); return; }
       copyText(inp.value, function (ok) { toast(ok ? "Copied." : "Couldn't copy. Tap Show, then select the text.", null, null); });
     }
+  });
+  // ---------- desktop: pop-up player and keyboard ----------
+  var DESK = window.matchMedia("(min-width: 900px) and (min-height: 521px)");
+  var pvV = null, pvF = null, pvSt = -1, pvT = 0, pvDur = 0;
+  function pvCmd(fn, args) { if (pvF && pvF.contentWindow) try { pvF.contentWindow.postMessage(JSON.stringify({ event: "command", func: fn, args: args || [] }), "https://www.youtube.com"); } catch (e) {} }
+  function pvLaterBtn() { var on = pvV && isSaved(pvV.id); $("pvLater").classList.toggle("on", !!on); $("pvLater").textContent = on ? "Saved" : "Watch later"; }
+  function pvNextPick() { for (var i = 0; i < later.length; i++) if (!pvV || later[i].id !== pvV.id) return later[i]; return null; }
+  function pvOpen(v) {
+    pvV = v; pvSt = -1; pvT = 0; pvDur = 0;
+    var box = $("pvFrame"); box.textContent = "";
+    var f = document.createElement("iframe");
+    f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen"; f.allowFullscreen = true; f.title = v.title || "Video";
+    f.src = "https://www.youtube.com/embed/" + encodeURIComponent(v.id) + "?autoplay=1&enablejsapi=1&playsinline=1&rel=0&origin=" + encodeURIComponent(location.origin);
+    f.addEventListener("load", function () { try { f.contentWindow.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), "https://www.youtube.com"); } catch (e) {} });
+    box.appendChild(f); pvF = f;
+    $("pvTi").textContent = v.title || ""; $("pvCh").textContent = v.channel || "";
+    $("pvYt").href = "https://www.youtube.com/watch?v=" + encodeURIComponent(v.id);
+    $("pvKeep").classList.remove("on"); $("pvNext").hidden = true; pvLaterBtn();
+    $("pv").hidden = false; document.body.classList.add("pvOn");
+  }
+  function pvClose() {
+    if ($("pv").hidden) return;
+    $("pv").hidden = true; document.body.classList.remove("pvOn"); $("pvFrame").textContent = ""; pvF = null; pvV = null;
+  }
+  function pvEnded() {
+    var cur = pvV; if (!cur) return;
+    if (isSaved(cur.id)) { later = later.filter(function (x) { return x.id !== cur.id; }); save("sf_later", later); setSavedTags(cur.id, false); renderLater(true); pvLaterBtn(); }
+    var n = pvNextPick();
+    if (n) { $("pvNextT").textContent = "Up next from Watch later: " + n.title; $("pvNext").hidden = false; }
+  }
+  function pvPlayNext() {
+    var n = pvNextPick(); if (!n) return;
+    if (!seen[n.id]) learn(n, 1); mark(n.id, true);
+    pvOpen(n);
+  }
+  function deskPlay(ev, v) {
+    if (!DESK.matches || !v || !v.id) return false;
+    if (ev && (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey || ev.button)) return false;
+    if (ev) ev.preventDefault();
+    pvOpen(v); return true;
+  }
+  window.addEventListener("message", function (e) {
+    if (!pvF || e.source !== pvF.contentWindow) return;
+    if (!/youtube\.com$/.test(String(e.origin).replace(/^https?:\/\//, ""))) return;
+    var d; try { d = typeof e.data === "string" ? JSON.parse(e.data) : e.data; } catch (x) { return; }
+    if (!d || !d.info || typeof d.info !== "object") return;
+    if (d.info.duration > 0) pvDur = d.info.duration;
+    if (typeof d.info.currentTime === "number") pvT = d.info.currentTime;
+    if (typeof d.info.playerState === "number") { var was = pvSt; pvSt = d.info.playerState; if (pvSt === 0 && was !== 0) pvEnded(); if (pvSt === 1) $("pvNext").hidden = true; }
+  });
+  $("pvX").addEventListener("click", pvClose);
+  $("pv").addEventListener("click", function (e) { if (e.target === $("pv")) pvClose(); });
+  $("pvNextB").addEventListener("click", pvPlayNext);
+  $("pvLater").addEventListener("click", function () { if (pvV) { toggleLater(pvV); pvLaterBtn(); } });
+  $("pvKeep").addEventListener("click", function () {
+    if (!pvV || $("pvKeep").classList.contains("on")) return;
+    learn(pvV, 2); kept[pvV.id] = 1; $("pvKeep").classList.add("on"); toast("Keeper. More like this will show up.", null, null);
+  });
+  $("pvNah").addEventListener("click", function () {
+    var v = pvV; if (!v) return;
+    hidden[v.id] = 1; save("sf_hidden", hidden); learn(v, -2.5);
+    pvClose(); render(); toast("Hidden. You will see less like it.", null, null);
+  });
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest ? e.target.closest("a.jk-play") : null; if (!a) return;
+    var v = jkList[jkSel]; if (v) deskPlay(e, v);
+  });
+  var shWheelAt = 0;
+  $("shOv").addEventListener("wheel", function (e) {
+    e.preventDefault(); var now = Date.now(); if (Math.abs(e.deltaY) < 12 || now - shWheelAt < 450) return;
+    shWheelAt = now; shGo(e.deltaY > 0 ? 1 : -1);
+  }, { passive: false });
+  document.addEventListener("keydown", function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var t = e.target, tn = t && t.tagName, typing = tn === "INPUT" || tn === "TEXTAREA" || tn === "SELECT" || (t && t.isContentEditable);
+    var k = e.key;
+    if (typing) { if (k === "Escape" && t.blur) t.blur(); return; }
+    if (document.body.classList.contains("shOn")) {
+      if (k === "ArrowDown" || k === "j") shGo(1);
+      else if (k === "ArrowUp" || k === "k") shGo(-1);
+      else if (k === "ArrowRight") shSeekRel(5);
+      else if (k === "ArrowLeft") shSeekRel(-5);
+      else if (k === " ") shTap();
+      else if (k === "Escape") shClose();
+      else return;
+      e.preventDefault(); return;
+    }
+    if (!$("pv").hidden) {
+      if (k === "Escape") pvClose();
+      else if (k === " " || k === "k") { if (pvSt === 1) { pvCmd("pauseVideo"); pvSt = 2; } else { pvCmd("playVideo"); pvSt = 1; } }
+      else if (k === "ArrowRight") { pvT = Math.min(pvDur || 1e9, pvT + 5); pvCmd("seekTo", [pvT, true]); }
+      else if (k === "ArrowLeft") { pvT = Math.max(0, pvT - 5); pvCmd("seekTo", [pvT, true]); }
+      else if (k === "n" && !$("pvNext").hidden) pvPlayNext();
+      else return;
+      e.preventDefault(); return;
+    }
+    if (k === "/" && !$("feedView").hidden) { e.preventDefault(); setTab("srch"); setTimeout(function () { var q = $("srchQ"); if (q) q.focus(); }, 60); }
   });
   // ---------- start ----------
   if (cfg.key && subs.length) {
