@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-C85mCQ1hjVx9h51vNP4qW3rrBAZGXJzEtN3vHSa5DK4=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-VhExknB4c0So2YROHzSPOu6LkkCskrjE0N4OAF3yG4k=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -701,7 +701,7 @@ body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px)
       return api("subscriptions", p, token).then(function (j) {
         (j.items || []).forEach(function (it) {
           var id = it.snippet && it.snippet.resourceId && it.snippet.resourceId.channelId;
-          if (id) out.push({ id: id, title: it.snippet.title });
+          if (id) out.push({ id: id, title: it.snippet.title, f: it.snippet.publishedAt || "" });
         });
         setStatus("Reading your subscriptions: " + out.length + " so far");
         return j.nextPageToken ? page(j.nextPageToken) : out;
@@ -904,7 +904,20 @@ body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px)
 
   // ---------- Following: channel postcards, then one channel's videos and playlists ----------
   var chInfo = load("sf_chinfo", {});                 // channelId -> { t: avatar url, n: video count, at: ms }
-  var folSort = load("sf_folSort", "az");             // Following page order: az | recent
+  var folSort = load("sf_folSort", "az"), folRev = load("sf_folRev", false);
+  var FSORTS = { recent: "Newest upload", az: "A–Z", subs: "Most subscribers", views: "Most total views", videos: "Most videos", active: "Most active (30 days)", follow: "Newest follow" };
+  if (!FSORTS[folSort]) folSort = "az";
+  function compact(n) { return n >= 1e9 ? (n / 1e9).toFixed(1).replace(/\.0$/, "") + "B" : n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, "") + "M" : n >= 1e3 ? (n / 1e3).toFixed(n >= 1e5 ? 0 : 1).replace(/\.0$/, "") + "K" : String(n); }
+  function activeCount(id) { var cut = Date.now() - 30 * 864e5, n = 0; feed.items.forEach(function (v) { if ((v.sid || v.chId) === id && new Date(v.at).getTime() > cut) n++; }); return n; }
+  function fMetric(s) {
+    var c = chInfo[s.id] || {}, t = (chk[s.id] || [0, 0])[1];
+    if (folSort === "recent") return t ? ago(t) : "";
+    if (folSort === "subs") return c.sc < 0 ? "Hidden" : c.sc != null ? compact(c.sc) + " subs" : "";
+    if (folSort === "views") return c.vw ? compact(c.vw) + " views" : "";
+    if (folSort === "active") return activeCount(s.id) + " in 30 days";
+    if (folSort === "follow") return s.f ? "Followed " + new Date(s.f).toLocaleDateString(undefined, { month: "short", year: "numeric" }) : "";
+    return c.n ? c.n + (c.n === 1 ? " video" : " videos") : "";
+  }
   var chSort = load("sf_chSort", "new");              // channel page order
   var chHide = load("sf_chHide", false);              // hide watched on channel pages
   var plSort = load("sf_plSort", "new");
@@ -913,7 +926,7 @@ body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px)
 
   function subTitle(id) { for (var i = 0; i < subs.length; i++) if (subs[i].id === id) return subs[i].title; return (chInfo[id] && chInfo[id].title) || "Channel"; }
   function loadInfo() {
-    var now = Date.now(), need = subs.filter(function (s) { var c = chInfo[s.id]; return !c || !c.v2 || now - c.at > 7 * 86400000; }).map(function (s) { return s.id; });
+    var now = Date.now(), need = subs.filter(function (s) { var c = chInfo[s.id]; return !c || !c.v2 || !c.v3 || now - c.at > 7 * 86400000; }).map(function (s) { return s.id; });
     if (!need.length || !cfg.key) return Promise.resolve();
     var chunks = []; for (var i = 0; i < need.length; i += 50) chunks.push(need.slice(i, i + 50));
     return chunks.reduce(function (p, ids) {
@@ -921,7 +934,7 @@ body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px)
         return api("channels", { part: "snippet,statistics,brandingSettings", id: ids.join(","), maxResults: 50 }).then(function (j) {
           (j.items || []).forEach(function (c) {
             var t = (c.snippet && c.snippet.thumbnails) || {};
-            chInfo[c.id] = { t: (t.medium || t.default || {}).url || "", n: +((c.statistics || {}).videoCount) || 0, title: (c.snippet || {}).title || "", at: now,
+            chInfo[c.id] = { t: (t.medium || t.default || {}).url || "", n: +((c.statistics || {}).videoCount) || 0, title: (c.snippet || {}).title || "", at: now, v3: 1, sc: (c.statistics || {}).hiddenSubscriberCount ? -1 : +((c.statistics || {}).subscriberCount) || 0, vw: +((c.statistics || {}).viewCount) || 0,
               d: String((c.snippet || {}).description || "").slice(0, 600), k: String(((c.brandingSettings || {}).channel || {}).keywords || "").slice(0, 400), v2: 1 };
           });
         });
@@ -1102,8 +1115,8 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   function isQuiet(id) { return quietMs(id) > QUIET_MS; }
   function renderFollow(box) {
     $("search").placeholder = "Filter channels";
-    $("sortBtn").hidden = false; $("sortBtn").textContent = folSort === "az" ? "A–Z" : "Recent";
-    $("sortBtn").setAttribute("aria-pressed", String(folSort === "recent"));
+    $("sortBtn").hidden = false; $("sortBtn").textContent = (FSORTS[folSort] || "A–Z").replace(" (30 days)", "") + (folRev ? " ↑" : "");
+    $("sortBtn").setAttribute("aria-pressed", String(folSort !== "az" || folRev));
     $("hideSeenBtn").hidden = true;
     var q = $("search").value.trim().toLowerCase();
     if (!subs.length) { setStatus(""); box.appendChild(el("p", "empty", "No channels yet. Add your key and channel in settings, then refresh.")); return; }
@@ -1116,8 +1129,11 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var list = subs.filter(function (s) { return !q || s.title.toLowerCase().indexOf(q) >= 0; });
     if (folTopic === "__quiet") list = list.filter(function (s) { return isQuiet(s.id); });
     else if (folTopic) list = list.filter(function (s) { var t = themeOf(s.id).ids; return folTopic === "__other" ? !t.length : t.indexOf(topicIdx(folTopic)) >= 0; });
-    if (folSort === "recent") list.sort(function (a, b) { return ((chk[b.id] || [0, 0])[1] || 0) - ((chk[a.id] || [0, 0])[1] || 0); });
-    else list.sort(function (a, b) { return a.title.toLowerCase() < b.title.toLowerCase() ? -1 : 1; });
+    var key = function (x) { var c = chInfo[x.id] || {};
+      return folSort === "recent" ? (chk[x.id] || [0, 0])[1] || 0 : folSort === "subs" ? (c.sc < 0 ? -1 : c.sc || 0) : folSort === "views" ? c.vw || 0 : folSort === "videos" ? c.n || 0 : folSort === "active" ? activeCount(x.id) : folSort === "follow" ? (x.f ? new Date(x.f).getTime() : 0) : 0; };
+    if (folSort === "az") list.sort(function (a, b) { return a.title.toLowerCase() < b.title.toLowerCase() ? -1 : 1; });
+    else list.sort(function (a, b) { return key(b) - key(a) || (a.title.toLowerCase() < b.title.toLowerCase() ? -1 : 1); });
+    if (folRev) list.reverse();
     setStatus("");
     var head = el("div", "f-head"); head.appendChild(el("h2", "f-h", "Following"));
     head.appendChild(el("p", "f-sub", subs.length + " channels you subscribe to")); box.appendChild(head);
@@ -1155,7 +1171,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       card._h = h; card.style.setProperty("--k", String(0.7 + (h % 7) * 0.1));
       if (liveObs) liveObs.observe(card); else card.classList.add("live");
       card.appendChild(el("div", "f-name", s.title));
-      card.appendChild(el("div", "f-meta", inf && inf.n ? inf.n + (inf.n === 1 ? " video" : " videos") : " "));
+      card.appendChild(el("div", "f-meta", fMetric(s) || " "));
       card.addEventListener("click", function () { openChannel(s.id); });
       return card;
     }
@@ -2182,7 +2198,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   })();
 
   // ---------- backup ----------
-  var BK_KEYS = ["sf_cfg", "sf_subs", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_chTags", "sf_jb", "sf_jbl", "sf_shorts", "sf_shch", "sf_rec", "sf_recNo", "sf_recYes", "sf_seeds", "sf_later", "sf_sh", "sf_unf", "sf_dboost", "sf_chTheme"];
+  var BK_KEYS = ["sf_folSort", "sf_folRev", "sf_cfg", "sf_subs", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_chTags", "sf_jb", "sf_jbl", "sf_shorts", "sf_shch", "sf_rec", "sf_recNo", "sf_recYes", "sf_seeds", "sf_later", "sf_sh", "sf_unf", "sf_dboost", "sf_chTheme"];
   function bkMake() {
     var data = {};
     BK_KEYS.forEach(function (k) { var raw = localStorage.getItem(k); if (raw == null) return; try { data[k] = JSON.parse(raw); } catch (e) {} });
@@ -2812,7 +2828,11 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   var searchTimer = null;
   $("search").addEventListener("input", function () { clearTimeout(searchTimer); searchTimer = setTimeout(render, 160); });
   $("sortBtn").addEventListener("click", function () {
-    if (tab === "follow") { folSort = folSort === "az" ? "recent" : "az"; save("sf_folSort", folSort); render(); return; }
+    if (tab === "follow") {
+      openSheet("Sort channels" + (folRev ? " (reversed)" : ""), Object.keys(FSORTS).map(function (k) { return { label: FSORTS[k] + (folSort === k && folRev ? " (reversed)" : ""), checked: folSort === k, pick: function () {
+        if (folSort === k) folRev = !folRev; else { folSort = k; folRev = false; }
+        save("sf_folSort", folSort); save("sf_folRev", folRev); render(); window.scrollTo(0, 0); } }; }));
+      return; }
     openSheet("Sort videos", Object.keys(SORTS).map(function (k) { return { label: SORTS[k], checked: sortMode === k, pick: function () { sortMode = k; save("sf_sort", sortMode); render(); window.scrollTo(0, 0); } }; })); });
   $("hideSeenBtn").addEventListener("click", function () { hideSeen = !hideSeen; save("sf_hideSeen", hideSeen); render(); });
   $("clearSeenBtn").addEventListener("click", function () { seen = {}; save("sf_seen", seen); setStatus("Watched marks cleared."); });
@@ -2823,7 +2843,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   });
   $("clearMutedBtn").addEventListener("click", function () { mutedCh = {}; save("sf_mutedCh", mutedCh); fillSettings(); setStatus("All channels unmuted."); });
   $("forgetBtn").addEventListener("click", function () {
-    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_recYes", "sf_later", "sf_chk", "sf_chinfo", "sf_folSort", "sf_chSort", "sf_chHide", "sf_plSort", "sf_chTheme", "sf_topicsSeeded", "sf_dref", "sf_dq", "sf_dseen", "sf_dboost", "sf_topicAt", "sf_light", "sf_crash", "sf_sq", "sf_sc", "sf_sh", "sf_jb", "sf_shorts", "sf_shch", "sf_lastcrash", "sf_unf", "sf_chTags", "sf_jbl"].forEach(drop);
+    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_recYes", "sf_later", "sf_chk", "sf_chinfo", "sf_folSort", "sf_folRev", "sf_chSort", "sf_chHide", "sf_plSort", "sf_chTheme", "sf_topicsSeeded", "sf_dref", "sf_dq", "sf_dseen", "sf_dboost", "sf_topicAt", "sf_light", "sf_crash", "sf_sq", "sf_sc", "sf_sh", "sf_jb", "sf_shorts", "sf_shch", "sf_lastcrash", "sf_unf", "sf_chTags", "sf_jbl"].forEach(drop);
     chk = {};
     cfg = Object.assign({}, DEFAULT_CFG, { v2: 1 });
     subs = []; feed = { at: 0, items: [] }; disc = { at: 0, n: 0, items: [] };
@@ -2908,7 +2928,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 27;
+  var VERSION = 28;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
