@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-LQOCji4WyPiVKV4inBGMY9HJ9p3T6Mf7EmD/ysyVmBE=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Tu9TGKNlHUEVJBXQKGIvz+u3cmM3xAp9sFjebr+nfMY=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -492,6 +492,12 @@ body.pvOn .toast { z-index: 80; }
 .wl-step .btn-row { margin: 0; }
 .wl-ok { color: #3FB26A; font-size: 13px; font-weight: 600; margin: 0 0 8px; }
 .wl-end { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-top: 1px solid var(--line); padding-top: 18px; }
+.jk-ctl .jk-tg.on { background: #2a2622; color: #fff3dc; }
+.jk-desk { display: none !important; }
+.jk-row.playing b::before { content: "\25B6  "; color: #a45c38; }
+@media (min-width: 900px) and (min-height: 521px) {
+  .jk-desk { display: inline-flex !important; }
+}
 </style>
 </head>
 <body>
@@ -707,7 +713,7 @@ body.pvOn .toast { z-index: 80; }
         <a id="pvYt" target="_blank" rel="noopener">Open on YouTube</a><button type="button" id="pvX" aria-label="Close player">Close</button>
       </div>
     </div>
-    <div class="pv-next" id="pvNext" hidden><span id="pvNextT"></span><button type="button" id="pvNextB">Play next</button></div>
+    <div class="pv-next" id="pvNext" hidden><span id="pvNextT"></span><button type="button" id="pvPrevB" hidden>Previous</button><button type="button" id="pvNextB">Play next</button></div>
   </div>
 </div>
 <div class="sh-ov" id="shOv" hidden>
@@ -2133,7 +2139,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   function jkQ(b, extra) { var one = jkBandKey(b).indexOf(" ") < 0; return '"' + b.replace(/"/g, "") + '"' + (extra ? " " + extra : (one ? " band" : "")); }
 
   // ---------- Jukebox ----------
-  var jb = load("sf_jb", { seeds: [], items: [] }), jkKeepOnly = false, jkSel = 0, jkPage = 0, jkList = [], jkUI = null, jkMode = "music";
+  var jb = load("sf_jb", { seeds: [], items: [] }), jkKeepOnly = false, jkSel = 0, jkPage = 0, jkList = [], jkUI = null, jkMode = "music", jkAuto = load("sf_jkAuto", false), jkRand = load("sf_jkRand", false), jkSeed = load("sf_jkSeed", 1), jkCycle = {}, jkHist = [], jkUpNext = -1, jkPlayingId = "";
   jb.items = jb.items || []; jb.seeds = jb.seeds || [];
   var jbl = load("sf_jbl", { t: {} });
   if (load("sf_jbv", 0) < 2) {
@@ -2151,6 +2157,8 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     jb.items.concat(jb.seeds.filter(function (v) { return !si[v.chId] && jkBandOf(v) && jkBandOf(v) !== "!"; })).forEach(function (v) { if (got[v.id]) return; got[v.id] = 1; var bd = jkBandOf(v); if (bd === "!") return; var kd = jkKind(v); if (kd === "junk" && !v.keep) return; if ((kd === "talk") !== (jkMode === "talk")) return; if (!v.keep && (jbl.t[bd ? jkBandKey(bd) : artistOf(v.channel).toLowerCase()] || 0) <= -6) return; if (passes(v, false, mw, si)) out.push(v); });
     if (jkKeepOnly) out = out.filter(function (v) { return v.keep; });
     var per = {}; out = out.filter(function (v) { var k = artistKey(v); per[k] = (per[k] || 0) + 1; return per[k] <= 3; });
+    // Deal the records out in a shuffled order (stable until Reshuffle), so refills, bands and kinds are interleaved.
+    out = out.map(function (v) { return [jkMix(hash(v.id), jkSeed), v]; }).sort(function (a, b) { return a[0] - b[0]; }).map(function (x) { return x[1]; });
     return jkSpread(out).slice(0, 120);
   }
   // The artist of a video: a favorite named in the title, else the text before " - ", else the channel.
@@ -2188,6 +2196,36 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   function jkThumb(id) { return "https://i.ytimg.com/vi/" + encodeURIComponent(id) + "/mqdefault.jpg"; }
   function jkMeta(v) { return [fmtOf(v) || "Music", v.channel, v.dur ? fmtDur(v.dur) : ""].filter(Boolean).join(" · "); }
   function jkImg(id) { var i = el("img"); i.alt = ""; i.loading = "lazy"; i.decoding = "async"; i.referrerPolicy = "no-referrer"; i.src = jkThumb(id); return i; }
+  function jkMix(h, seed) { h = (h ^ Math.imul(seed + 1, 0x9E3779B1)) | 0; h = Math.imul(h ^ (h >>> 15), 0x85EBCA6B); h ^= h >>> 13; h = Math.imul(h, 0xC2B2AE35); h ^= h >>> 16; return h >>> 0; }
+  function jkPickNext() {
+    var cur = jkList[jkSel], n = jkList.length; if (n < 2) return -1;
+    var ok = function (f) { var a = []; for (var i = 0; i < n; i++) if ((!cur || jkList[i].id !== cur.id) && f(jkList[i])) a.push(i); return a; };
+    var c = ok(function (v) { return !seen[v.id] && !jkCycle[v.id]; });
+    if (!c.length) c = ok(function (v) { return !jkCycle[v.id]; });
+    if (!c.length) {
+      jkCycle = {}; if (cur) jkCycle[cur.id] = 1;
+      if (n > 5) jkHist.slice(-3).forEach(function (id) { jkCycle[id] = 1; });
+      c = ok(function (v) { return !jkCycle[v.id]; }); if (!c.length) c = ok(function () { return true; });
+    }
+    if (jkRand) return c[Math.floor(Math.random() * c.length)];
+    for (var k = 0; k < c.length; k++) if (c[k] > jkSel) return c[k];
+    return c[0];
+  }
+  // Start record i in the pop-up player and keep the cabinet pointing at it.
+  function jkPlayAt(i, back) {
+    var v = jkList[i]; if (!v) return false;
+    if (!back && jkList[jkSel] && jkList[jkSel].id !== v.id) { jkHist.push(jkList[jkSel].id); if (jkHist.length > 60) jkHist.shift(); }
+    jkSel = i; jkCycle[v.id] = 1; jkPlayingId = v.id;
+    if (!seen[v.id]) { learn(v, 1); jbLearn(v, 1); } mark(v.id, true);
+    jkUpNext = jkPickNext();
+    jkUpdate(true); jkStrip(false);
+    pvOpen(v, true); return true;
+  }
+  function jkSkip() { if (jkUpNext < 0 || !jkList[jkUpNext]) jkUpNext = jkPickNext(); if (jkUpNext >= 0) jkPlayAt(jkUpNext, false); }
+  function jkBack() {
+    while (jkHist.length) { var id = jkHist.pop(); for (var i = 0; i < jkList.length; i++) if (jkList[i].id === id) { jkPlayAt(i, true); return; } }
+    toast("That was the first one.", null, null);
+  }
   function jkPer() { try { return DESK.matches ? 8 : 5; } catch (e) { return 5; } }
   function jkThumbBig(id) { return "https://i.ytimg.com/vi/" + encodeURIComponent(id) + "/hqdefault.jpg"; }
   function jkStrip(turn) {
@@ -2195,7 +2233,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     jkPage = Math.max(0, Math.min(pages - 1, jkPage));
     u.strip.textContent = "";
     jkList.slice(jkPage * P, jkPage * P + P).forEach(function (v, k) {
-      var i = jkPage * P + k, r = el("button", "jk-row" + (i === jkSel ? " on" : "") + (seen[v.id] ? " seen" : "")); r.type = "button";
+      var i = jkPage * P + k, r = el("button", "jk-row" + (i === jkSel ? " on" : "") + (seen[v.id] ? " seen" : "") + (v.id === jkPlayingId ? " playing" : "")); r.type = "button";
       r.appendChild(jkImg(v.id));
       var t = el("div"); t.appendChild(el("b", null, v.title)); t.appendChild(el("small", null, jkMeta(v))); r.appendChild(t);
       r.addEventListener("click", function () { jkSel = i; jkUpdate(true); });
@@ -2253,18 +2291,30 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     var play = el("a", "jk-play", "▶ Play"); play.rel = "noopener";
     var keepB = el("button", "jk-keep", "✓"); keepB.type = "button"; keepB.setAttribute("aria-label", "Keeper");
     var nah = el("button", "jk-nah", "✗"); nah.type = "button"; nah.setAttribute("aria-label", "Not interested");
-    ctl.appendChild(prev); ctl.appendChild(play); ctl.appendChild(next); ctl.appendChild(keepB); ctl.appendChild(nah); ctl.appendChild(kv); ctl.appendChild(refill); jk.appendChild(ctl);
+    var tAuto = el("button", "jk-tg jk-desk" + (jkAuto ? " on" : ""), "Autoplay"), tRand = el("button", "jk-tg" + (jkRand ? " on" : ""), "Random"), reshuf = el("button", "jk-reshuf", "Reshuffle");
+    tAuto.type = "button"; tRand.type = "button"; reshuf.type = "button"; tAuto.setAttribute("aria-pressed", String(!!jkAuto)); tRand.setAttribute("aria-pressed", String(!!jkRand));
+    tAuto.addEventListener("click", function () { jkAuto = !jkAuto; save("sf_jkAuto", jkAuto); tAuto.classList.toggle("on", jkAuto); tAuto.setAttribute("aria-pressed", String(jkAuto)); toast(jkAuto ? "Autoplay is on. The next song starts when one ends." : "Autoplay is off.", null, null); });
+    tRand.addEventListener("click", function () { jkRand = !jkRand; save("sf_jkRand", jkRand); tRand.classList.toggle("on", jkRand); tRand.setAttribute("aria-pressed", String(jkRand)); jkUpNext = -1; toast(jkRand ? "Random is on." : "Random is off. Songs play in list order.", null, null); });
+    reshuf.addEventListener("click", function () { jkSeed = (jkSeed || 1) + 1; save("sf_jkSeed", jkSeed); jkSel = 0; jkPage = 0; jkHist = []; render(); toast("Reshuffled.", null, null); });
+    ctl.appendChild(prev); ctl.appendChild(play); ctl.appendChild(next); ctl.appendChild(keepB); ctl.appendChild(nah); ctl.appendChild(tAuto); ctl.appendChild(tRand); ctl.appendChild(reshuf); ctl.appendChild(kv); ctl.appendChild(refill); jk.appendChild(ctl);
     var strip = el("div", "jk-strip"), pager = el("div", "jk-pager");
     var pp = el("button", null, "‹ Prev page"), pn = el("button", null, "Next page ›"), pt = el("span");
     pp.type = "button"; pn.type = "button"; pager.appendChild(pp); pager.appendChild(pt); pager.appendChild(pn);
     jk.appendChild(strip); jk.appendChild(pager);
     jk.appendChild(el("div", "jk-cost", "Play starts the video. ✓ trains more like it; ✗ hides it (Undo for a few seconds). Refill runs 3 searches (300 units) for your bands and similar bands."));
     jkUI = { cover: cover, title: title, meta: meta, play: play, strip: strip, pageTxt: pt, pp: pp, pn: pn, reel: reel };
-    prev.addEventListener("click", function () { if (jkSel > 0) { jkSel--; jkUpdate(true); } });
-    next.addEventListener("click", function () { if (jkSel < jkList.length - 1) { jkSel++; jkUpdate(true); } });
+    prev.addEventListener("click", function () {
+      if (jkRand && jkHist.length) { var id = jkHist.pop(); for (var i = 0; i < jkList.length; i++) if (jkList[i].id === id) { jkSel = i; jkUpdate(true); return; } }
+      if (jkSel > 0) { jkSel--; jkUpdate(true); }
+    });
+    next.addEventListener("click", function () {
+      if (jkRand) { var n = jkPickNext(); if (n >= 0) { if (jkList[jkSel]) { jkHist.push(jkList[jkSel].id); jkCycle[jkList[jkSel].id] = 1; } jkSel = n; jkUpdate(true); } return; }
+      if (jkSel < jkList.length - 1) { jkSel++; jkUpdate(true); }
+    });
     pp.addEventListener("click", function () { jkSel = Math.max(0, jkPage * jkPer() - jkPer()); jkUpdate(true); });
     pn.addEventListener("click", function () { jkSel = Math.min(jkList.length - 1, jkPage * jkPer() + jkPer()); jkUpdate(true); });
-    play.addEventListener("click", function () { var v = jkList[jkSel]; if (!v) return; if (!seen[v.id]) { learn(v, 1); jbLearn(v, 1); } mark(v.id, true); setTimeout(function () { jkStrip(false); }, 50); });
+    play.addEventListener("click", function (ev) { var v = jkList[jkSel]; if (!v) return;
+      if (DESK.matches && !(ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey)) { ev.preventDefault(); jkPlayAt(jkSel, true); return; } if (!seen[v.id]) { learn(v, 1); jbLearn(v, 1); } mark(v.id, true); setTimeout(function () { jkStrip(false); }, 50); });
     var jkBusy = 0;
     function jkStamp(kind, done) {
       var c = jkUI && jkUI.cover; if (!c || !c.animate || light.on) { done(); return; }
@@ -3318,7 +3368,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 40;
+  var VERSION = 41;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -3532,7 +3582,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
 
   // ---------- diagnostics (no key, token or watch history) ----------
   function clean(t) { return String(t).replace(/AIza[\w-]+/g, "[key]").replace(/ya29\.[\w.-]+/g, "[token]").replace(/([?&](?:key|access_token)=)[^&\s"]+/g, "$1[x]"); }
-  if (load("sf_testhook", false)) window.__sf = { inviteMake: inviteMake, quotaUsed: function () { return quotaUsed(); }, jkKind: jkKind, jkBandOf: jkBandOf, jukeQueries: jukeQueries, pvEnd: function () { pvEnded(); }, pvState: function () { return { id: pvV && pvV.id, st: pvSt }; }, shLog: SHLOG, shSet: function (t, d) { shT = t; shDur = d; }, noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
+  if (load("sf_testhook", false)) window.__sf = { jkState: function () { return { sel: jkSel, id: jkList[jkSel] && jkList[jkSel].id, n: jkList.length, ids: jkList.map(function (v) { return v.id; }), up: jkList[jkUpNext] && jkList[jkUpNext].id }; }, inviteMake: inviteMake, quotaUsed: function () { return quotaUsed(); }, jkKind: jkKind, jkBandOf: jkBandOf, jukeQueries: jukeQueries, pvEnd: function () { pvEnded(); }, pvState: function () { return { id: pvV && pvV.id, st: pvSt }; }, shLog: SHLOG, shSet: function (t, d) { shT = t; shDur = d; }, noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
   function diagText() {
     var sz = {}, tot = 0;
     try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i), n = (localStorage.getItem(k) || "").length; if (k.indexOf("sf_") === 0) { sz[k.slice(3)] = n; tot += n; } } } catch (e) {}
@@ -3597,14 +3647,14 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   });
   // ---------- desktop: pop-up player and keyboard ----------
   var DESK = window.matchMedia("(min-width: 900px) and (min-height: 521px)");
-  var pvV = null, pvF = null, pvSt = -1, pvT = 0, pvDur = 0, pvMuted = false;
+  var pvV = null, pvF = null, pvSt = -1, pvT = 0, pvDur = 0, pvMuted = false, pvJuke = false;
   // The YouTube frame swallows keys once clicked, so hand the keyboard back to the page: Esc, space and arrows keep working.
   setInterval(function () { if (pvF && document.activeElement === pvF && !document.fullscreenElement) { try { pvF.blur(); window.focus(); } catch (e) {} } }, 300);
   function pvCmd(fn, args) { if (pvF && pvF.contentWindow) try { pvF.contentWindow.postMessage(JSON.stringify({ event: "command", func: fn, args: args || [] }), "https://www.youtube.com"); } catch (e) {} }
   function pvLaterBtn() { var on = pvV && isSaved(pvV.id); $("pvLater").classList.toggle("on", !!on); $("pvLater").textContent = on ? "Saved" : "Watch later"; }
   function pvNextPick() { for (var i = 0; i < later.length; i++) if (!pvV || later[i].id !== pvV.id) return later[i]; return null; }
-  function pvOpen(v) {
-    pvV = v; pvSt = -1; pvT = 0; pvDur = 0; pvMuted = false;
+  function pvOpen(v, juke) {
+    pvJuke = !!juke; pvV = v; pvSt = -1; pvT = 0; pvDur = 0; pvMuted = false;
     var box = $("pvFrame"); box.textContent = "";
     var f = document.createElement("iframe");
     f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen"; f.allowFullscreen = true; f.title = v.title || "Video";
@@ -3614,19 +3664,24 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     $("pvTi").textContent = v.title || ""; $("pvCh").textContent = v.channel || "";
     $("pvYt").href = "https://www.youtube.com/watch?v=" + encodeURIComponent(v.id);
     $("pvKeep").classList.remove("on"); $("pvNext").hidden = true; pvLaterBtn();
+    $("pvPrevB").hidden = !pvJuke; $("pvNextB").textContent = pvJuke ? "Skip" : "Play next";
+    if (pvJuke) { var nx = jkList[jkUpNext]; $("pvNextT").textContent = nx ? "Next: " + nx.title : "Nothing else in the list."; $("pvNext").hidden = false; $("pvNextB").hidden = !nx; if (v.keep) $("pvKeep").classList.add("on"); } else $("pvNextB").hidden = false;
     $("pv").hidden = false; document.body.classList.add("pvOn");
   }
   function pvClose() {
     if ($("pv").hidden) return;
     $("pv").hidden = true; document.body.classList.remove("pvOn"); $("pvFrame").textContent = ""; pvF = null; pvV = null;
+    if (pvJuke) { pvJuke = false; jkPlayingId = ""; if (tab === "juke" && jkUI) jkStrip(false); }
   }
   function pvEnded() {
     var cur = pvV; if (!cur) return;
+    if (pvJuke) { if (jkAuto) jkSkip(); return; }
     if (isSaved(cur.id)) { later = later.filter(function (x) { return x.id !== cur.id; }); save("sf_later", later); setSavedTags(cur.id, false); renderLater(true); pvLaterBtn(); }
     var n = pvNextPick();
     if (n) { $("pvNextT").textContent = "Up next from Watch later: " + n.title; $("pvNext").hidden = false; }
   }
   function pvPlayNext() {
+    if (pvJuke) { jkSkip(); return; }
     var n = pvNextPick(); if (!n) return;
     if (!seen[n.id]) learn(n, 1); mark(n.id, true);
     pvOpen(n);
@@ -3644,24 +3699,30 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     if (!d || !d.info || typeof d.info !== "object") return;
     if (d.info.duration > 0) pvDur = d.info.duration;
     if (typeof d.info.currentTime === "number") pvT = d.info.currentTime;
-    if (typeof d.info.playerState === "number") { var was = pvSt; pvSt = d.info.playerState; if (pvSt === 0 && was !== 0) pvEnded(); if (pvSt === 1) $("pvNext").hidden = true; }
+    if (typeof d.info.playerState === "number") { var was = pvSt; pvSt = d.info.playerState; if (pvSt === 0 && was !== 0) pvEnded(); if (pvSt === 1 && !pvJuke) $("pvNext").hidden = true; }
   });
   $("pvX").addEventListener("click", pvClose);
   $("pv").addEventListener("click", function (e) { if (e.target === $("pv")) pvClose(); });
   $("pvNextB").addEventListener("click", pvPlayNext);
+  $("pvPrevB").addEventListener("click", function () { if (pvJuke) jkBack(); });
   $("pvLater").addEventListener("click", function () { if (pvV) { toggleLater(pvV); pvLaterBtn(); } });
   $("pvKeep").addEventListener("click", function () {
     if (!pvV || $("pvKeep").classList.contains("on")) return;
-    learn(pvV, 2); kept[pvV.id] = 1; $("pvKeep").classList.add("on"); toast("Keeper. More like this will show up.", null, null);
+    learn(pvV, 2); kept[pvV.id] = 1; $("pvKeep").classList.add("on");
+    if (pvJuke) { var kv0 = pvV; jbLearn(kv0, 3); if (!jb.items.some(function (x) { return x.id === kv0.id; })) jb.items.unshift(jbItem(kv0)); jb.items.forEach(function (x) { if (x.id === kv0.id) x.keep = 1; }); kv0.keep = 1; save("sf_jb", jb); } toast("Keeper. More like this will show up.", null, null);
   });
   $("pvNah").addEventListener("click", function () {
     var v = pvV; if (!v) return;
     hidden[v.id] = 1; save("sf_hidden", hidden); learn(v, -2.5);
+    if (pvJuke) {
+      jbLearn(v, -3); jb.items = jb.items.filter(function (x) { return x.id !== v.id; }); save("sf_jb", jb);
+      var nxt = jkAuto ? (jkList[jkUpNext] || jkList[jkPickNext()]) : null, nid = nxt && nxt.id !== v.id ? nxt.id : "";
+      if (nid) {
+        pvJuke = false; jkPlayingId = ""; render(); toast("Hidden. On to the next one.", null, null);
+        for (var i = 0; i < jkList.length; i++) if (jkList[i].id === nid) { jkPlayAt(i, true); return; }
+      }
+    }
     pvClose(); render(); toast("Hidden. You will see less like it.", null, null);
-  });
-  document.addEventListener("click", function (e) {
-    var a = e.target.closest ? e.target.closest("a.jk-play") : null; if (!a) return;
-    var v = jkList[jkSel]; if (v) deskPlay(e, v);
   });
   var shWheelAt = 0;
   $("shOv").addEventListener("wheel", function (e) {
@@ -3690,6 +3751,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       else if (k === "ArrowRight") { pvT = Math.min(pvDur || 1e9, pvT + 5); pvCmd("seekTo", [pvT, true]); }
       else if (k === "ArrowLeft") { pvT = Math.max(0, pvT - 5); pvCmd("seekTo", [pvT, true]); }
       else if (k === "n" && !$("pvNext").hidden) pvPlayNext();
+      else if (k === "p" && pvJuke) jkBack();
       else if (k === "m") { pvMuted = !pvMuted; pvCmd(pvMuted ? "mute" : "unMute"); }
       else if (k === "f") { try { if (document.fullscreenElement) document.exitFullscreen(); else if ($("pvFrame").requestFullscreen) $("pvFrame").requestFullscreen(); } catch (x) {} }
       else return;
