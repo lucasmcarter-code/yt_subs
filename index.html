@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-olh/JFY7mS5boM9geUYCAF2x6cCBW0NNhiHyCBceBrs=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-W5krwwMZm2t91l2q0NdZoU3XQQjYalkMtf1PIDk9/4M=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -371,6 +371,15 @@ body.light .jk-turn { animation: none; }
 .taste-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
 #tasteBox { margin: 4px 0 14px; }
 #tasteBox .btn { margin-top: 10px; }
+.sh-bar { position: absolute; left: 14px; right: 14px; bottom: calc(env(safe-area-inset-bottom) + 6px); height: 50px; z-index: 4; touch-action: none; }
+.sh-bt { position: absolute; left: 0; right: 0; top: 23px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.3); transition: height .12s, top .12s; }
+.sh-bt i { display: block; height: 100%; width: 0; border-radius: 2px; background: #fff; }
+.sh-chip { position: absolute; top: 14px; left: 0; width: 22px; height: 22px; margin-left: -11px; border-radius: 50%; background: #fff; box-shadow: 0 1px 6px rgba(0,0,0,.6); transition: transform .12s; }
+.sh-bar.drag .sh-bt { height: 8px; top: 21px; }
+.sh-bar.drag .sh-chip { transform: scale(1.35); }
+.sh-time { position: absolute; left: 0; right: 0; top: -22px; text-align: center; font-size: 14px; font-weight: 600; text-shadow: 0 1px 4px #000; opacity: 0; transition: opacity .12s; pointer-events: none; }
+.sh-bar.drag .sh-time { opacity: 1; }
+.sh-2x { position: absolute; left: 50%; top: calc(env(safe-area-inset-top) + 18px); transform: translateX(-50%); z-index: 4; padding: 6px 14px; border-radius: 16px; background: rgba(0,0,0,.6); font-weight: 700; font-size: 15px; pointer-events: none; }
 .sh-chrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; }
 .sh-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 6px 0 10px; }
 .sh-top h2 { margin: 0; font: italic 700 26px/1 Georgia, "Caveat", serif; }
@@ -385,17 +394,17 @@ body.light .jk-turn { animation: none; }
 body.shOn .sh-wrap { z-index: 60; }
 .sh-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; transition: opacity .25s; pointer-events: none; }
 .sh-vid, .sh-vid iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-.sh-hit { position: absolute; inset: 64px 0 90px 0; touch-action: none; }
+.sh-hit { position: absolute; inset: 64px 0 130px 0; touch-action: none; }
 .sh-x { position: absolute; left: 14px; top: calc(env(safe-area-inset-top) + 10px); width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(0,0,0,.55); color: #fff; font-size: 18px; z-index: 2; }
 .sh-n { position: absolute; right: 16px; top: calc(env(safe-area-inset-top) + 22px); font-size: 13px; opacity: .8; z-index: 2; text-shadow: 0 1px 3px #000; }
-.sh-side { position: absolute; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 110px); display: flex; flex-direction: column; gap: 14px; z-index: 2; }
+.sh-side { position: absolute; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 150px); display: flex; flex-direction: column; gap: 14px; z-index: 2; }
 .sh-side button { width: 52px; height: 52px; border-radius: 50%; border: 0; background: rgba(0,0,0,.55); font-size: 24px; line-height: 1; }
-.sh-cap { position: absolute; left: 16px; right: 84px; bottom: calc(env(safe-area-inset-bottom) + 22px); z-index: 2; text-shadow: 0 1px 4px #000; pointer-events: none; }
+.sh-cap { position: absolute; left: 16px; right: 84px; bottom: calc(env(safe-area-inset-bottom) + 62px); z-index: 2; text-shadow: 0 1px 4px #000; pointer-events: none; }
 .sh-cap b { display: block; font-size: 15px; }
 .sh-cap span { display: block; font-size: 14px; margin-top: 3px; opacity: .9; max-height: 3.6em; overflow: hidden; }
 .sh-ov .stamp { z-index: 5; font-size: 34px; }
 body.shOn { overflow: hidden; }
-body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px); }
+body.shOn .toast { z-index: 40; bottom: auto; top: calc(env(safe-area-inset-top) + 64px); }
 #tabSrch[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
 </style>
 </head>
@@ -585,6 +594,8 @@ body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px)
     <button type="button" id="shDn" aria-label="Nah, less like this">&#128078;</button>
     <button type="button" id="shMore" aria-label="More options">&#8943;</button>
   </div>
+  <div class="sh-bar" id="shBar" aria-label="Scrub through the Short" role="slider"><div class="sh-bt"><i id="shFill"></i></div><b class="sh-chip" id="shChip"></b><span class="sh-time" id="shTime"></span></div>
+  <div class="sh-2x" id="sh2x" hidden>2x</div>
   <div class="sh-cap"><b id="shCh"></b><span id="shTi"></span></div>
 </div>
 <div class="ptr" id="ptr" hidden>Release to refresh</div>
@@ -2169,11 +2180,11 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     });
     box.appendChild(g);
   }
-  var shF = null, shSt = -1, shLoadT = 0, shFb = 0, shPend = false;
-  function shCmd(func, args) { try { if (shF && shF.contentWindow) shF.contentWindow.postMessage(JSON.stringify({ event: "command", func: func, args: args || [] }), "*"); } catch (e) {} }
-  function shSrc(id) {
+  var shF = null, shSt = -1, shLoadT = 0, shFb = 0, shPend = false, shT = 0, shDur = 0, shPos = {}, shLastId = "", shDrag = false, SHLOG = load("sf_testhook", false) ? [] : null;
+  function shCmd(func, args) { if (SHLOG) SHLOG.push(func + ":" + JSON.stringify(args || [])); try { if (shF && shF.contentWindow) shF.contentWindow.postMessage(JSON.stringify({ event: "command", func: func, args: args || [] }), "*"); } catch (e) {} }
+  function shSrc(id, startAt) {
     var o = /^https?:/.test(location.protocol) ? "&origin=" + encodeURIComponent(location.origin) : "";
-    return "https://www.youtube.com/embed/" + encodeURIComponent(id) + "?autoplay=1&cc_load_policy=0&playsinline=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&enablejsapi=1" + o;
+    return "https://www.youtube.com/embed/" + encodeURIComponent(id) + "?autoplay=1&start=" + Math.floor(startAt || 0) + "&cc_load_policy=0&playsinline=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&enablejsapi=1" + o;
   }
   function shPoster(v) {
     var im = $("shPoster"); if (!v) { im.hidden = true; return; }
@@ -2183,16 +2194,23 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   function shArm() { clearTimeout(shFb); shFb = setTimeout(function () { if (!$("shOv").hidden && shSt !== 1 && shSt !== 3) $("shPlay").hidden = false; }, 2500); }
   function shAct() {
     var v = shList[shI]; if (!v) return;
+    if (shLastId && shLastId !== v.id) { if (shDur > 3 && shT > 1 && shT < shDur - 2) shPos[shLastId] = shT; else delete shPos[shLastId]; }
+    shLastId = v.id; shT = 0; shDur = 0; shBarSet(0); shRate(1);
+    var startAt = shPos[v.id] || 0;
     $("shPlay").hidden = true; shPoster(v); shInfo(); shSt = -1; clearTimeout(shLoadT); clearTimeout(shFb);
     if (!shF) {
       var f = el("iframe"); f.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture"); f.setAttribute("title", "Short"); f.referrerPolicy = "strict-origin-when-cross-origin";
       f.addEventListener("load", function () { try { f.contentWindow.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), "*"); } catch (e) {} shCaps(); });
-      f.src = shSrc(v.id); $("shVid").appendChild(f); shF = f; shArm(); return;
+      f.src = shSrc(v.id, startAt); $("shVid").appendChild(f); shF = f; shArm(); return;
     }
     shPend = true;
-    shLoadT = setTimeout(function () { shPend = false; var w = shList[shI]; if (!w) return; shCmd("loadVideoById", [w.id]); shCmd("unMute"); shCaps(); shArm(); }, 260);
+    shLoadT = setTimeout(function () { shPend = false; var w = shList[shI]; if (!w) return; shCmd("loadVideoById", [startAt ? { videoId: w.id, startSeconds: startAt } : w.id]); shCmd("unMute"); shCaps(); shArm(); }, 260);
   }
   var shCC = false;
+  function shFmt(t) { t = Math.max(0, Math.floor(t || 0)); return Math.floor(t / 60) + ":" + (t % 60 < 10 ? "0" : "") + (t % 60); }
+  function shBarSet(f) { f = Math.max(0, Math.min(1, f || 0)); $("shFill").style.width = (f * 100) + "%"; $("shChip").style.left = (f * 100) + "%"; $("shBar").setAttribute("aria-valuenow", String(Math.round(f * 100))); }
+  function shRate(r) { shCmd("setPlaybackRate", [r]); $("sh2x").hidden = r === 1; }
+  function shSeekRel(d) { var t = Math.max(0, Math.min(shDur ? shDur - 0.3 : 1e9, shT + d)); shT = t; shCmd("seekTo", [t, true]); if (shDur) shBarSet(t / shDur); }
   function shCaps() { if (shCC) { shCmd("loadModule", ["captions"]); } else { shCmd("unloadModule", ["captions"]); shCmd("setOption", ["captions", "track", {}]); } }
   function shTapPlay() { $("shPlay").hidden = true; shCmd("unMute"); shCmd("playVideo"); shArm(); }
   function shTap() { if (shSt === 1) { shCmd("pauseVideo"); shSt = 2; $("shPlay").hidden = false; } else shTapPlay(); }
@@ -2260,22 +2278,47 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     if (!/youtube\.com$/.test(String(e.origin).replace(/^https?:\/\//, ""))) return;
     var d; try { d = typeof e.data === "string" ? JSON.parse(e.data) : e.data; } catch (x) { return; }
     if (!d) return;
-    var st = d.event === "onStateChange" ? d.info : (d.info && d.info.playerState != null ? d.info.playerState : null);
-    if (st == null) return;
     if (!shF || e.source !== shF.contentWindow) return;
+    if (d.info && typeof d.info === "object") {
+      if (d.info.duration > 0) shDur = d.info.duration;
+      if (typeof d.info.currentTime === "number" && !shDrag) { shT = d.info.currentTime; if (shDur) shBarSet(shT / shDur); }
+    }
+    var st = d.event === "onStateChange" ? d.info : (d.info && d.info.playerState != null ? d.info.playerState : null);
+    if (typeof st !== "number") return;
     shSt = st;
     if (st === 1) { clearTimeout(shFb); $("shPlay").hidden = true; shCmd("unMute"); if (!shCC) shCmd("unloadModule", ["captions"]); var pi = $("shPoster"); pi.style.opacity = "0"; setTimeout(function () { if (shSt === 1) pi.hidden = true; }, 300); }
     else if (st === 0) { shCmd("seekTo", [0, true]); shCmd("playVideo"); }
     else if ((st === 2 || st === 5) && !shPend) { clearTimeout(shFb); shFb = setTimeout(function () { if (!$("shOv").hidden && shSt !== 1 && shSt !== 3) $("shPlay").hidden = false; }, 1100); }
   });
   (function () {
-    var hit = $("shHit"), y0 = 0, t0 = 0, x0 = 0;
-    hit.addEventListener("pointerdown", function (e) { y0 = e.clientY; x0 = e.clientX; t0 = Date.now(); });
-    hit.addEventListener("pointerup", function (e) {
+    var hit = $("shHit"), y0 = 0, t0 = 0, x0 = 0, holdT = 0, held = false, moved = false, tapT = 0, lastTap = 0, lastSide = 0, bar = $("shBar"), bx = 0;
+    function side(x) { var w = window.innerWidth; return x < w * 0.35 ? -1 : x > w * 0.65 ? 1 : 0; }
+    hit.addEventListener("pointerdown", function (e) {
+      y0 = e.clientY; x0 = e.clientX; t0 = Date.now(); held = false; moved = false; clearTimeout(holdT);
+      holdT = setTimeout(function () { if (!moved && shSt === 1) { held = true; shRate(2); } }, 280);
+    });
+    hit.addEventListener("pointermove", function (e) { if (!moved && (Math.abs(e.clientY - y0) > 12 || Math.abs(e.clientX - x0) > 12)) { moved = true; clearTimeout(holdT); if (held) { held = false; shRate(1); } } });
+    function release(e, cancel) {
+      clearTimeout(holdT);
+      if (held) { held = false; shRate(1); return; }
+      if (cancel) return;
       var dy = e.clientY - y0, dx = e.clientX - x0;
       if (Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx)) { shGo(dy < 0 ? 1 : -1); return; }
-      if (Math.abs(dy) < 12 && Math.abs(dx) < 12) shTap();
-    });
+      if (Math.abs(dy) < 12 && Math.abs(dx) < 12) {
+        var sd = side(e.clientX), now = Date.now();
+        if (sd && now - lastTap < 320 && sd === lastSide) { clearTimeout(tapT); lastTap = 0; shSeekRel(sd * 5); return; }
+        lastTap = now; lastSide = sd; clearTimeout(tapT);
+        if (sd) tapT = setTimeout(shTap, 300); else shTap();
+      }
+    }
+    hit.addEventListener("pointerup", function (e) { release(e, false); });
+    hit.addEventListener("pointercancel", function (e) { release(e, true); });
+    function barPos(e) { var r = bar.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / Math.max(1, r.width))); }
+    function barMove(e) { var f = barPos(e); shBarSet(f); $("shTime").textContent = shFmt(f * shDur) + " / " + shFmt(shDur); shT = f * shDur; if (shDur) shCmd("seekTo", [shT, false]); }
+    bar.addEventListener("pointerdown", function (e) { if (!shDur) return; shDrag = true; bar.classList.add("drag"); try { bar.setPointerCapture(e.pointerId); } catch (x) {} barMove(e); e.preventDefault(); });
+    bar.addEventListener("pointermove", function (e) { if (shDrag) barMove(e); });
+    function barEnd(e) { if (!shDrag) return; shDrag = false; bar.classList.remove("drag"); if (shDur) { shCmd("seekTo", [shT, true]); shCmd("playVideo"); } }
+    bar.addEventListener("pointerup", barEnd); bar.addEventListener("pointercancel", barEnd);
     $("shX").addEventListener("click", shClose); $("shUp").addEventListener("click", shKeep); $("shDn").addEventListener("click", shNah); $("shMore").addEventListener("click", function () { var v = shList[shI]; if (!v) return; var sv = isSaved(v.id); openSheet(v.channel, [{ label: shCC ? "Turn captions off" : "Turn captions on", pick: function () { shCC = !shCC; shCaps(); toast(shCC ? "Captions on for this session." : "Captions off.", null, null); } }, { label: sv ? "Remove from Watch later" : "Save to Watch later", pick: function () { toggleLater({ id: v.id, title: v.title, channel: v.channel, chId: v.chId, at: v.at, thumb: jkThumb(v.id), dur: 0, cat: "" }); } }, { label: "Hide Shorts from " + v.channel, pick: shMute }]); });
     $("shPlay").addEventListener("click", shTapPlay);
   })();
@@ -3030,7 +3073,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 34;
+  var VERSION = 35;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -3244,7 +3287,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
 
   // ---------- diagnostics (no key, token or watch history) ----------
   function clean(t) { return String(t).replace(/AIza[\w-]+/g, "[key]").replace(/ya29\.[\w.-]+/g, "[token]").replace(/([?&](?:key|access_token)=)[^&\s"]+/g, "$1[x]"); }
-  if (load("sf_testhook", false)) window.__sf = { noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
+  if (load("sf_testhook", false)) window.__sf = { shLog: SHLOG, shSet: function (t, d) { shT = t; shDur = d; }, noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
   function diagText() {
     var sz = {}, tot = 0;
     try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i), n = (localStorage.getItem(k) || "").length; if (k.indexOf("sf_") === 0) { sz[k.slice(3)] = n; tot += n; } } } catch (e) {}
