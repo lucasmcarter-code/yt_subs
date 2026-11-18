@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-GUnAfJwOC+QpdCSmtQTwVo3eiLvba0tocgQa0Id2xpM=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-olh/JFY7mS5boM9geUYCAF2x6cCBW0NNhiHyCBceBrs=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -762,7 +762,8 @@ body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px)
   }
 
   function pool(items, size, worker, onProgress) {
-    var i = 0, done = 0, results = [], failed = null;
+    var i = 0, done = 0, results = [], failed = null, skipped = [];
+    results.skipped = skipped;
     return new Promise(function (resolve, reject) {
       function next() {
         if (failed) return;
@@ -770,7 +771,10 @@ body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px)
         var idx = i++;
         worker(items[idx]).then(function (r) {
           results[idx] = r; done++; onProgress(done); next();
-        }, function (e) { failed = e; reject(e); });
+        }, function (e) {
+          if (e && (e.status === 403 || e.status === 401 || e.status === 400 || e.quota)) { failed = e; reject(e); return; }
+          skipped.push(items[idx] && (items[idx].title || items[idx].id)); results[idx] = []; done++; onProgress(done); next();
+        });
       }
       if (!items.length) resolve(results);
       for (var k = 0; k < Math.min(size, items.length); k++) next();
@@ -931,7 +935,7 @@ body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px)
       view.marker = view.marker || el("div", "more-marker");
       box.appendChild(view.marker);
       moreObs.observe(view.marker);
-    }
+    } else if (view.pos >= view.items.length && view.chan) { var cs = currentStore(); if (cs && cs.go && cs.paused) cs.go(false); }
   }
 
   // ---------- Following: channel postcards, then one channel's videos and playlists ----------
@@ -1255,15 +1259,15 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   function loadAll(store, key, getId, sid, title, onUpdate) {
     var st = store[key];
     if (st) return st;
-    st = store[key] = { items: [], done: false, busy: true, pages: 0 };
-    var notify = function (d) { if (currentStore() === st && fol.mode !== "playlists") onUpdate(d); };
+    st = store[key] = { items: [], done: false, busy: true, pages: 0, limit: 3, next: "", paused: false };
+    var notify = function (d) { if (currentStore() === st && fol.mode !== "playlists") { if (st.more && d) { st.more = false; extendList(); } else onUpdate(d); } };
     var useId = getId();
     function step(token, fallbackOk) {
       return pagePlaylist(useId, token, sid, title).then(function (r) {
         return addStats(r.items).then(function () {
-          st.items = st.items.concat(r.items); st.pages++;
+          st.items = st.items.concat(r.items); st.pages++; st.next = r.next || "";
           notify(false);
-          if (r.next && st.pages < 30) return step(r.next, false);
+          if (r.next && st.pages < 30) { if (st.pages < st.limit) return step(r.next, false); st.paused = true; }
         });
       }, function (e) {
         if (e.status === 404 && fallbackOk && /^UULF/.test(useId)) { useId = "UU" + useId.slice(4); return step(token, false); }
@@ -1271,7 +1275,9 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
         throw e;
       });
     }
-    step("", true).catch(function (e) { st.err = e.message; }).then(function () { st.done = true; st.busy = false; notify(true); });
+    function fin() { st.busy = false; if (!st.paused) st.done = true; notify(true); }
+    st.go = function (all) { if (all) st.limit = 99; if (!st.paused || st.busy) return; st.paused = false; st.busy = true; st.limit = Math.max(st.limit, st.pages + 3); step(st.next, false).catch(function (e) { st.err = e.message; }).then(function () { st.busy = false; if (!st.paused) st.done = true; st.more = true; notify(true); }); };
+    step("", true).catch(function (e) { st.err = e.message; }).then(fin);
     return st;
   }
 
@@ -1430,16 +1436,23 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var st = currentStore(), c = $("chCount"); if (!st || !c) return;
     c.textContent = "Loading all videos (" + st.items.length + " so far)";
   }
+  function extendList() {
+    var c = $("chCount"), st = currentStore(); if (!st) return;
+    if (view) { view.items = listFor(); if (view.pos >= view.items.length || !view.marker) appendMore(); else if (moreObs && view.marker) { moreObs.unobserve(view.marker); moreObs.observe(view.marker); } }
+    if (c) c.textContent = st.done ? st.items.length + (st.items.length === 1 ? " video" : " videos") : st.items.length + "+ videos";
+  }
+  function needAll(st) { var q = $("search").value.trim(); return chSort === "old" || chSort === "views" || chSort === "short" || chSort === "long" || !!q; }
   function renderChannelList() {
     var box = $("feed"); box.textContent = ""; view = null;
     var st = currentStore();
     if (!st) { setStatus("Loading"); return; }
     renderChannelHead();
+    if (st.go && st.paused && needAll(st)) st.go(true);
     var items = listFor(), c = $("chCount");
-    if (c) c.textContent = st.done ? items.length + (items.length === 1 ? " video" : " videos") : "Loading all videos (" + st.items.length + " so far)";
+    if (c) c.textContent = st.done ? items.length + (items.length === 1 ? " video" : " videos") : st.paused ? st.items.length + "+ videos" : "Loading all videos (" + st.items.length + " so far)";
     if (st.err && !st.items.length) { box.appendChild(el("p", "empty", "Could not load this channel: " + st.err)); return; }
     if (!items.length) { box.appendChild(el("p", "empty", st.done ? (st.items.length ? "Nothing to show. Turn off Hide watched." : "No videos found.") : "Loading videos")); return; }
-    view = { items: items, pos: 0, ranked: true, counts: {}, day: null, list: null, marker: null };
+    view = { items: items, pos: 0, ranked: true, counts: {}, day: null, list: null, marker: null, chan: true };
     appendMore();
   }
 
@@ -1576,6 +1589,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
         setStatus("Checking channel " + n + " of " + todo.length);
       });
     }).then(function (lists) {
+      if (lists && lists.skipped && lists.skipped.length) setTimeout(function () { toast("Skipped " + lists.skipped.length + (lists.skipped.length === 1 ? " channel that failed: " + lists.skipped[0] : " channels that failed") + ". It will retry next refresh.", null, null); }, 600);
       save("sf_chk", chk);
       // Videos we already know keep their length and category, so they are not looked up again.
       var known = {};
@@ -2159,7 +2173,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   function shCmd(func, args) { try { if (shF && shF.contentWindow) shF.contentWindow.postMessage(JSON.stringify({ event: "command", func: func, args: args || [] }), "*"); } catch (e) {} }
   function shSrc(id) {
     var o = /^https?:/.test(location.protocol) ? "&origin=" + encodeURIComponent(location.origin) : "";
-    return "https://www.youtube.com/embed/" + encodeURIComponent(id) + "?autoplay=1&playsinline=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&enablejsapi=1" + o;
+    return "https://www.youtube.com/embed/" + encodeURIComponent(id) + "?autoplay=1&cc_load_policy=0&playsinline=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&enablejsapi=1" + o;
   }
   function shPoster(v) {
     var im = $("shPoster"); if (!v) { im.hidden = true; return; }
@@ -2172,12 +2186,14 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     $("shPlay").hidden = true; shPoster(v); shInfo(); shSt = -1; clearTimeout(shLoadT); clearTimeout(shFb);
     if (!shF) {
       var f = el("iframe"); f.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture"); f.setAttribute("title", "Short"); f.referrerPolicy = "strict-origin-when-cross-origin";
-      f.addEventListener("load", function () { try { f.contentWindow.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), "*"); } catch (e) {} });
+      f.addEventListener("load", function () { try { f.contentWindow.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), "*"); } catch (e) {} shCaps(); });
       f.src = shSrc(v.id); $("shVid").appendChild(f); shF = f; shArm(); return;
     }
     shPend = true;
-    shLoadT = setTimeout(function () { shPend = false; var w = shList[shI]; if (!w) return; shCmd("loadVideoById", [w.id]); shCmd("unMute"); shArm(); }, 260);
+    shLoadT = setTimeout(function () { shPend = false; var w = shList[shI]; if (!w) return; shCmd("loadVideoById", [w.id]); shCmd("unMute"); shCaps(); shArm(); }, 260);
   }
+  var shCC = false;
+  function shCaps() { if (shCC) { shCmd("loadModule", ["captions"]); } else { shCmd("unloadModule", ["captions"]); shCmd("setOption", ["captions", "track", {}]); } }
   function shTapPlay() { $("shPlay").hidden = true; shCmd("unMute"); shCmd("playVideo"); shArm(); }
   function shTap() { if (shSt === 1) { shCmd("pauseVideo"); shSt = 2; $("shPlay").hidden = false; } else shTapPlay(); }
   function shOpen(i) {
@@ -2248,9 +2264,9 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     if (st == null) return;
     if (!shF || e.source !== shF.contentWindow) return;
     shSt = st;
-    if (st === 1) { clearTimeout(shFb); $("shPlay").hidden = true; shCmd("unMute"); var pi = $("shPoster"); pi.style.opacity = "0"; setTimeout(function () { if (shSt === 1) pi.hidden = true; }, 300); }
+    if (st === 1) { clearTimeout(shFb); $("shPlay").hidden = true; shCmd("unMute"); if (!shCC) shCmd("unloadModule", ["captions"]); var pi = $("shPoster"); pi.style.opacity = "0"; setTimeout(function () { if (shSt === 1) pi.hidden = true; }, 300); }
     else if (st === 0) { shCmd("seekTo", [0, true]); shCmd("playVideo"); }
-    else if ((st === 2 || st === 5) && !shPend) { clearTimeout(shFb); $("shPlay").hidden = false; }
+    else if ((st === 2 || st === 5) && !shPend) { clearTimeout(shFb); shFb = setTimeout(function () { if (!$("shOv").hidden && shSt !== 1 && shSt !== 3) $("shPlay").hidden = false; }, 1100); }
   });
   (function () {
     var hit = $("shHit"), y0 = 0, t0 = 0, x0 = 0;
@@ -2260,7 +2276,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       if (Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx)) { shGo(dy < 0 ? 1 : -1); return; }
       if (Math.abs(dy) < 12 && Math.abs(dx) < 12) shTap();
     });
-    $("shX").addEventListener("click", shClose); $("shUp").addEventListener("click", shKeep); $("shDn").addEventListener("click", shNah); $("shMore").addEventListener("click", function () { var v = shList[shI]; if (!v) return; var sv = isSaved(v.id); openSheet(v.channel, [{ label: sv ? "Remove from Watch later" : "Save to Watch later", pick: function () { toggleLater({ id: v.id, title: v.title, channel: v.channel, chId: v.chId, at: v.at, thumb: jkThumb(v.id), dur: 0, cat: "" }); } }, { label: "Hide Shorts from " + v.channel, pick: shMute }]); });
+    $("shX").addEventListener("click", shClose); $("shUp").addEventListener("click", shKeep); $("shDn").addEventListener("click", shNah); $("shMore").addEventListener("click", function () { var v = shList[shI]; if (!v) return; var sv = isSaved(v.id); openSheet(v.channel, [{ label: shCC ? "Turn captions off" : "Turn captions on", pick: function () { shCC = !shCC; shCaps(); toast(shCC ? "Captions on for this session." : "Captions off.", null, null); } }, { label: sv ? "Remove from Watch later" : "Save to Watch later", pick: function () { toggleLater({ id: v.id, title: v.title, channel: v.channel, chId: v.chId, at: v.at, thumb: jkThumb(v.id), dur: 0, cat: "" }); } }, { label: "Hide Shorts from " + v.channel, pick: shMute }]); });
     $("shPlay").addEventListener("click", shTapPlay);
   })();
 
@@ -3014,7 +3030,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 33;
+  var VERSION = 34;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
