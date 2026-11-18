@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-RtasD9516A1YV3gsxw7uTU7YSJSYZ/rXDGtBQhY8Xfs=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-LQOCji4WyPiVKV4inBGMY9HJ9p3T6Mf7EmD/ysyVmBE=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -469,6 +469,29 @@ body.pvOn .toast { z-index: 80; }
 .jk-empty .jk-mode { margin: 14px 0 0; }
 .jk-mode button { height: 40px; border: 3px solid #2a2622; border-radius: 20px; background: #f1c9a3; color: #2a2622; font: 700 14px/1 "Manrope", system-ui, sans-serif; box-shadow: 2px 3px 0 #2a2622; padding: 0 18px; }
 .jk-mode button.on { background: #2a2622; color: #fff3dc; }
+.cb-l { display: block; font-weight: 600; font-size: 14px; margin: 14px 0 6px; }
+.cb { position: relative; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 8px 8px 4px; }
+.cb-chip { display: inline-flex; align-items: center; gap: 2px; height: 30px; padding: 0 4px 0 12px; margin: 0 6px 6px 0; border-radius: 15px; background: var(--accent); color: var(--accent-ink); font-size: 13px; font-weight: 600; }
+.cb-chip button { width: 26px; height: 26px; border: 0; border-radius: 50%; background: transparent; color: inherit; font-size: 15px; line-height: 1; padding: 0; }
+.cb-more { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; margin: 0 6px 6px 0; border-radius: 15px; border: 1px solid var(--line); background: transparent; color: var(--ink); font-size: 13px; font-weight: 600; }
+.cb input { width: 100%; height: 40px; border: 0; background: transparent; color: var(--ink); padding: 0 6px; outline: none; }
+.cb-dd { border-top: 1px solid var(--line); margin: 0 -8px; }
+.cb-dd button { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ink); padding: 10px 14px; font-size: 14px; }
+.cb-dd button:last-child { border-bottom: 0; }
+.cb-dd button.on, .cb-dd button:hover { background: rgba(255, 255, 255, 0.07); }
+.cb-dd small { color: var(--muted); }
+.wl { max-width: 620px; margin: 0 auto; padding: 18px 0 60px; }
+.wl h2 { font: italic 700 34px/1.1 Georgia, "Caveat", serif; margin: 10px 0 6px; }
+.wl > p { color: var(--muted); margin: 0 0 14px; }
+.wl-step { display: flex; gap: 14px; padding: 18px 0; border-top: 1px solid var(--line); }
+.wl-n { flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-weight: 700; display: grid; place-items: center; }
+.wl-step > div { flex: 1; min-width: 0; }
+.wl-step b { display: block; font-size: 17px; margin-bottom: 2px; }
+.wl-step p { margin: 0 0 10px; color: var(--muted); font-size: 14px; }
+.wl-step input { width: 100%; height: 46px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 0 14px; margin-bottom: 8px; }
+.wl-step .btn-row { margin: 0; }
+.wl-ok { color: #3FB26A; font-size: 13px; font-weight: 600; margin: 0 0 8px; }
+.wl-end { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-top: 1px solid var(--line); padding-top: 18px; }
 </style>
 </head>
 <body>
@@ -537,6 +560,24 @@ body.pvOn .toast { z-index: 80; }
   </section>
 
   <!-- Settings view -->
+  <section id="welcomeView" hidden>
+    <div class="wl">
+      <h2>Welcome to North Star</h2>
+      <p>Three steps and your feed is ready. Everything you enter stays in this browser.</p>
+      <div class="wl-step"><span class="wl-n">1</span><div><b>Connect to YouTube</b><p>Paste a YouTube API key, or an invite code from a friend.</p>
+        <input type="text" id="wKey" placeholder="API key or invite code" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="API key or invite code">
+        <div class="wl-ok" id="wKeyOk" hidden></div>
+        <div class="btn-row"><button class="btn ghost" id="wHelp" type="button">How to get a key</button></div></div></div>
+      <div class="wl-step"><span class="wl-n">2</span><div><b>Bring in your subscriptions</b><p>Sign in with Google, or type your channel handle if your subscriptions are public.</p>
+        <input type="text" id="wCid" placeholder="Google OAuth client ID" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Google OAuth client ID" hidden>
+        <input type="text" id="wHandle" placeholder="@yourhandle" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Channel handle" hidden>
+        <div class="btn-row"><button class="btn" id="wGoogle" type="button">Sign in with Google</button><button class="btn ghost" id="wUseHandle" type="button">Use a handle instead</button></div></div></div>
+      <div class="wl-step"><span class="wl-n">3</span><div><b>Already use North Star elsewhere?</b><p>Turn on sync to pull your saved data from your own Google Drive. Optional.</p>
+        <div class="btn-row"><button class="btn ghost" id="wSync" type="button">Turn on sync</button></div></div></div>
+      <div class="status" id="wStatus" role="status"></div>
+      <div class="wl-end"><button class="btn ghost" id="wFull" type="button">All settings</button><button class="btn" id="wLoad" type="button">Load my feed</button></div>
+    </div>
+  </section>
   <section id="settingsView" class="sheet" hidden>
     <h2>Connect your subscriptions</h2>
     <div class="verbar"><b id="versionTop"></b><button class="btn ghost" id="reloadBtn" type="button">Reload newest</button><span id="updMsg">Checking for a newer version</span></div>
@@ -611,7 +652,12 @@ body.pvOn .toast { z-index: 80; }
 
     <h3>Playback</h3>
     <label class="check"><input type="checkbox" id="srchInf" checked> Let my pinned and repeated searches steer Discover (up to 20% of picks)</label>
-    <div class="field"><label for="favMusic">Favorite music for the Jukebox</label><textarea id="favMusic" rows="3" autocomplete="off" autocapitalize="off" placeholder="Artists and genres, one per line or separated by commas. Example: Tyler Childers, bluegrass, Khruangbin, jazz"></textarea></div>
+    <textarea id="favMusic" hidden></textarea>
+    <div class="field" id="jkbBox"><label>Jukebox bands</label><div class="hint">Refill searches these by full name. They are your own list, saved in this browser and synced to your own Google Drive.</div>
+      <label class="cb-l" for="cbOwnIn">My bands</label><div class="cb" id="cbOwn"></div>
+      <label class="cb-l" for="cbSimIn">Similar bands</label><div class="cb" id="cbSim"></div><div class="hint">Bands like yours that Refill should also try. A recommender such as hate5six.com/sage can suggest some.</div>
+      <label class="cb-l" for="cbNeverIn">Never show</label><div class="cb" id="cbNever"></div>
+    </div>
     <div class="hint">The Jukebox looks for new artists like these, and it learns from what you play or skip.</div>
     <div class="btn-row"><button class="btn ghost small" id="srchClear" type="button">Clear remembered searches</button></div>
     <label class="check"><input type="checkbox" id="hideShorts" checked> Leave out Shorts and live streams (from Subs and Discover)</label>
@@ -643,6 +689,7 @@ body.pvOn .toast { z-index: 80; }
         <details class="help"><summary>One-time setup</summary><p>In Google Cloud Console, open the project that holds your OAuth client ID, go to APIs and Services, Library, find "Google Drive API" and press Enable. Then press Turn on sync here and approve the Google prompt. Do the Turn on step once in each browser.</p></details>
       </div>
     <div class="field"><label>Backup</label><div class="hint">Saves your keepers, hidden items, favorites, learning and follows into one file. It leaves out your API key and client ID.</div>
+      <div class="btn-row"><button class="btn ghost" id="inviteBtn" type="button">Copy invite for a friend</button></div><div class="hint">The invite holds only your API key and client ID, so a friend can paste one code. They share your daily quota, and you still need to add them as a test user in Google Cloud.</div>
       <div class="btn-row"><button class="btn ghost" id="expBtn" type="button">Export backup</button><button class="btn ghost" id="impBtn" type="button">Import backup</button></div>
       <input type="file" id="impFile" accept="application/json,.json" hidden></div>
     <div class="btn-row"><button class="btn ghost" id="diagBtn" type="button">Copy diagnostics</button><button class="btn" id="crashBtn" type="button">Copy crash report</button></div>
@@ -741,10 +788,11 @@ body.pvOn .toast { z-index: 80; }
   function show(view) {
     feedView.hidden = view !== "feed";
     settingsView.hidden = view !== "settings";
+    $("welcomeView").hidden = view !== "welcome";
     window.scrollTo(0, 0);
   }
   function setStatus(msg, isErr) {
-    [$("status"), $("setupStatus")].forEach(function (s) { s.textContent = msg || ""; s.classList.toggle("err", !!isErr); });
+    [$("status"), $("setupStatus"), $("wStatus")].forEach(function (s) { s.textContent = msg || ""; s.classList.toggle("err", !!isErr); });
   }
   var toastTimer = null;
   function toast(msg, actLabel, fn) {
@@ -770,17 +818,31 @@ body.pvOn .toast { z-index: 80; }
     return pdVal;
   }
   function quota() { if (!qMem) qMem = load("sf_quota", { day: "", used: 0 }); var d = pacificDay(); if (qMem.day !== d) qMem = { day: d, used: 0 }; return qMem; }
+  // Shared tally: each of this user's synced browsers records its own spending for the day; the ring shows the sum.
+  var devId = load("sf_dev", ""); if (!devId) { devId = "d" + Math.random().toString(36).slice(2, 10); save("sf_dev", devId); }
+  var qShareAt = -1;
+  function qShare() { var d = pacificDay(), q = load("sf_qshare", null); if (!q || q.day !== d) q = { day: d, by: {}, out: 0 }; return q; }
+  function qShareWrite(force) {
+    var q = quota(); if (!force && qShareAt >= 0 && Math.abs(q.used - qShareAt) < 50) return;
+    var sh = qShare(); if (sh.by[devId] === q.used && !force) { qShareAt = q.used; return; }
+    sh.by[devId] = q.used; qShareAt = q.used; save("sf_qshare", sh);
+  }
+  function quotaUsed() { var q = quota(), sh = qShare(), sum = 0; Object.keys(sh.by).forEach(function (k) { if (k !== devId) sum += +sh.by[k] || 0; }); sum += q.used; return sh.out ? 10000 : Math.min(10000, sum); }
+  function quotaOut() {
+    var sh = qShare(); if (sh.out) return; var mine = quotaUsed(); sh.out = 1; sh.by[devId] = quota().used; save("sf_qshare", sh); quotaRing();
+    if (mine < 8500) toast("The key is out of quota for today. Someone else on this key used the rest.", null, null);
+  }
   function quotaFlush() { if (qT) { clearTimeout(qT); qT = 0; save("sf_quota", qMem); } }
-  function spend(n) { var q = quota(); q.used += n; if (!qT) qT = setTimeout(function () { qT = 0; save("sf_quota", qMem); quotaRing(); }, 800); }
+  function spend(n) { var q = quota(); q.used += n; if (!qT) qT = setTimeout(function () { qT = 0; save("sf_quota", qMem); qShareWrite(false); quotaRing(); }, 800); }
   window.addEventListener("pagehide", quotaFlush);
   document.addEventListener("visibilitychange", function () { if (document.hidden) quotaFlush(); });
   function quotaRing() {
     var b = document.getElementById("settingsBtn"); if (!b) return;
-    var pct = Math.min(100, quota().used / 100);
+    var pct = Math.min(100, quotaUsed() / 100);
     b.style.setProperty("--q", String(Math.round(pct))); b.style.setProperty("--qc", pct >= 95 ? "#E5484D" : pct >= 80 ? "#F2B03C" : "var(--accent)");
     b.setAttribute("aria-label", "Open settings. " + Math.round(pct) + " percent of today's quota used");
   }
-  function quotaLeft() { return Math.max(0, 10000 - quota().used); }
+  function quotaLeft() { return Math.max(0, 10000 - quotaUsed()); }
 
   // ---------- YouTube API ----------
   function api(path, params, token, cost) {
@@ -796,6 +858,7 @@ body.pvOn .toast { z-index: 80; }
           var e = new Error((j.error && j.error.message) || ("Request failed (" + r.status + ")"));
           e.status = r.status;
           e.reason = j.error && j.error.errors && j.error.errors[0] && j.error.errors[0].reason;
+          if (e.reason === "quotaExceeded" || e.reason === "dailyLimitExceeded") { try { quotaOut(); } catch (x) {} }
           throw e;
         }
         return j;
@@ -1097,7 +1160,6 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
 // @@ICONS-END
 
   if (!load("sf_topicsSeeded", false)) {
-    if (!cfg.topics) { cfg.topics = TOPICS.map(function (t) { return t[0]; }).join(", "); save("sf_cfg", cfg); }
     save("sf_topicsSeeded", true);
   }
   var chTheme = load("sf_chTheme", {});             // channelId -> topic name, or "none": your own choice for a card
@@ -1998,28 +2060,39 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   var JK_OWNX = "Snotty Nose Rez Kids|AURORA|Jeaux Seph|No Bird Sing|Poor Man's Poison|Dessa|Ren|Adam Guzman|Father Of Peace|Unamused Dave".split("|");
   var JK_SIM = "Casket Lottery|Prawn|Braid|Look Mexico|Sundays Best|Sunny Day Real Estate|Engine Down|Hey Mercedes|Balance and Composure|Circa Survive|Their / They're / There|Piebald|The World Is a Beautiful Place & I Am No Longer Afraid to Die|The Jealous Sound|The Get Up Kids|Elliott|At the Drive-In|Moneen|You Blew It!|Seahaven|Benton Falls|Boys Night Out|Pianos Become the Teeth|A Great Big Pile of Leaves|CSTVT|Small Leaks Sink Ships|Colour Revolt|Mock Orange|Tiny Moving Parts|Snowing|No Knife|Chamberlain|The Appleseed Cast|Texas Is the Reason|The Anniversary|Everyone Everywhere|The Promise Ring|Young Statues|American Football|Hot Rod Circuit|Native|Dads|Jeremy Enigk|Moving Mountains|Deer Leap|My Heart to Joy|Glassjaw|The Republic of Wolves|Rival Schools|Small Brown Bike|The New Amsterdams|Hightide Hotel|Desaparecidos|Looming|Weatherbox|Joie De Vivre|Cap'n Jazz|The Fire Theft|Empire! Empire! (I Was a Lonely Estate)|Further Seems Forever|I Hate Myself|Kittyhawk|Sainthood Reps|Have Mercy|The Sound of Animals Fighting|Crash of Rhinos|Jets to Brazil|Football, etc.|Pop Unknown|The Gloria Record|Petal|Owen|Knapsack|On the Might of Princes|As Cities Burn|From Indian Lakes|Algernon Cadwallader|Into It. Over It.|Microwave|Frodus|The Good Life|Cardboard Swords|Koji|These Arms Are Snakes|Cross My Heart|I Kill Giants|Armor for Sleep|Adventures|Lydia|Street Smart Cyclist|Reggie and the Full Effect|New End Original|Restorations|The Juliana Theory".split("|");
   var JK_SIMX = "Doomtree|P.O.S|Sims|Brother Ali|Atmosphere|Aesop Rock|Sage Francis|Open Mike Eagle|billy woods|Armand Hammer|Frank Waln|The Halluci Nation|Shad|Noname|Astronautalis|Kae Tempest|Sigrid|Susanne Sundfør|Daughter|Highasakite|Of Monsters and Men|Agnes Obel|Eivør|The Dead South|Amigo the Devil".split("|");
-  var JK_NEVER = ["brand new", "touche amore", "taylor swift", "chappell roan"];
+  var JK_NEVER0 = ["Brand New", "Touché Amoré", "Taylor Swift", "Chappell Roan"];
+  // The lists above are only a one-time starter for browsers that were already set up before V40. From here on the bands are the user's own data (sf_jkb), synced to their own Drive; new setups start empty.
+  var jkb = load("sf_jkb", null), jkbRev = 0;
+  if (!jkb) {
+    var jkOld = !!(load("sf_cfg", {}).key);
+    jkb = { own: [], sim: [], never: [], v: 1 };
+    if (jkOld) {
+      var gI = new RegExp(GENRE_RE.source, "i"), favOld = String(load("sf_cfg", {}).favMusic || "").split(/[\n,;]+/).map(function (x) { return x.trim(); }).filter(function (x) { return x.length >= 2 && !gI.test(x); });
+      jkb.own = favOld.concat(JK_OWN, JK_OWNX); jkb.sim = JK_SIM.concat(JK_SIMX); jkb.never = JK_NEVER0.slice();
+    }
+    save("sf_jkb", jkb);
+  }
+  jkb.own = jkb.own || []; jkb.sim = jkb.sim || []; jkb.never = jkb.never || [];
+  var JK_NEVER = [];
   var JK_ALIAS = { "ttng": ["this town needs guns"], "the world is a beautiful place & i am no longer afraid to die": ["the world is a beautiful place", "twiabp"], "their / they're / there": ["their theyre there"], "empire! empire! (i was a lonely estate)": ["empire empire"], "the sound of animals fighting": ["tsoaf"], "the receiving end of sirens": ["treos"] };
   var JK_SESS = /audiotree|kexp|npr music|tiny desk|hate5six|little elephant|sofar sounds|jam in the van|bbc|triple j|la blogoth|daytrotter|from the basement|far out|pitchfork|paste|sideonedummy|run for cover|topshelf|count your lucky stars|big scary monsters|epitaph|polyvinyl|tooth|equal vision|triple crown|vagrant|deep elm|jade tree|rhymesayers|doomtree/;
   function jkNorm(x) { var t = String(x || "").toLowerCase(); try { t = t.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); } catch (e) {} return t.replace(/&/g, " and ").replace(/['\u2019.]/g, "").replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim(); }
-  var jkIdx = null, jkIdxSig = null, jkBandMemo = {};
+  var jkIdx = null, jkIdxSig = null, jkBandMemo = {}, jkKindMemo = {};
   function jkBands() {
-    var sig = cfg.favMusic || "";
-    if (jkIdx && sig === jkIdxSig) return jkIdx;
-    GENRE_I = GENRE_I || new RegExp(GENRE_RE.source, "i");
-    var favs = favTerms().filter(function (f) { return f.length >= 2 && !GENRE_I.test(f); });
-    var got = {}, own = [], ownx = [], sim = [], simx = [], keys = [];
+    if (jkIdx && jkIdxSig === jkbRev) return jkIdx;
+    var got = {}, own = [], sim = [], keys = [];
+    JK_NEVER = jkb.never.map(function (n) { return jkNorm(n).replace(/^the /, ""); }).filter(Boolean);
     function add(name, into) {
       var k = jkNorm(name).replace(/^the /, ""); if (!k || got[k] || JK_NEVER.indexOf(k) >= 0) return; got[k] = name; into.push(name);
       keys.push({ k: k, name: name, one: k.indexOf(" ") < 0 });
       (JK_ALIAS[name.toLowerCase()] || []).forEach(function (a) { keys.push({ k: jkNorm(a), name: name, one: a.indexOf(" ") < 0 }); });
     }
-    favs.forEach(function (n) { add(n, own); }); JK_OWN.forEach(function (n) { add(n, own); }); JK_OWNX.forEach(function (n) { add(n, ownx); });
-    JK_SIM.forEach(function (n) { add(n, sim); }); JK_SIMX.forEach(function (n) { add(n, simx); });
+    jkb.own.forEach(function (n) { add(n, own); }); jkb.sim.forEach(function (n) { add(n, sim); });
     keys.sort(function (a, b) { return b.k.length - a.k.length; });
-    jkIdxSig = sig; jkBandMemo = {};
-    return jkIdx = { own: own, ownx: ownx, sim: sim, simx: simx, keys: keys };
+    jkIdxSig = jkbRev; jkBandMemo = {}; jkKindMemo = {};
+    return jkIdx = { own: own, ownx: [], sim: sim, simx: [], keys: keys };
   }
+  function jkbChanged() { jkbRev++; jkIdx = null; save("sf_jkb", jkb); }
   // Which known band a video is by. "" when none; "!" when it is on the never-show list.
   function jkBandOf(v) {
     var idx = jkBands(), mk = v.id + "|" + v.title; if (jkBandMemo[mk] != null) return jkBandMemo[mk];
@@ -2043,7 +2116,6 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   var JK_ALTER = /\b(slowed|reverb|sped up|speed up|nightcore|daycore|8d audio|bass boosted|1 hour|10 hours|hour loop|looped)\b/i;
   var JK_TALK = /\b(interviews?|podcast|q ?& ?a|q and a|talks? (about|to|with)|discuss(es|ing|ion)?|in conversation|conversation with|documentary|behind the scenes|track by track|commentary|episode [0-9]+|ep\.? ?[0-9]+)\b/i;
   // "junk" = never show (practice material, covers, reactions, altered audio, fan lyric uploads); "talk" = interviews and podcasts; "music" otherwise.
-  var jkKindMemo = {};
   function jkKind(v) {
     var mk = v.id + "|" + v.title; if (jkKindMemo[mk]) return jkKindMemo[mk];
     var t = String(v.title || ""), ch = String(v.channel || ""), out = "music";
@@ -2084,7 +2156,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   // The artist of a video: a favorite named in the title, else the text before " - ", else the channel.
   var akSig = "", akTerms = [], akMemo = {}, GENRE_I = null;
   function artistKey(v) {
-    var keys = Object.keys(jbl.t), sig = (cfg.favMusic || "") + "|" + keys.length;
+    var keys = Object.keys(jbl.t), sig = jkbRev + "|" + keys.length;
     if (sig !== akSig) { akSig = sig; akMemo = {}; GENRE_I = GENRE_I || new RegExp(GENRE_RE.source, "i"); akTerms = favTerms().concat(keys).map(function (f) { return f.toLowerCase(); }).filter(function (f) { return f.length >= 3 && !GENRE_I.test(f); }); }
     var mk = v.id + "|" + v.title; if (akMemo[mk]) return akMemo[mk];
     var bd = jkBandOf(v);
@@ -2242,13 +2314,12 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     ks.slice(120).forEach(function (k) { delete jbl.t[k]; });
     save("sf_jbl", jbl);
   }
-  function favTerms() { return String(cfg.favMusic || "").split(/[\n,;]+/).map(function (x) { return x.trim(); }).filter(Boolean); }
+  function favTerms() { return jkb.own.slice(); }
   // Half your own bands, half similar bands. Each search names four bands in full, joined with OR.
   function jukeQueries() {
-    var idx = jkBands(), n = jb.n || 0, used = [];
+    var idx = jkBands(), used = [];
     function grab(list, ptr, k) { var g = jkTake(list, ptr, k, used); used = used.concat(g); return g; }
-    var withX = n % 2 === 0;
-    var a = grab(idx.own, "po", withX ? 1 : 2).concat(withX ? grab(idx.ownx, "pox", 1) : []).concat(grab(idx.sim, "ps", withX ? 1 : 2)).concat(withX ? grab(idx.simx, "psx", 1) : []);
+    var a = grab(idx.own, "po", 2).concat(grab(idx.sim, "ps", 2));
     var b = grab(idx.own, "po", 2).concat(grab(idx.sim, "ps", 2));
     var c = grab(idx.own, "po", 2).concat(grab(idx.sim, "ps", 2));
     return [
@@ -2262,7 +2333,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     if (!cfg.key) { show("settings"); setStatus("Add an API key to start.", true); return; }
     if (quotaLeft() < 340) { toast("Not enough of today's free quota left for a refill.", null, null); return; }
     var qs = jukeQueries(); jb.n = (jb.n || 0) + 1;
-    if (!qs.length) { toast("No bands left to search for.", null, null); return; }
+    if (!qs.length) { toast("Add some bands in Settings first, under Jukebox bands.", null, null); return; }
     start();
     var fresh = [], have = {}, lang = (navigator.language || "en").slice(0, 2), si = {};
     subs.forEach(function (x) { si[x.id] = 1; });
@@ -2507,7 +2578,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   })();
 
   // ---------- backup ----------
-  var BK_KEYS = ["sf_tasteSeen", "sf_visit", "sf_folSort", "sf_folRev", "sf_cfg", "sf_subs", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_chTags", "sf_jb", "sf_jbl", "sf_shorts", "sf_shch", "sf_rec", "sf_recNo", "sf_recYes", "sf_seeds", "sf_later", "sf_sh", "sf_unf", "sf_dboost", "sf_chTheme"];
+  var BK_KEYS = ["sf_jkb", "sf_tasteSeen", "sf_visit", "sf_folSort", "sf_folRev", "sf_cfg", "sf_subs", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_chTags", "sf_jb", "sf_jbl", "sf_shorts", "sf_shch", "sf_rec", "sf_recNo", "sf_recYes", "sf_seeds", "sf_later", "sf_sh", "sf_unf", "sf_dboost", "sf_chTheme"];
   function bkMake() {
     var data = {};
     BK_KEYS.forEach(function (k) { var raw = localStorage.getItem(k); if (raw == null) return; try { data[k] = JSON.parse(raw); } catch (e) {} });
@@ -3160,7 +3231,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   });
   $("clearMutedBtn").addEventListener("click", function () { mutedCh = {}; save("sf_mutedCh", mutedCh); fillSettings(); setStatus("All channels unmuted."); });
   $("forgetBtn").addEventListener("click", function () {
-    ["sf_sync", "sf_syncm", "sf_synctok", "sf_jbv", "sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_recYes", "sf_later", "sf_chk", "sf_chinfo", "sf_folSort", "sf_folRev", "sf_chSort", "sf_chHide", "sf_plSort", "sf_chTheme", "sf_topicsSeeded", "sf_dref", "sf_dq", "sf_dseen", "sf_dboost", "sf_topicAt", "sf_light", "sf_crash", "sf_sq", "sf_sc", "sf_sh", "sf_jb", "sf_shorts", "sf_shch", "sf_lastcrash", "sf_unf", "sf_chTags", "sf_jbl"].forEach(drop);
+    ["sf_jkb", "sf_qshare", "sf_dev", "sf_sync", "sf_syncm", "sf_synctok", "sf_jbv", "sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_recYes", "sf_later", "sf_chk", "sf_chinfo", "sf_folSort", "sf_folRev", "sf_chSort", "sf_chHide", "sf_plSort", "sf_chTheme", "sf_topicsSeeded", "sf_dref", "sf_dq", "sf_dseen", "sf_dboost", "sf_topicAt", "sf_light", "sf_crash", "sf_sq", "sf_sc", "sf_sh", "sf_jb", "sf_shorts", "sf_shch", "sf_lastcrash", "sf_unf", "sf_chTags", "sf_jbl"].forEach(drop);
     chk = {};
     cfg = Object.assign({}, DEFAULT_CFG, { v2: 1 });
     subs = []; feed = { at: 0, items: [] }; disc = { at: 0, n: 0, items: [] };
@@ -3247,7 +3318,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 39;
+  var VERSION = 40;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -3461,7 +3532,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
 
   // ---------- diagnostics (no key, token or watch history) ----------
   function clean(t) { return String(t).replace(/AIza[\w-]+/g, "[key]").replace(/ya29\.[\w.-]+/g, "[token]").replace(/([?&](?:key|access_token)=)[^&\s"]+/g, "$1[x]"); }
-  if (load("sf_testhook", false)) window.__sf = { jkKind: jkKind, jkBandOf: jkBandOf, jukeQueries: jukeQueries, pvEnd: function () { pvEnded(); }, pvState: function () { return { id: pvV && pvV.id, st: pvSt }; }, shLog: SHLOG, shSet: function (t, d) { shT = t; shDur = d; }, noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
+  if (load("sf_testhook", false)) window.__sf = { inviteMake: inviteMake, quotaUsed: function () { return quotaUsed(); }, jkKind: jkKind, jkBandOf: jkBandOf, jukeQueries: jukeQueries, pvEnd: function () { pvEnded(); }, pvState: function () { return { id: pvV && pvV.id, st: pvSt }; }, shLog: SHLOG, shSet: function (t, d) { shT = t; shDur = d; }, noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
   function diagText() {
     var sz = {}, tot = 0;
     try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i), n = (localStorage.getItem(k) || "").length; if (k.indexOf("sf_") === 0) { sz[k.slice(3)] = n; tot += n; } } } catch (e) {}
@@ -3628,7 +3699,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     if (k === "/" && !$("feedView").hidden) { e.preventDefault(); setTab("srch"); setTimeout(function () { var q = $("srchQ"); if (q) q.focus(); }, 60); }
   });
   // ---------- sync between browsers (Google Drive app-data folder) ----------
-  var SYNC_KEYS = BK_KEYS.filter(function (k) { return k !== "sf_visit" && k !== "sf_tasteSeen"; });
+  var SYNC_KEYS = BK_KEYS.filter(function (k) { return k !== "sf_visit" && k !== "sf_tasteSeen"; }).concat(["sf_qshare"]);
   var SYNC_UNION = { sf_seen: 1, sf_hidden: 1 };
   var sync = load("sf_sync", { on: false, at: 0, inited: false, fileId: "" }), syncM = load("sf_syncm", {}), syncBusy = false, syncT = 0, syncApplying = false, syncPending = false;
   function syncSaveState() { try { localStorage.setItem("sf_sync", JSON.stringify(sync)); localStorage.setItem("sf_syncm", JSON.stringify(syncM)); } catch (e) {} }
@@ -3681,6 +3752,10 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       var L = syncLocal(k), R = rk[k], lt = syncM[k] || 0, val;
       if (!R) { if (L !== undefined) push = true; return; }
       if (L === undefined) val = R.v;
+      else if (k === "sf_qshare") {
+        if (!R.v || R.v.day !== L.day) val = (R.v && R.v.day > L.day) ? R.v : L;
+        else { val = { day: L.day, by: {}, out: (L.out || R.v.out) ? 1 : 0 }; [R.v.by || {}, L.by || {}].forEach(function (m) { Object.keys(m).forEach(function (d) { val.by[d] = Math.max(val.by[d] || 0, +m[d] || 0); }); }); }
+      }
       else if (first || SYNC_UNION[k]) {
         if (k === "sf_model") val = ((R.v && R.v.n) || 0) > ((L && L.n) || 0) ? R.v : L;
         else if (k === "sf_cfg" || k === "sf_folSort" || k === "sf_folRev") val = L;
@@ -3750,6 +3825,92 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   window.addEventListener("pagehide", function () { if (sync.on && syncT && syncTok()) { clearTimeout(syncT); syncT = 0; try { if (sync.fileId) fetch(DRIVE_UP + "/" + encodeURIComponent(sync.fileId) + "?uploadType=media", { method: "PATCH", keepalive: true, headers: { Authorization: "Bearer " + syncTok(), "Content-Type": "application/json" }, body: syncPayload() }); } catch (e) {} } });
   syncLine();
   if (sync.on) { if (syncTok()) setTimeout(function () { if (!sessionStorage.getItem("sf_syncr")) { syncNow(false); } try { sessionStorage.removeItem("sf_syncr"); } catch (e) {} }, 1200); else setTimeout(syncNudge, 1500); }
+  // ---------- band boxes with suggestions ----------
+  var mbT = 0, mbSeq = 0, mbCache = {};
+  function mbSuggest(q, cb) {
+    var k = q.toLowerCase(); if (mbCache[k]) { cb(mbCache[k]); return; }
+    var my = ++mbSeq;
+    clearTimeout(mbT); mbT = setTimeout(function () {
+      fetch("https://musicbrainz.org/ws/2/artist?fmt=json&limit=6&query=" + encodeURIComponent("artist:" + q.replace(/[^\w\s.'&-]/g, " ") + "*")).then(function (r) { return r.ok ? r.json() : { artists: [] }; }).then(function (j) {
+        var out = (j.artists || []).map(function (a) { return { name: a.name, note: [a.disambiguation, a.area && a.area.name].filter(Boolean).join(", ") }; });
+        mbCache[k] = out; if (my === mbSeq) cb(out);
+      }).catch(function () { if (my === mbSeq) cb([]); });
+    }, 350);
+  }
+  function chipBox(rootId, listName, placeholder) {
+    var root = $(rootId), open = false, sel = -1;
+    var chips = el("div"), inp = el("input"), dd = el("div", "cb-dd"); inp.type = "text"; inp.id = rootId + "In"; inp.placeholder = placeholder; inp.autocomplete = "off"; inp.setAttribute("autocapitalize", "off"); inp.spellcheck = false; dd.hidden = true;
+    root.appendChild(chips); root.appendChild(inp); root.appendChild(dd);
+    function draw() {
+      chips.textContent = ""; var list = jkb[listName], show = open ? list : list.slice(0, 10);
+      show.forEach(function (name) {
+        var c = el("span", "cb-chip"); c.appendChild(el("span", null, name));
+        var x = el("button", null, "×"); x.type = "button"; x.setAttribute("aria-label", "Remove " + name);
+        x.addEventListener("click", function () { jkb[listName] = jkb[listName].filter(function (n) { return n !== name; }); jkbChanged(); draw(); });
+        c.appendChild(x); chips.appendChild(c);
+      });
+      if (list.length > 10) { var m = el("button", "cb-more", open ? "Show fewer" : "+" + (list.length - 10) + " more"); m.type = "button"; m.addEventListener("click", function () { open = !open; draw(); }); chips.appendChild(m); }
+    }
+    function add(name) {
+      name = String(name || "").trim().replace(/\s+/g, " "); inp.value = ""; dd.hidden = true; dd.textContent = ""; sel = -1; if (!name) return;
+      var k = jkNorm(name); if (jkb[listName].some(function (n) { return jkNorm(n) === k; })) { toast(name + " is already on that list.", null, null); return; }
+      jkb[listName].unshift(name); jkbChanged(); draw();
+    }
+    function menu(items) {
+      var q = inp.value.trim(); dd.textContent = ""; sel = -1; if (q.length < 2) { dd.hidden = true; return; }
+      items.forEach(function (it) { var b = el("button"); b.type = "button"; b.appendChild(el("span", null, it.name)); if (it.note) b.appendChild(el("small", null, " · " + it.note)); b.addEventListener("mousedown", function (e) { e.preventDefault(); }); b.addEventListener("click", function () { add(it.name); }); dd.appendChild(b); });
+      var own = el("button", null, "Add “" + q + "” as typed"); own.type = "button"; own.addEventListener("mousedown", function (e) { e.preventDefault(); }); own.addEventListener("click", function () { add(q); }); dd.appendChild(own);
+      dd.hidden = false;
+    }
+    inp.addEventListener("input", function () { var q = inp.value.trim(); if (q.length < 2) { dd.hidden = true; return; } menu([]); mbSuggest(q, function (list) { if (inp.value.trim() === q) menu(list); }); });
+    inp.addEventListener("keydown", function (e) {
+      var bs = dd.querySelectorAll("button");
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") { if (!bs.length) return; e.preventDefault(); sel = (sel + (e.key === "ArrowDown" ? 1 : -1) + bs.length) % bs.length; for (var i = 0; i < bs.length; i++) bs[i].classList.toggle("on", i === sel); }
+      else if (e.key === "Enter" || e.key === ",") { e.preventDefault(); e.stopPropagation(); if (sel >= 0 && bs[sel]) bs[sel].click(); else add(inp.value); }
+      else if (e.key === "Escape") { dd.hidden = true; }
+    });
+    inp.addEventListener("blur", function () { setTimeout(function () { dd.hidden = true; }, 150); });
+    draw(); return draw;
+  }
+  var cbDraws = [chipBox("cbOwn", "own", "Type a band, then pick or press Enter"), chipBox("cbSim", "sim", "Add a similar band"), chipBox("cbNever", "never", "Add an artist to block")];
+  // ---------- invite code and welcome page ----------
+  function inviteMake() { return "NS1." + btoa(unescape(encodeURIComponent(JSON.stringify({ k: cfg.key, c: cfg.clientId || "" })))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
+  function inviteRead(txt) {
+    var m = /^NS1\.([A-Za-z0-9_-]+)$/.exec(String(txt || "").trim()); if (!m) return null;
+    try { var o = JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g, "+").replace(/_/g, "/"))))); return o && o.k ? { key: String(o.k), clientId: String(o.c || "") } : null; } catch (e) { return null; }
+  }
+  $("inviteBtn").addEventListener("click", function () {
+    readSettings(); if (!cfg.key) { toast("Add your API key first.", null, null); return; }
+    copyText(inviteMake(), function (ok) { toast(ok ? "Invite copied. Send it to your friend privately." : "Couldn't copy the invite.", null, null); });
+  });
+  function wApply() {
+    var raw = $("wKey").value.trim(), inv = inviteRead(raw), ok = $("wKeyOk");
+    if (inv) { cfg.key = inv.key; if (inv.clientId) cfg.clientId = inv.clientId; ok.textContent = "Invite accepted" + (inv.clientId ? ", Google sign-in included." : "."); ok.hidden = false; }
+    else { cfg.key = raw; ok.hidden = true; }
+    if (!$("wCid").hidden && $("wCid").value.trim()) cfg.clientId = $("wCid").value.trim();
+    if (!$("wHandle").hidden) cfg.channel = $("wHandle").value.trim();
+    save("sf_cfg", cfg);
+    return !!cfg.key;
+  }
+  $("wKey").addEventListener("input", function () { wApply(); });
+  $("wHelp").addEventListener("click", function () { wApply(); fillSettings(); show("settings"); var d = document.querySelector("#settingsView details.help"); if (d) { d.open = true; d.scrollIntoView(); } });
+  $("wFull").addEventListener("click", function () { wApply(); fillSettings(); show("settings"); });
+  $("wUseHandle").addEventListener("click", function () { $("wHandle").hidden = false; $("wHandle").focus(); });
+  $("wGoogle").addEventListener("click", function () {
+    if (!wApply()) { setStatus("Paste an API key or invite code in step 1 first.", true); return; }
+    if (!cfg.clientId) { $("wCid").hidden = false; $("wCid").focus(); setStatus("Paste a Google OAuth client ID, or use an invite code that includes one.", true); return; }
+    googleImport();
+  });
+  $("wSync").addEventListener("click", function () {
+    if (!wApply()) { setStatus("Paste an API key or invite code in step 1 first.", true); return; }
+    if (!cfg.clientId) { $("wCid").hidden = false; $("wCid").focus(); setStatus("Sync needs a Google OAuth client ID. Paste one, or use an invite code that includes one.", true); return; }
+    setStatus("Checking your Google Drive"); syncNow(true).then(function () { if (sync.on && !subs.length && load("sf_subs", []).length) location.reload(); else if (sync.on) setStatus("Sync is on. Nothing saved in your Drive yet, so carry on with step 2."); });
+  });
+  $("wLoad").addEventListener("click", function () {
+    if (!wApply()) { setStatus("Paste an API key or invite code in step 1 first.", true); return; }
+    if (!cfg.channel && !subs.length) { setStatus("Do step 2 first: sign in with Google, or add your channel handle.", true); return; }
+    setStatus("Loading"); tab = "subs"; save("sf_tab", tab); refreshSubs({ reimport: !!cfg.channel && !subs.length });
+  });
   // ---------- start ----------
   if (cfg.key && subs.length) {
     show("feed");
@@ -3758,7 +3919,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   } else {
     tab = "subs";
     fillSettings();
-    show("settings");
+    show(cfg.key ? "settings" : "welcome");
   }
 })();
 </script>
