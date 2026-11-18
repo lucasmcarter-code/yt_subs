@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-DC7PkxANYXH8lCxPykRpEJK7zjSeBWJyXCmZkam11pE=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-RtasD9516A1YV3gsxw7uTU7YSJSYZ/rXDGtBQhY8Xfs=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -465,6 +465,10 @@ body.pvOn .toast { z-index: 80; }
   .jk.jk-empty { display: block; max-width: 640px; margin-left: auto; margin-right: auto; }
   .sh-ov { left: 50%; right: auto; width: min(100vw, calc(100vh * 9 / 16)); transform: translateX(-50%); box-shadow: 0 0 0 100vmax #000; }
 }
+.jk-mode { display: flex; gap: 8px; justify-content: center; width: 100%; margin-bottom: 4px; }
+.jk-empty .jk-mode { margin: 14px 0 0; }
+.jk-mode button { height: 40px; border: 3px solid #2a2622; border-radius: 20px; background: #f1c9a3; color: #2a2622; font: 700 14px/1 "Manrope", system-ui, sans-serif; box-shadow: 2px 3px 0 #2a2622; padding: 0 18px; }
+.jk-mode button.on { background: #2a2622; color: #fff3dc; }
 </style>
 </head>
 <body>
@@ -633,6 +637,11 @@ body.pvOn .toast { z-index: 80; }
     <h3>Diagnostics</h3>
     <p>If something looks wrong, tap Copy and paste the result into chat. It has no API key, sign-in token or watch history.</p>
     <div class="field"><label>What I've learned</label><div class="hint">Built from your Keepers, Nahs, thumbs and watching. Tap Not true to make me forget a lesson.</div><div id="tasteSet"></div></div>
+    <div class="field" id="syncBox"><label>Sync between browsers</label>
+        <p class="hint" id="syncLine">Off. Keeps your channels, watched marks, taste and Jukebox the same on every browser, using a private app folder in your Google Drive.</p>
+        <div class="btn-row"><button class="btn" id="syncBtn" type="button">Turn on sync</button><button class="btn ghost" id="syncOffBtn" type="button" hidden>Turn off</button></div>
+        <details class="help"><summary>One-time setup</summary><p>In Google Cloud Console, open the project that holds your OAuth client ID, go to APIs and Services, Library, find "Google Drive API" and press Enable. Then press Turn on sync here and approve the Google prompt. Do the Turn on step once in each browser.</p></details>
+      </div>
     <div class="field"><label>Backup</label><div class="hint">Saves your keepers, hidden items, favorites, learning and follows into one file. It leaves out your API key and client ID.</div>
       <div class="btn-row"><button class="btn ghost" id="expBtn" type="button">Export backup</button><button class="btn ghost" id="impBtn" type="button">Import backup</button></div>
       <input type="file" id="impFile" accept="application/json,.json" hidden></div>
@@ -687,7 +696,11 @@ body.pvOn .toast { z-index: 80; }
   // ---------- storage ----------
   var mem = {};
   function load(k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return k in mem ? mem[k] : d; } }
-  function save(k, v) { mem[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function save(k, v) {
+    mem[k] = v; var js = JSON.stringify(v), changed = true;
+    try { if (typeof syncWatch === "function" && syncWatch(k)) changed = localStorage.getItem(k) !== js; localStorage.setItem(k, js); } catch (e) {}
+    if (changed && typeof syncTouch === "function") syncTouch(k);
+  }
   function drop(k) { delete mem[k]; try { localStorage.removeItem(k); } catch (e) {} }
 
   var DEFAULT_CFG = { key: "", channel: "", clientId: "", hideShorts: true, openInApp: false, sway: true, topics: "", mutedWords: "", blockCats: ["25"], minViews: 25000, refreshCap: 4 };
@@ -1393,9 +1406,11 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
   var chSortTouched = false;
 
+  var sheetClose = null;
   function openSheet(title, rows, toggle) {
     var wrap = el("div", "sh-wrap"), veil = el("div", "sh-veil"), sh = el("div", "sh");
-    function close() { wrap.remove(); }
+    function close() { wrap.remove(); if (sheetClose === close) sheetClose = null; }
+    sheetClose = close;
     veil.addEventListener("click", close);
     sh.appendChild(el("div", "sh-grab")); sh.appendChild(el("h4", null, title));
     rows.forEach(function (r) {
@@ -2022,6 +2037,21 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     }
     return jkBandMemo[mk] = out;
   }
+  var JK_PRACTICE = /\b(charts?|drumless|backing tracks?|play.?alongs?|minus (drums|guitar|bass|vocals)|no (drums|guitar|bass|vocals)|without (drums|guitar|bass|vocals)|isolated|stems|multitrack|tabs?|tablature|lessons?|tutorial|how to play|karaoke|clone hero|rock ?band [0-9]|rocksmith|guitar hero|phase shift|yarg|real drums|pro drums|expert\+?|play.?through|drum cam|guitar cam|sheet music|transcription|synthesia|midi)\b/i;
+  var JK_COVER = /\b(cover|covers|covered|tribute)\b/i;
+  var JK_REACT = /\b(reactions?|reacts?|reacting|first time hearing|first listen|review|reviewed|breakdown|analysis|explained|ranked|ranking|tier list)\b/i;
+  var JK_ALTER = /\b(slowed|reverb|sped up|speed up|nightcore|daycore|8d audio|bass boosted|1 hour|10 hours|hour loop|looped)\b/i;
+  var JK_TALK = /\b(interviews?|podcast|q ?& ?a|q and a|talks? (about|to|with)|discuss(es|ing|ion)?|in conversation|conversation with|documentary|behind the scenes|track by track|commentary|episode [0-9]+|ep\.? ?[0-9]+)\b/i;
+  // "junk" = never show (practice material, covers, reactions, altered audio, fan lyric uploads); "talk" = interviews and podcasts; "music" otherwise.
+  var jkKindMemo = {};
+  function jkKind(v) {
+    var mk = v.id + "|" + v.title; if (jkKindMemo[mk]) return jkKindMemo[mk];
+    var t = String(v.title || ""), ch = String(v.channel || ""), out = "music";
+    if (JK_PRACTICE.test(t) || /\bcharts?\b/i.test(ch) || JK_COVER.test(t) || JK_REACT.test(t) || JK_ALTER.test(t)) out = "junk";
+    else if (/\blyrics?\b/i.test(t)) { var bd = jkBandOf(v), c = jkNorm(artistOf(ch)).replace(/^the /, "").replace(/ (official|band|music|vevo|tv)$/, ""); if (!(bd && bd !== "!" && c === jkBandKey(bd)) && !JK_SESS.test(jkNorm(ch))) out = "junk"; }
+    if (out === "music" && JK_TALK.test(t)) out = "talk";
+    return jkKindMemo[mk] = out;
+  }
   function jkBandKey(name) { return jkNorm(name).replace(/^the /, ""); }
   function jkTake(list, ptr, n, skip) {
     var out = [], tries = 0, L = list.length; if (!L) return out;
@@ -2031,7 +2061,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   function jkQ(b, extra) { var one = jkBandKey(b).indexOf(" ") < 0; return '"' + b.replace(/"/g, "") + '"' + (extra ? " " + extra : (one ? " band" : "")); }
 
   // ---------- Jukebox ----------
-  var jb = load("sf_jb", { seeds: [], items: [] }), jkKeepOnly = false, jkSel = 0, jkPage = 0, jkList = [], jkUI = null;
+  var jb = load("sf_jb", { seeds: [], items: [] }), jkKeepOnly = false, jkSel = 0, jkPage = 0, jkList = [], jkUI = null, jkMode = "music";
   jb.items = jb.items || []; jb.seeds = jb.seeds || [];
   var jbl = load("sf_jbl", { t: {} });
   if (load("sf_jbv", 0) < 2) {
@@ -2040,12 +2070,13 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     Object.keys(jbl.t).forEach(function (k) { if (new RegExp("^(?:" + GENRE_RE.source + ")$", "i").test(k)) delete jbl.t[k]; });
     save("sf_jb", jb); save("sf_jbl", jbl); save("sf_jbv", 2);
   }
+  if (load("sf_jbv", 0) < 3) { save("sf_jbv", 3); setTimeout(function () { var n0 = jb.items.length; jb.items = jb.items.filter(function (x) { return x.keep || jkKind(x) !== "junk"; }); if (jb.items.length !== n0) save("sf_jb", jb); }, 0); }
   function jbItem(v) { return { id: v.id, title: v.title, channel: v.channel, chId: v.chId, at: v.at, dur: v.dur || 0, cat: v.cat || "", views: v.views, live: "none", det: 1 }; }
   function jbAdd(v) { jbLearn(v, 1); if (!jb.items.some(function (x) { return x.id === v.id; })) { jb.items.unshift(jbItem(v)); jb.items = jb.items.slice(0, 150); save("sf_jb", jb); } toast("Added to the Jukebox.", null, null); }
   function jukeList() {
     var mw = mutedWordList(), si = {}, got = {}, out = [];
     subs.forEach(function (x) { si[x.id] = 1; });
-    jb.items.concat(jb.seeds.filter(function (v) { return !si[v.chId] && jkBandOf(v) && jkBandOf(v) !== "!"; })).forEach(function (v) { if (got[v.id]) return; got[v.id] = 1; var bd = jkBandOf(v); if (bd === "!") return; if (!v.keep && (jbl.t[bd ? jkBandKey(bd) : artistOf(v.channel).toLowerCase()] || 0) <= -6) return; if (passes(v, false, mw, si)) out.push(v); });
+    jb.items.concat(jb.seeds.filter(function (v) { return !si[v.chId] && jkBandOf(v) && jkBandOf(v) !== "!"; })).forEach(function (v) { if (got[v.id]) return; got[v.id] = 1; var bd = jkBandOf(v); if (bd === "!") return; var kd = jkKind(v); if (kd === "junk" && !v.keep) return; if ((kd === "talk") !== (jkMode === "talk")) return; if (!v.keep && (jbl.t[bd ? jkBandKey(bd) : artistOf(v.channel).toLowerCase()] || 0) <= -6) return; if (passes(v, false, mw, si)) out.push(v); });
     if (jkKeepOnly) out = out.filter(function (v) { return v.keep; });
     var per = {}; out = out.filter(function (v) { var k = artistKey(v); per[k] = (per[k] || 0) + 1; return per[k] <= 3; });
     return jkSpread(out).slice(0, 120);
@@ -2123,9 +2154,14 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     var refill = el("button", null, "Refill"); refill.type = "button"; refill.addEventListener("click", jukeRefill);
     var kv = el("button", "jk-kv" + (jkKeepOnly ? " on" : ""), jkKeepOnly ? "All" : "Keepers"); kv.type = "button";
     kv.addEventListener("click", function () { jkKeepOnly = !jkKeepOnly; jkSel = 0; jkPage = 0; render(); });
+    var mM = el("button", jkMode === "music" ? "on" : "", "Music"), mT = el("button", jkMode === "talk" ? "on" : "", "Talk"); mM.type = "button"; mT.type = "button";
+    mM.setAttribute("aria-pressed", String(jkMode === "music")); mT.setAttribute("aria-pressed", String(jkMode === "talk")); mT.setAttribute("aria-label", "Interviews, podcasts and discussions");
+    mM.addEventListener("click", function () { if (jkMode !== "music") { jkMode = "music"; jkSel = 0; jkPage = 0; render(); } });
+    mT.addEventListener("click", function () { if (jkMode !== "talk") { jkMode = "talk"; jkSel = 0; jkPage = 0; render(); } });
+    var modeRow = el("div", "jk-mode"); modeRow.appendChild(mM); modeRow.appendChild(mT);
     if (!jkList.length) {
-      jk.classList.add("jk-empty"); var w = el("div", "jk-win"); w.appendChild(el("div", "jk-title", "The jukebox is empty")); w.appendChild(el("div", "jk-meta", jkKeepOnly ? "No keepers yet. Tap the check on a song you like." : "Music videos you load or add will show up here."));
-      jk.appendChild(w);
+      jk.classList.add("jk-empty"); var w = el("div", "jk-win"); w.appendChild(el("div", "jk-title", "The jukebox is empty")); w.appendChild(el("div", "jk-meta", jkKeepOnly ? "No keepers yet. Tap the check on a song you like." : (jkMode === "talk" ? "No interviews or podcasts yet. Refill looks for some from your bands." : "Music videos you load or add will show up here.")));
+      jk.appendChild(w); jk.appendChild(modeRow);
       var c0 = el("div", "jk-ctl"); if (jkKeepOnly) c0.appendChild(kv); c0.appendChild(refill); jk.appendChild(c0);
       jk.appendChild(el("div", "jk-cost", "Refill runs 3 searches (300 units) for bands on your list and bands like them.")); jkUI = null; return;
     }
@@ -2139,7 +2175,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       reel.appendChild(b);
     });
     jk.appendChild(reel); jk.appendChild(win);
-    var ctl = el("div", "jk-ctl");
+    var ctl = el("div", "jk-ctl"); ctl.appendChild(modeRow);
     var prev = el("button", null, "‹"); prev.type = "button"; prev.setAttribute("aria-label", "Previous");
     var next = el("button", null, "›"); next.type = "button"; next.setAttribute("aria-label", "Next");
     var play = el("a", "jk-play", "▶ Play"); play.rel = "noopener";
@@ -2216,9 +2252,9 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     var b = grab(idx.own, "po", 2).concat(grab(idx.sim, "ps", 2));
     var c = grab(idx.own, "po", 2).concat(grab(idx.sim, "ps", 2));
     return [
-      { q: a.map(function (x) { return jkQ(x, ""); }).join("|"), bands: a, cat: true },
-      { q: b.map(function (x) { return jkQ(x, "live session"); }).join("|"), bands: b, cat: true },
-      { q: c.map(function (x) { return jkQ(x, "hate5six"); }).join("|"), bands: c, cat: false }
+      { q: a.map(function (x) { return jkQ(x, jkMode === "talk" ? "interview" : ""); }).join("|"), bands: a, cat: jkMode !== "talk" },
+      { q: b.map(function (x) { return jkQ(x, jkMode === "talk" ? "podcast" : "live session"); }).join("|"), bands: b, cat: jkMode !== "talk" },
+      { q: c.map(function (x) { return jkQ(x, jkMode === "talk" ? "interview" : "hate5six"); }).join("|"), bands: c, cat: false }
     ].filter(function (x) { return x.bands.length; });
   }
   function jukeRefill() {
@@ -2247,10 +2283,11 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       var mw = mutedWordList(), cnt = {};
       var keep = fresh.filter(function (v) { return v.det && v.dur >= 120 && (!v.live || v.live === "none") && passes(v, false, mw, si); }).filter(function (v) {
         var bd = jkBandOf(v); if (!bd || bd === "!") return false;
+        var kd = jkKind(v); if (kd === "junk" || (kd === "talk") !== (jkMode === "talk")) return false;
         var k = jkBandKey(bd); cnt[k] = (cnt[k] || 0) + 1; return cnt[k] <= 3;
       }).map(function (v) { var it = jbItem(v); it.band = jkBandOf(v); return it; });
       keep = jkSpread(keep);
-      jb.items = keep.concat(jb.items).slice(0, 150); save("sf_jb", jb);
+      jb.items = keep.concat(jb.items).slice(0, 200); save("sf_jb", jb);
       jkSel = 0; jkPage = 0;
       toast(keep.length ? "Added " + keep.length + " songs by bands on your lists." : "Nothing new this time. Try Refill again for the next bands.", null, null);
       render();
@@ -3008,6 +3045,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
   function setTab(t) {
     tab = t; save("sf_tab", tab);
+    if (t === "juke") { jkMode = "music"; jkSel = 0; jkPage = 0; }
     setStatus("");
     render();
     if (t === "disc" && !disc.items.length && topicList().length) refreshDiscover();
@@ -3122,7 +3160,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   });
   $("clearMutedBtn").addEventListener("click", function () { mutedCh = {}; save("sf_mutedCh", mutedCh); fillSettings(); setStatus("All channels unmuted."); });
   $("forgetBtn").addEventListener("click", function () {
-    ["sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_recYes", "sf_later", "sf_chk", "sf_chinfo", "sf_folSort", "sf_folRev", "sf_chSort", "sf_chHide", "sf_plSort", "sf_chTheme", "sf_topicsSeeded", "sf_dref", "sf_dq", "sf_dseen", "sf_dboost", "sf_topicAt", "sf_light", "sf_crash", "sf_sq", "sf_sc", "sf_sh", "sf_jb", "sf_shorts", "sf_shch", "sf_lastcrash", "sf_unf", "sf_chTags", "sf_jbl"].forEach(drop);
+    ["sf_sync", "sf_syncm", "sf_synctok", "sf_jbv", "sf_cfg", "sf_subs", "sf_feed", "sf_disc", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_shown", "sf_hideSeen", "sf_tab", "sf_sort", "sf_quota", "sf_seeds", "sf_rec", "sf_recNo", "sf_recYes", "sf_later", "sf_chk", "sf_chinfo", "sf_folSort", "sf_folRev", "sf_chSort", "sf_chHide", "sf_plSort", "sf_chTheme", "sf_topicsSeeded", "sf_dref", "sf_dq", "sf_dseen", "sf_dboost", "sf_topicAt", "sf_light", "sf_crash", "sf_sq", "sf_sc", "sf_sh", "sf_jb", "sf_shorts", "sf_shch", "sf_lastcrash", "sf_unf", "sf_chTags", "sf_jbl"].forEach(drop);
     chk = {};
     cfg = Object.assign({}, DEFAULT_CFG, { v2: 1 });
     subs = []; feed = { at: 0, items: [] }; disc = { at: 0, n: 0, items: [] };
@@ -3209,7 +3247,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 38;
+  var VERSION = 39;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -3423,7 +3461,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
 
   // ---------- diagnostics (no key, token or watch history) ----------
   function clean(t) { return String(t).replace(/AIza[\w-]+/g, "[key]").replace(/ya29\.[\w.-]+/g, "[token]").replace(/([?&](?:key|access_token)=)[^&\s"]+/g, "$1[x]"); }
-  if (load("sf_testhook", false)) window.__sf = { jkBandOf: jkBandOf, jukeQueries: jukeQueries, pvEnd: function () { pvEnded(); }, pvState: function () { return { id: pvV && pvV.id, st: pvSt }; }, shLog: SHLOG, shSet: function (t, d) { shT = t; shDur = d; }, noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
+  if (load("sf_testhook", false)) window.__sf = { jkKind: jkKind, jkBandOf: jkBandOf, jukeQueries: jukeQueries, pvEnd: function () { pvEnded(); }, pvState: function () { return { id: pvV && pvV.id, st: pvSt }; }, shLog: SHLOG, shSet: function (t, d) { shT = t; shDur = d; }, noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
   function diagText() {
     var sz = {}, tot = 0;
     try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i), n = (localStorage.getItem(k) || "").length; if (k.indexOf("sf_") === 0) { sz[k.slice(3)] = n; tot += n; } } } catch (e) {}
@@ -3488,12 +3526,14 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   });
   // ---------- desktop: pop-up player and keyboard ----------
   var DESK = window.matchMedia("(min-width: 900px) and (min-height: 521px)");
-  var pvV = null, pvF = null, pvSt = -1, pvT = 0, pvDur = 0;
+  var pvV = null, pvF = null, pvSt = -1, pvT = 0, pvDur = 0, pvMuted = false;
+  // The YouTube frame swallows keys once clicked, so hand the keyboard back to the page: Esc, space and arrows keep working.
+  setInterval(function () { if (pvF && document.activeElement === pvF && !document.fullscreenElement) { try { pvF.blur(); window.focus(); } catch (e) {} } }, 300);
   function pvCmd(fn, args) { if (pvF && pvF.contentWindow) try { pvF.contentWindow.postMessage(JSON.stringify({ event: "command", func: fn, args: args || [] }), "https://www.youtube.com"); } catch (e) {} }
   function pvLaterBtn() { var on = pvV && isSaved(pvV.id); $("pvLater").classList.toggle("on", !!on); $("pvLater").textContent = on ? "Saved" : "Watch later"; }
   function pvNextPick() { for (var i = 0; i < later.length; i++) if (!pvV || later[i].id !== pvV.id) return later[i]; return null; }
   function pvOpen(v) {
-    pvV = v; pvSt = -1; pvT = 0; pvDur = 0;
+    pvV = v; pvSt = -1; pvT = 0; pvDur = 0; pvMuted = false;
     var box = $("pvFrame"); box.textContent = "";
     var f = document.createElement("iframe");
     f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen"; f.allowFullscreen = true; f.title = v.title || "Video";
@@ -3561,6 +3601,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     var t = e.target, tn = t && t.tagName, typing = tn === "INPUT" || tn === "TEXTAREA" || tn === "SELECT" || (t && t.isContentEditable);
     var k = e.key;
+    if (k === "Escape" && sheetClose) { sheetClose(); e.preventDefault(); return; }
     if (typing) { if (k === "Escape" && t.blur) t.blur(); return; }
     if (document.body.classList.contains("shOn")) {
       if (k === "ArrowDown" || k === "j") shGo(1);
@@ -3578,11 +3619,137 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       else if (k === "ArrowRight") { pvT = Math.min(pvDur || 1e9, pvT + 5); pvCmd("seekTo", [pvT, true]); }
       else if (k === "ArrowLeft") { pvT = Math.max(0, pvT - 5); pvCmd("seekTo", [pvT, true]); }
       else if (k === "n" && !$("pvNext").hidden) pvPlayNext();
+      else if (k === "m") { pvMuted = !pvMuted; pvCmd(pvMuted ? "mute" : "unMute"); }
+      else if (k === "f") { try { if (document.fullscreenElement) document.exitFullscreen(); else if ($("pvFrame").requestFullscreen) $("pvFrame").requestFullscreen(); } catch (x) {} }
       else return;
       e.preventDefault(); return;
     }
+    if (k === "Escape" && !$("settingsView").hidden && feed.items.length) { $("settingsBtn").click(); e.preventDefault(); return; }
     if (k === "/" && !$("feedView").hidden) { e.preventDefault(); setTab("srch"); setTimeout(function () { var q = $("srchQ"); if (q) q.focus(); }, 60); }
   });
+  // ---------- sync between browsers (Google Drive app-data folder) ----------
+  var SYNC_KEYS = BK_KEYS.filter(function (k) { return k !== "sf_visit" && k !== "sf_tasteSeen"; });
+  var SYNC_UNION = { sf_seen: 1, sf_hidden: 1 };
+  var sync = load("sf_sync", { on: false, at: 0, inited: false, fileId: "" }), syncM = load("sf_syncm", {}), syncBusy = false, syncT = 0, syncApplying = false, syncPending = false;
+  function syncSaveState() { try { localStorage.setItem("sf_sync", JSON.stringify(sync)); localStorage.setItem("sf_syncm", JSON.stringify(syncM)); } catch (e) {} }
+  function syncWatch(k) { return !!(sync && sync.on && !syncApplying && SYNC_KEYS.indexOf(k) >= 0); }
+  function syncTouch(k) {
+    if (syncApplying || !sync || !sync.on || SYNC_KEYS.indexOf(k) < 0) return;
+    syncM[k] = Date.now(); try { localStorage.setItem("sf_syncm", JSON.stringify(syncM)); } catch (e) {}
+    clearTimeout(syncT); syncT = setTimeout(function () { syncNow(false); }, 8000);
+  }
+  function syncTok() { var t = load("sf_synctok", null); return t && t.exp > Date.now() + 60000 ? t.tok : ""; }
+  function syncGetToken(interactive) {
+    return new Promise(function (res, rej) {
+      var have = syncTok(); if (have) { res(have); return; }
+      if (!interactive) { rej(new Error("needs-tap")); return; }
+      if (!cfg.clientId) { rej(new Error("Paste your Google OAuth client ID above and save first.")); return; }
+      function go() {
+        try {
+          google.accounts.oauth2.initTokenClient({
+            client_id: cfg.clientId, scope: "https://www.googleapis.com/auth/drive.appdata",
+            callback: function (r) { if (r && r.access_token) { try { localStorage.setItem("sf_synctok", JSON.stringify({ tok: r.access_token, exp: Date.now() + (Math.max(300, +r.expires_in || 3600) - 120) * 1000 })); } catch (e) {} res(r.access_token); } else rej(new Error("Google sign-in was cancelled or refused.")); },
+            error_callback: function () { rej(new Error("Google sign-in did not complete. Allow pop-ups for this page and try again.")); }
+          }).requestAccessToken({ prompt: "" });
+        } catch (e) { rej(new Error("Google sign-in could not start.")); }
+      }
+      if (window.google && google.accounts && google.accounts.oauth2) { go(); return; }
+      var sc = document.createElement("script"); sc.src = "https://accounts.google.com/gsi/client";
+      sc.onload = go; sc.onerror = function () { rej(new Error("Could not load Google sign-in. Check your connection.")); };
+      document.head.appendChild(sc);
+    });
+  }
+  function syncFetch(tok, url, opt) {
+    opt = opt || {}; opt.headers = Object.assign({ Authorization: "Bearer " + tok }, opt.headers || {});
+    return fetch(url, opt).then(function (r) {
+      if (r.status === 401) { drop("sf_synctok"); throw new Error("needs-tap"); }
+      if (r.status === 403) return r.json().catch(function () { return {}; }).then(function (j) { var m = j && j.error && j.error.message || ""; throw new Error(/not been used|disabled|accessNotConfigured/i.test(m) ? "The Google Drive API is not enabled for your project yet. See One-time setup below." : "Google Drive refused the request. " + m); });
+      if (!r.ok) throw new Error("Google Drive did not answer (" + r.status + ").");
+      return r;
+    });
+  }
+  function syncUnion(a, b) {
+    if (Array.isArray(a) && Array.isArray(b)) { var got = {}, out = []; a.concat(b).forEach(function (x) { var k = x && typeof x === "object" ? (x.id || JSON.stringify(x)) : String(x); if (!got[k]) { got[k] = 1; out.push(x); } }); return out; }
+    if (a && b && typeof a === "object" && typeof b === "object" && !Array.isArray(a) && !Array.isArray(b)) { var o = {}; Object.keys(b).forEach(function (k) { o[k] = b[k]; }); Object.keys(a).forEach(function (k) { o[k] = (k in b) ? ((Array.isArray(a[k]) && Array.isArray(b[k])) ? syncUnion(a[k], b[k]) : a[k]) : a[k]; }); return o; }
+    return a == null ? b : a;
+  }
+  function syncLocal(k) { var raw = null; try { raw = localStorage.getItem(k); } catch (e) {} if (raw == null) return undefined; try { return JSON.parse(raw); } catch (e) { return undefined; } }
+  // Folds the Drive copy into this browser. Returns { changed: keys taken from Drive, push: true when this browser has something newer }.
+  function syncFold(remote) {
+    var changed = [], push = false, rk = (remote && remote.keys) || {}, first = !sync.inited;
+    SYNC_KEYS.forEach(function (k) {
+      var L = syncLocal(k), R = rk[k], lt = syncM[k] || 0, val;
+      if (!R) { if (L !== undefined) push = true; return; }
+      if (L === undefined) val = R.v;
+      else if (first || SYNC_UNION[k]) {
+        if (k === "sf_model") val = ((R.v && R.v.n) || 0) > ((L && L.n) || 0) ? R.v : L;
+        else if (k === "sf_cfg" || k === "sf_folSort" || k === "sf_folRev") val = L;
+        else val = syncUnion(L, R.v);
+      }
+      else if (R.t > lt) val = R.v;
+      else { if (lt > R.t) push = true; return; }
+      if (k === "sf_cfg") val = Object.assign({}, val, { key: cfg.key, clientId: cfg.clientId });
+      var js = JSON.stringify(val);
+      if (js !== JSON.stringify(L)) { try { localStorage.setItem(k, js); } catch (e) {} changed.push(k); }
+      if (js !== JSON.stringify(k === "sf_cfg" ? Object.assign({}, R.v, { key: cfg.key, clientId: cfg.clientId }) : R.v)) { syncM[k] = Date.now(); push = true; } else syncM[k] = R.t;
+    });
+    return { changed: changed, push: push };
+  }
+  function syncPayload() {
+    var keys = {};
+    SYNC_KEYS.forEach(function (k) { var v = syncLocal(k); if (v === undefined) return; if (k === "sf_cfg") { v = JSON.parse(JSON.stringify(v)); delete v.key; delete v.clientId; } keys[k] = { t: syncM[k] || 1, v: v }; });
+    return JSON.stringify({ app: "north-star-sync", v: 1, at: Date.now(), keys: keys });
+  }
+  var DRIVE = "https://www.googleapis.com/drive/v3/files", DRIVE_UP = "https://www.googleapis.com/upload/drive/v3/files";
+  function syncNow(interactive) {
+    if (syncBusy) { syncPending = true; return Promise.resolve(); }
+    if (!sync.on && !interactive) return Promise.resolve();
+    syncBusy = true; clearTimeout(syncT); syncLine("Syncing");
+    var tok = "", reload = false;
+    return syncGetToken(interactive).then(function (t) {
+      tok = t;
+      return syncFetch(tok, DRIVE + "?spaces=appDataFolder&fields=files(id,modifiedTime)&q=" + encodeURIComponent("name='north-star-sync.json'")).then(function (r) { return r.json(); });
+    }).then(function (j) {
+      var f = j.files && j.files[0]; sync.fileId = f ? f.id : "";
+      if (!f) return null;
+      return syncFetch(tok, DRIVE + "/" + encodeURIComponent(f.id) + "?alt=media").then(function (r) { return r.json(); }).catch(function (e) { if (/needs-tap|refused|not enabled/.test(e.message)) throw e; return null; });
+    }).then(function (remote) {
+      var valid = remote && remote.app === "north-star-sync";
+      syncApplying = true; var fold; try { fold = syncFold(valid ? remote : null); } finally { syncApplying = false; }
+      reload = fold.changed.length > 0;
+      sync.on = true; sync.inited = true;
+      if (!fold.push && valid) return;
+      var body = syncPayload();
+      if (sync.fileId) return syncFetch(tok, DRIVE_UP + "/" + encodeURIComponent(sync.fileId) + "?uploadType=media", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: body });
+      var bd = "nsb" + Date.now();
+      var multi = "--" + bd + "\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n" + JSON.stringify({ name: "north-star-sync.json", parents: ["appDataFolder"] }) + "\r\n--" + bd + "\r\nContent-Type: application/json\r\n\r\n" + body + "\r\n--" + bd + "--";
+      return syncFetch(tok, DRIVE_UP + "?uploadType=multipart&fields=id", { method: "POST", headers: { "Content-Type": "multipart/related; boundary=" + bd }, body: multi }).then(function (r) { return r.json(); }).then(function (j) { sync.fileId = j.id || ""; });
+    }).then(function () {
+      sync.at = Date.now(); syncSaveState(); syncBusy = false; syncLine();
+      if (reload) { toast("Synced. Loading the newer data.", null, null); try { sessionStorage.setItem("sf_syncr", "1"); } catch (e) {} setTimeout(function () { location.reload(); }, 700); }
+      else if (interactive) toast("Synced.", null, null);
+      if (syncPending) { syncPending = false; syncT = setTimeout(function () { syncNow(false); }, 3000); }
+    }).catch(function (e) {
+      syncBusy = false; syncSaveState();
+      if (e && e.message === "needs-tap") { syncLine("Waiting for Google sign-in. Press Sync now."); if (!interactive) syncNudge(); }
+      else { syncLine(e && e.message ? e.message : "Sync failed.", true); if (interactive) toast(e && e.message ? e.message : "Sync failed.", null, null); }
+    });
+  }
+  var syncNudged = false;
+  function syncNudge() { if (syncNudged) return; syncNudged = true; toast("Sync needs a quick Google sign-in.", "Sync", function () { syncNudged = false; syncNow(true); }); }
+  function syncLine(msg, bad) {
+    var l = $("syncLine"); if (!l) return;
+    $("syncBtn").textContent = sync.on ? "Sync now" : "Turn on sync"; $("syncOffBtn").hidden = !sync.on;
+    l.style.color = bad ? "var(--warn)" : "";
+    if (msg) { l.textContent = msg; return; }
+    l.textContent = sync.on ? ("On. Last synced " + (sync.at ? ago(sync.at) : "never") + ". Changes upload a few seconds after you make them.") : "Off. Keeps your channels, watched marks, taste and Jukebox the same on every browser, using a private app folder in your Google Drive.";
+  }
+  $("syncBtn").addEventListener("click", function () { if (!sync.on) { readSettings(); save("sf_cfg", cfg); } syncNow(true); });
+  $("syncOffBtn").addEventListener("click", function () { sync.on = false; clearTimeout(syncT); syncSaveState(); drop("sf_synctok"); syncLine(); toast("Sync is off for this browser. Your Drive copy is untouched.", null, null); });
+  $("settingsBtn").addEventListener("click", function () { syncLine(); });
+  window.addEventListener("pagehide", function () { if (sync.on && syncT && syncTok()) { clearTimeout(syncT); syncT = 0; try { if (sync.fileId) fetch(DRIVE_UP + "/" + encodeURIComponent(sync.fileId) + "?uploadType=media", { method: "PATCH", keepalive: true, headers: { Authorization: "Bearer " + syncTok(), "Content-Type": "application/json" }, body: syncPayload() }); } catch (e) {} } });
+  syncLine();
+  if (sync.on) { if (syncTok()) setTimeout(function () { if (!sessionStorage.getItem("sf_syncr")) { syncNow(false); } try { sessionStorage.removeItem("sf_syncr"); } catch (e) {} }, 1200); else setTimeout(syncNudge, 1500); }
   // ---------- start ----------
   if (cfg.key && subs.length) {
     show("feed");
