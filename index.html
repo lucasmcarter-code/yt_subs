@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-eqegJQVEadY58wOOqyomFLgITlUSWmPw3hTwkgOWEWI=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-GUnAfJwOC+QpdCSmtQTwVo3eiLvba0tocgQa0Id2xpM=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -37,7 +37,7 @@ header.bar { position: sticky; top: 0; z-index: 5; background: var(--bg); border
 .tools { display: flex; gap: 8px; align-items: center; }
 .tools input[type="search"] { height: 40px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
 .chip { height: 40px; border-radius: 10px; white-space: nowrap; border: 1px solid var(--line); background: var(--surface); font-weight: 500; }
-.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.chip[aria-pressed="true"], .chip.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .status { color: var(--muted); padding: 10px 0 0; min-height: 30px; }
 .status.err { color: var(--warn); }
 .day { display: flex; gap: 8px; align-items: baseline; }
@@ -667,9 +667,17 @@ body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px)
   }
 
   // ---------- quota (rough, per Pacific day) ----------
-  function pacificDay() { try { return new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" }); } catch (e) { return new Date().toISOString().slice(0, 10); } }
-  function quota() { var q = load("sf_quota", { day: "", used: 0 }); if (q.day !== pacificDay()) q = { day: pacificDay(), used: 0 }; return q; }
-  function spend(n) { var q = quota(); q.used += n; save("sf_quota", q); quotaRing(); }
+  var pdAt = 0, pdVal = "", qMem = null, qT = 0;
+  function pacificDay() {
+    var now = Date.now(); if (pdVal && now - pdAt < 60000) return pdVal; pdAt = now;
+    try { pdVal = new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" }); } catch (e) { pdVal = new Date().toISOString().slice(0, 10); }
+    return pdVal;
+  }
+  function quota() { if (!qMem) qMem = load("sf_quota", { day: "", used: 0 }); var d = pacificDay(); if (qMem.day !== d) qMem = { day: d, used: 0 }; return qMem; }
+  function quotaFlush() { if (qT) { clearTimeout(qT); qT = 0; save("sf_quota", qMem); } }
+  function spend(n) { var q = quota(); q.used += n; if (!qT) qT = setTimeout(function () { qT = 0; save("sf_quota", qMem); quotaRing(); }, 800); }
+  window.addEventListener("pagehide", quotaFlush);
+  document.addEventListener("visibilitychange", function () { if (document.hidden) quotaFlush(); });
   function quotaRing() {
     var b = document.getElementById("settingsBtn"); if (!b) return;
     var pct = Math.min(100, quota().used / 100);
@@ -854,12 +862,17 @@ body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px)
     shown = {}; save("sf_shown", shown);
     if (changed) save("sf_model", model);
   }
+  var shownT = 0;
+  function shownFlush() { if (shownT) { clearTimeout(shownT); shownT = 0; save("sf_shown", shown); } }
+  function shownLater() { if (!shownT) shownT = setTimeout(function () { shownT = 0; save("sf_shown", shown); }, 4000); }
+  window.addEventListener("pagehide", shownFlush);
+  document.addEventListener("visibilitychange", function () { if (document.hidden) shownFlush(); });
   var observer = ("IntersectionObserver" in window) ? new IntersectionObserver(function (entries) {
     var dirty = false;
     entries.forEach(function (en) {
       if (en.isIntersecting) { var id = en.target.getAttribute("data-id"); if (id && !shown[id]) { shown[id] = 1; dirty = true; } observer.unobserve(en.target); }
     });
-    if (dirty) save("sf_shown", shown);
+    if (dirty) shownLater();
   }, { threshold: 0.6 }) : null;
 
   // Cards near the screen are "live": only those take part in the sway.
@@ -927,7 +940,12 @@ body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px)
   var FSORTS = { recent: "Newest upload", az: "A–Z", subs: "Most subscribers", views: "Most total views", videos: "Most videos", active: "Most active (30 days)", follow: "Newest follow" };
   if (!FSORTS[folSort]) folSort = "az";
   function compact(n) { return n >= 1e9 ? (n / 1e9).toFixed(1).replace(/\.0$/, "") + "B" : n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, "") + "M" : n >= 1e3 ? (n / 1e3).toFixed(n >= 1e5 ? 0 : 1).replace(/\.0$/, "") + "K" : String(n); }
-  function activeCount(id) { var cut = Date.now() - 30 * 864e5, n = 0; feed.items.forEach(function (v) { if ((v.sid || v.chId) === id && new Date(v.at).getTime() > cut) n++; }); return n; }
+  var acM = null, acSig = "";
+  function activeCount(id) {
+    var sig = feed.at + "|" + feed.items.length;
+    if (!acM || sig !== acSig) { acSig = sig; acM = {}; var cut = Date.now() - 30 * 864e5; feed.items.forEach(function (v) { if (new Date(v.at).getTime() > cut) { var k = v.sid || v.chId; acM[k] = (acM[k] || 0) + 1; } }); }
+    return acM[id] || 0;
+  }
   function fMetric(s) {
     var c = chInfo[s.id] || {}, t = (chk[s.id] || [0, 0])[1];
     if (folSort === "recent") return t ? ago(t) : "";
@@ -946,7 +964,7 @@ body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px)
   function subTitle(id) { for (var i = 0; i < subs.length; i++) if (subs[i].id === id) return subs[i].title; return (chInfo[id] && chInfo[id].title) || "Channel"; }
   function loadInfo() {
     var now = Date.now(), need = subs.filter(function (s) { var c = chInfo[s.id]; return !c || !c.v2 || !c.v3 || now - c.at > 7 * 86400000; }).map(function (s) { return s.id; });
-    if (!need.length || !cfg.key) return Promise.resolve();
+    if (!need.length || !cfg.key) return Promise.resolve(false);
     var chunks = []; for (var i = 0; i < need.length; i += 50) chunks.push(need.slice(i, i + 50));
     return chunks.reduce(function (p, ids) {
       return p.then(function () {
@@ -958,7 +976,7 @@ body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px)
           });
         });
       });
-    }, Promise.resolve()).then(function () { save("sf_chinfo", chInfo); }).catch(function () {});
+    }, Promise.resolve()).then(function () { save("sf_chinfo", chInfo); return true; }).catch(function () { return false; });
   }
 
   var PALETTE = [["#B3763E", "#8E5A2C"], ["#4F7CAC", "#375A82"], ["#6E7F8A", "#4E5C66"], ["#8A5A44", "#6B4332"], ["#B24B4B", "#8C3636"], ["#4F8C7A", "#37695A"], ["#8C7A3E", "#6C5C2A"], ["#7A5A9A", "#5A4078"]];
@@ -985,7 +1003,8 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   var chTheme = load("sf_chTheme", {});             // channelId -> topic name, or "none": your own choice for a card
   var folTopic = null, chipScroll = 0, themeMemo = {}, symDone = {};
   function norm(x) { return " " + String(x || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim() + " "; }
-  function countIn(hay, kw, cap) { var k = norm(kw), n = 0, at = 0; while (n < cap && (at = hay.indexOf(k, at)) >= 0) { n++; at += k.length - 1; } return n; }
+  var normMemo = {};
+  function countIn(hay, kw, cap) { var k = normMemo[kw] || (normMemo[kw] = norm(kw)), n = 0, at = 0; while (n < cap && (at = hay.indexOf(k, at)) >= 0) { n++; at += k.length - 1; } return n; }
   function topicIdx(name) { for (var i = 0; i < TOPICS.length; i++) if (TOPICS[i][0].toLowerCase() === String(name).toLowerCase()) return i; return -1; }
   function scoreTopics(id) {
     var inf = chInfo[id] || {}, title = norm(subTitle(id)), kw = norm(inf.k), ds = norm(inf.d), vt = "", c = 0;
@@ -1170,6 +1189,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       box.appendChild(row); row.scrollLeft = chipScroll;
     }
     if (!list.length) { box.appendChild(el("p", "empty", "No channel matches that filter.")); return; }
+    var unM = {}; feed.items.forEach(function (v) { if (!seen[v.id] && !hidden[v.id]) { var k = v.sid || v.chId; unM[k] = (unM[k] || 0) + 1; } });
     var grid = el("div", "f-grid"), fpos = 0, fobs = null, fmark = el("div", "more-marker");
     function fchunk() {
       var end = Math.min(list.length, fpos + (fpos ? 18 : 24));
@@ -1179,7 +1199,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       if (fpos < list.length) { box.appendChild(fmark); if (fobs) fobs.observe(fmark); }
     }
     function fcard(s) {
-      var h = hash(s.id), pal = PALETTE[h % PALETTE.length], n = unseenCount(s.id), inf = chInfo[s.id];
+      var h = hash(s.id), pal = PALETTE[h % PALETTE.length], n = unM[s.id] || 0, inf = chInfo[s.id];
       var card = el("button", "f-card"); card.type = "button";
       card.style.setProperty("--tilt", String((((h >> 3) % 5) - 2) * 0.5));
       if (n) card.appendChild(el("span", "f-new", n + " new"));
@@ -1768,7 +1788,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var q = sq.q.trim();
     if (!q) { setStatus("Type something to search.", true); return; }
     if (!cfg.key) { show("settings"); setStatus("Add an API key to start.", true); return; }
-    var key = sKey(), cache = load("sf_sc", {}), ent = cache[key];
+    var key = sKey(), cache = scGet(), ent = cache[key];
     if (!more && ent && !force) { sres = ent; noteSearch(q); render(); return; }
     if (more && (!sres.tok || sres.pages >= 4)) return;
     if (quotaLeft() < 120) { setStatus("Not enough of today's free quota left for a search. It resets at midnight Pacific time.", true); return; }
@@ -1794,7 +1814,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     }).then(function () {
       base.items = base.items.concat(fresh);
       sres = base;
-      var c = load("sf_sc", {}); c[key] = base;
+      var c = scGet(); c[key] = base;
       var ks = Object.keys(c).sort(function (a, b) { return c[b].at - c[a].at; });
       ks.slice(20).forEach(function (k) { delete c[k]; });
       save("sf_sc", c);
@@ -1824,11 +1844,13 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       x.addEventListener("click", function () { save("sf_sh", searchHist().filter(function (y) { return y.q !== e.q; })); renderSrchPanel(); });
       c.appendChild(b); c.appendChild(p); c.appendChild(x); sv.appendChild(c);
     });
-    var key = sKey(), cached = !!load("sf_sc", {})[key];
+    var key = sKey(), cached = !!scGet()[key];
     $("srchCost").textContent = !sq.q.trim() ? "A search costs 100 of your 10,000 daily units. Saved searches reopen free." : cached ? "Saved from earlier, so this reopens free." : "A new search costs 100 units.";
     $("srchGo").textContent = cached ? "Open" : "Search";
 
   }
+  var scMem = null;
+  function scGet() { return scMem || (scMem = load("sf_sc", {})); }
   function renderSearch(box) {
     $("srchQ").value = sq.q;
     renderSrchPanel();
@@ -1872,10 +1894,17 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     return jkSpread(out).slice(0, 120);
   }
   // The artist of a video: a favorite named in the title, else the text before " - ", else the channel.
+  var akSig = "", akTerms = [], akMemo = {}, GENRE_I = null;
   function artistKey(v) {
+    var keys = Object.keys(jbl.t), sig = (cfg.favMusic || "") + "|" + keys.length;
+    if (sig !== akSig) { akSig = sig; akMemo = {}; GENRE_I = GENRE_I || new RegExp(GENRE_RE.source, "i"); akTerms = favTerms().concat(keys).map(function (f) { return f.toLowerCase(); }).filter(function (f) { return f.length >= 3 && !GENRE_I.test(f); }); }
+    var mk = v.id + "|" + v.title; if (akMemo[mk]) return akMemo[mk];
+    return akMemo[mk] = artistKey0(v);
+  }
+  function artistKey0(v) {
     var t = String(v.title || ""), tl = t.toLowerCase(), best = "";
-    favTerms().concat(Object.keys(jbl.t)).forEach(function (f) {
-      f = f.toLowerCase(); if (f.length < 3 || f.length <= best.length || new RegExp(GENRE_RE.source, "i").test(f)) return;
+    akTerms.forEach(function (f) {
+      if (f.length <= best.length) return;
       var i = tl.indexOf(f); if (i < 0) return;
       var b = i === 0 || /\W/.test(tl[i - 1]), e = i + f.length >= tl.length || /\W/.test(tl[i + f.length]);
       if (b && e) best = f;
@@ -2382,7 +2411,6 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     }).catch(function (e) { setStatus(explain(e), true); }).then(finish);
   }
 
-  function subTitle(id) { for (var i = 0; i < subs.length; i++) if (subs[i].id === id) return subs[i].title; return id; }
   function addSeed(id) {
     if (!id || seeds.indexOf(id) >= 0) return;
     if (seeds.length >= 5) { setStatus("Five channels at a time keeps the search focused. Remove one to add another.", true); return; }
@@ -2692,7 +2720,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     box.textContent = "";
     view = null;
     var isDisc = tab === "disc", isChan = isDisc && discFind, isSrch = tab === "srch", isJuke = tab === "juke", isFol = tab === "follow", isSh = tab === "shorts";
-    seedJukebox();
+    if (isJuke) seedJukebox();
     $("tabSubs").setAttribute("aria-selected", String(tab === "subs"));
     $("tabDisc").setAttribute("aria-selected", String(isDisc));
     $("tabFollow").setAttribute("aria-selected", String(isFol));
@@ -2713,7 +2741,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     if (isSh) { renderShorts(box); return; }
     if (isFol) {
       if (inChannel) { setStatus(""); renderChannelPage(box); return; }
-      loadInfo().then(function () { if (tab === "follow" && !fol.id) renderFollowLazy(); });
+      loadInfo().then(function (got) { if (got && tab === "follow" && !fol.id) renderFollowLazy(); });
       renderFollow(box); return;
     }
     $("sortBtn").hidden = isDisc;
@@ -2863,9 +2891,10 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   $("dtVid").addEventListener("click", function () { discFind = false; render(); });
   $("dtChan").addEventListener("click", function () { discFind = true; render(); });
   $("srchForm").addEventListener("submit", function (e) { e.preventDefault(); sq.q = $("srchQ").value; save("sf_sq", sq); $("srchQ").blur(); runSearch(false); });
-  $("srchQ").addEventListener("input", function () { sq.q = $("srchQ").value; save("sf_sq", sq); renderSrchPanel(); });
+  var sqT = 0;
+  $("srchQ").addEventListener("input", function () { sq.q = $("srchQ").value; clearTimeout(sqT); sqT = setTimeout(function () { save("sf_sq", sq); renderSrchPanel(); }, 180); });
   $("srchMore").addEventListener("click", function () { runSearch(true); });
-  $("srchClear").addEventListener("click", function () { save("sf_sh", []); save("sf_sc", {}); toast("Remembered searches cleared.", null, null); });
+  $("srchClear").addEventListener("click", function () { save("sf_sh", []); scMem = {}; save("sf_sc", scMem); toast("Remembered searches cleared.", null, null); });
   $("tabFollow").addEventListener("click", function () { if (tab === "follow") { if (fol.id) closeChannelAll(); else toTop(); } else setTab("follow"); });
   function closeChannelAll() { fol = { id: null, mode: "videos", pl: null }; render(); window.scrollTo(0, 0); }
   document.querySelector(".bar").addEventListener("click", function (e) { if (!e.target.closest("button")) toTop(); });
@@ -2948,7 +2977,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     a.addEventListener("contextmenu", function (e) { e.preventDefault(); });
   }
   function renderLater(keepPlace) {
-    var box = $("laterBox"), h0 = box.hidden ? 0 : box.offsetHeight;
+    var box = $("laterBox"), h0 = !keepPlace || box.hidden ? 0 : box.offsetHeight;
     box.textContent = "";
     box.hidden = tab !== "subs" || !later.length;
     if (!box.hidden) {
@@ -2979,12 +3008,13 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       });
       box.appendChild(rowEl);
     }
+    if (!keepPlace) return;
     var h1 = box.hidden ? 0 : box.offsetHeight;
-    if (keepPlace && h1 !== h0 && window.scrollY > 40) window.scrollBy(0, h1 - h0);
+    if (h1 !== h0 && window.scrollY > 40) window.scrollBy(0, h1 - h0);
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 32;
+  var VERSION = 33;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -3032,7 +3062,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
   function physFrame(now) {
     var dt = Math.min(100, now - (ph.last || now)); ph.last = now; ph.acc += dt;
-    rankCards();
+    if (!(ph.rk = ((ph.rk || 0) + 1) % 12) || ph.rkN !== liveSet.length) { ph.rkN = liveSet.length; rankCards(); }
     var cardsBusy = false;
     while (ph.acc >= 16.667) { physStep(); if (stepCards()) cardsBusy = true; ph.acc -= 16.667; }
     var moving = Math.abs(ph.rest - ph.a) > 0.02 || Math.abs(ph.w) > 0.01 || Math.abs(ph.b) > 0.02 || Math.abs(ph.bv) > 0.01 || cardsBusy;
@@ -3042,7 +3072,6 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       ph.a = ph.rest; ph.w = 0; ph.b = 0; ph.bv = 0; ph.hist.length = 0;
       liveSet.forEach(function (c) { var s = c._s || cardState(c); s.a = ph.rest * s.am; s.w = 0; s.b = 0; s.v = 0; });
     }
-    $("feed").style.setProperty("--sway", ph.a.toFixed(3) + "deg");
     applyCards();
     if (live) ph.raf = requestAnimationFrame(physFrame); else { ph.raf = 0; ph.last = 0; ph.acc = 0; }
   }
@@ -3068,10 +3097,10 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   function tasteLines(max) {
     var out = [];
     function top(map, pos, n, min) { return Object.keys(map).filter(function (k) { return pos ? map[k] >= min : map[k] <= -min; }).sort(function (a, b) { return pos ? map[b] - map[a] : map[a] - map[b]; }).slice(0, n); }
-    top(model.ch, true, max, 1.5).forEach(function (id) { out.push({ txt: "You like videos from " + subTitle(id), drop: function () { delete model.ch[id]; save("sf_model", model); } }); });
+    top(model.ch, true, max * 3, 1.5).filter(function (id) { return subTitle(id) !== "Channel"; }).slice(0, max).forEach(function (id) { out.push({ txt: "You like videos from " + subTitle(id), drop: function () { delete model.ch[id]; save("sf_model", model); } }); });
     var pw = top(model.w, true, max, 1.2); if (pw.length) out.push({ txt: "You watch a lot about: " + pw.join(", "), drop: function () { pw.forEach(function (w) { delete model.w[w]; }); save("sf_model", model); } });
     top(jbl.t, true, max, 2).forEach(function (t) { out.push({ txt: "Jukebox: you like " + t, drop: function () { delete jbl.t[t]; save("sf_jbl", jbl); } }); });
-    top(model.ch, false, max, 2.5).forEach(function (id) { out.push({ txt: "You tend to skip " + subTitle(id), drop: function () { delete model.ch[id]; save("sf_model", model); } }); });
+    top(model.ch, false, max * 3, 2.5).filter(function (id) { return subTitle(id) !== "Channel"; }).slice(0, max).forEach(function (id) { out.push({ txt: "You tend to skip " + subTitle(id), drop: function () { delete model.ch[id]; save("sf_model", model); } }); });
     var nw = top(model.w, false, max, 1.2); if (nw.length) out.push({ txt: "You skip videos about: " + nw.join(", "), drop: function () { nw.forEach(function (w) { delete model.w[w]; }); save("sf_model", model); } });
     return out;
   }
@@ -3164,6 +3193,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
   function onScrollPush() {
     topBtnState();
+    if (feedView.hidden) return;
     markScroll(); if (LAND.matches) winSync();
     if (LAND.matches && view && view.pos < view.items.length) {
       var f = $("feed"); if (f.scrollLeft + f.clientWidth > f.scrollWidth - 1600) appendMore();
@@ -3193,7 +3223,8 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     }).catch(function (e) { upd = "check failed"; logErr("update", e && e.message || e); $("updMsg").textContent = "Could not check. Tap Reload newest to be sure."; });
   }
   $("reloadBtn").addEventListener("click", function () { location.replace(location.pathname + "?r=" + Date.now()); });
-  $("settingsBtn").addEventListener("click", checkUpdate);
+  var updAt = 0;
+  $("settingsBtn").addEventListener("click", function () { if (Date.now() - updAt > 10 * 60000) { updAt = Date.now(); checkUpdate(); } });
 
   // ---------- diagnostics (no key, token or watch history) ----------
   function clean(t) { return String(t).replace(/AIza[\w-]+/g, "[key]").replace(/ya29\.[\w.-]+/g, "[token]").replace(/([?&](?:key|access_token)=)[^&\s"]+/g, "$1[x]"); }
