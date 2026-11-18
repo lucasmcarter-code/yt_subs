@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-enOQZx0N9UWVMTlBOgB78TNlePZujR2cbI9ZrKOatfU=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-DC7PkxANYXH8lCxPykRpEJK7zjSeBWJyXCmZkam11pE=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -441,7 +441,28 @@ body.pvOn .toast { z-index: 80; }
   .top-btn { bottom: 28px; right: 28px; }
   .vid, .f-card, .later-card, .sh-card, .stk { cursor: pointer; }
   .vid:hover { z-index: 1; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 26px 40px -14px rgba(0, 0, 0, 0.75); }
-  #settingsView, body.juke #feed, #srchPanel, #chanPanel { max-width: 760px; }
+  #settingsView, #srchPanel, #chanPanel { max-width: 760px; }
+  body.juke #feed { max-width: 1320px; }
+  .jk { max-width: none; margin: 18px 0 24px; display: grid; grid-template-columns: minmax(320px, 36%) 1fr; grid-template-areas: "win strip" "ctl strip" "cost pager"; gap: 18px 30px; align-items: start; padding: 118px 40px 54px; border-width: 6px; border-radius: 300px 300px 30px 30px / 170px 170px 30px 30px; box-shadow: 8px 10px 0 #2a2622, inset 0 0 0 7px #f1c9a3, inset 0 0 0 13px #b8683f, inset 0 0 0 16px #f6d9a8; }
+  .jk::before { content: ""; position: absolute; left: 12%; right: 12%; top: 92px; height: 6px; border-radius: 3px; background: repeating-linear-gradient(90deg, #fff3dc 0 14px, transparent 14px 26px); opacity: .85; }
+  .jk::after { content: ""; position: absolute; left: 40px; right: 40px; bottom: 16px; height: 22px; border: 3px solid #2a2622; border-radius: 8px; background: repeating-linear-gradient(90deg, #2a2622 0 4px, #6b3d26 4px 10px); }
+  .jk-sign { top: 26px; font-size: 62px; }
+  .jk-win { grid-area: win; padding: 30px 22px 20px; border-width: 5px; }
+  .jk-cv { width: 70%; }
+  .jk-title { font-size: 36px; margin-top: 20px; }
+  .jk-meta { font-size: 14px; }
+  .jk-ctl { grid-area: ctl; margin: 0; }
+  .jk-ctl button, .jk-play { height: 50px; min-width: 50px; font-size: 16px; padding: 0 18px; border-radius: 25px; }
+  .jk-strip { grid-area: strip; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; padding: 16px; border-width: 5px; border-radius: 16px; align-content: start; min-height: 0; }
+  .jk-row { flex-direction: column; align-items: stretch; gap: 8px; padding: 8px; background: #fffaf0; border: 2px solid #2a2622; box-shadow: 2px 3px 0 #2a2622; cursor: pointer; }
+  .jk-row:hover { transform: translate(-1px, -2px); }
+  .jk-row.on { background: #f1c9a3; outline: 3px solid #2a2622; }
+  .jk-row img { width: 100%; }
+  .jk-row b { font-size: 22px; }
+  .jk-row small { font-size: 12.5px; }
+  .jk-pager { grid-area: pager; padding: 0 4px; color: #fff3dc; }
+  .jk-cost { grid-area: cost; margin: 0; text-align: left; align-self: center; }
+  .jk.jk-empty { display: block; max-width: 640px; margin-left: auto; margin-right: auto; }
   .sh-ov { left: 50%; right: auto; width: min(100vw, calc(100vh * 9 / 16)); transform: translateX(-50%); box-shadow: 0 0 0 100vmax #000; }
 }
 </style>
@@ -1956,15 +1977,75 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
 
 
+  var GENRE_RE = /\b(rock|jazz|blues|country|bluegrass|hip.?hop|rap|metal|punk|folk|indie|soul|funk|reggae|electronic|classical|r&b|pop|latin|gospel|ska|shoegaze|synth|americana|disco|house|techno|ambient|psychedelic|grunge|emo|swing|opera|k-?pop)\b/gi;
+  // ---------- Jukebox band lists: picks go by band, never by loose title words ----------
+  var JK_OWN = "Midwest Pen Pals|Merchant Ships|Hikes|IDLES|Delta Sleep|Love Letter|Best Sleep|Bloc Party|Sparta|Jim Ward|The Receiving End of Sirens|Verse|mewithoutYou|Pool Kids|Minus the Bear|Motion City Soundtrack|Glass Bones|Hundreds of Au|The Speed of Sound in Seawater|Militarie Gun|Thursday|Slow Joy|No Pressure|Mikey Erg|saturdays at your place|The Smashing Pumpkins|Gulfer|Incubus|Grimoires|L.S. Dunes|I Feel Fine|Avec Plaisir|Mansions|Dryjacket|standards|Rule Them All|awakebutstillinbed|Astral Planes|Disco Inc. & fredo disco|Parachute Day|Good Sleepy|Swordfish|Jimmy Eat World|Foals|The Dear Hunter|The Reptilian|William Bonney|Polyphia|Joyce Manor|Anathallo|Thrice|Manchester Orchestra|Bad Books|Kevin Devine|Pedro the Lion|La Dispute|Cursive|TTNG|Have Heart|Turnstile|Trophy Scars|Hot Water Music|Bear vs. Shark|Foxing".split("|");
+  var JK_OWNX = "Snotty Nose Rez Kids|AURORA|Jeaux Seph|No Bird Sing|Poor Man's Poison|Dessa|Ren|Adam Guzman|Father Of Peace|Unamused Dave".split("|");
+  var JK_SIM = "Casket Lottery|Prawn|Braid|Look Mexico|Sundays Best|Sunny Day Real Estate|Engine Down|Hey Mercedes|Balance and Composure|Circa Survive|Their / They're / There|Piebald|The World Is a Beautiful Place & I Am No Longer Afraid to Die|The Jealous Sound|The Get Up Kids|Elliott|At the Drive-In|Moneen|You Blew It!|Seahaven|Benton Falls|Boys Night Out|Pianos Become the Teeth|A Great Big Pile of Leaves|CSTVT|Small Leaks Sink Ships|Colour Revolt|Mock Orange|Tiny Moving Parts|Snowing|No Knife|Chamberlain|The Appleseed Cast|Texas Is the Reason|The Anniversary|Everyone Everywhere|The Promise Ring|Young Statues|American Football|Hot Rod Circuit|Native|Dads|Jeremy Enigk|Moving Mountains|Deer Leap|My Heart to Joy|Glassjaw|The Republic of Wolves|Rival Schools|Small Brown Bike|The New Amsterdams|Hightide Hotel|Desaparecidos|Looming|Weatherbox|Joie De Vivre|Cap'n Jazz|The Fire Theft|Empire! Empire! (I Was a Lonely Estate)|Further Seems Forever|I Hate Myself|Kittyhawk|Sainthood Reps|Have Mercy|The Sound of Animals Fighting|Crash of Rhinos|Jets to Brazil|Football, etc.|Pop Unknown|The Gloria Record|Petal|Owen|Knapsack|On the Might of Princes|As Cities Burn|From Indian Lakes|Algernon Cadwallader|Into It. Over It.|Microwave|Frodus|The Good Life|Cardboard Swords|Koji|These Arms Are Snakes|Cross My Heart|I Kill Giants|Armor for Sleep|Adventures|Lydia|Street Smart Cyclist|Reggie and the Full Effect|New End Original|Restorations|The Juliana Theory".split("|");
+  var JK_SIMX = "Doomtree|P.O.S|Sims|Brother Ali|Atmosphere|Aesop Rock|Sage Francis|Open Mike Eagle|billy woods|Armand Hammer|Frank Waln|The Halluci Nation|Shad|Noname|Astronautalis|Kae Tempest|Sigrid|Susanne Sundfør|Daughter|Highasakite|Of Monsters and Men|Agnes Obel|Eivør|The Dead South|Amigo the Devil".split("|");
+  var JK_NEVER = ["brand new", "touche amore", "taylor swift", "chappell roan"];
+  var JK_ALIAS = { "ttng": ["this town needs guns"], "the world is a beautiful place & i am no longer afraid to die": ["the world is a beautiful place", "twiabp"], "their / they're / there": ["their theyre there"], "empire! empire! (i was a lonely estate)": ["empire empire"], "the sound of animals fighting": ["tsoaf"], "the receiving end of sirens": ["treos"] };
+  var JK_SESS = /audiotree|kexp|npr music|tiny desk|hate5six|little elephant|sofar sounds|jam in the van|bbc|triple j|la blogoth|daytrotter|from the basement|far out|pitchfork|paste|sideonedummy|run for cover|topshelf|count your lucky stars|big scary monsters|epitaph|polyvinyl|tooth|equal vision|triple crown|vagrant|deep elm|jade tree|rhymesayers|doomtree/;
+  function jkNorm(x) { var t = String(x || "").toLowerCase(); try { t = t.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); } catch (e) {} return t.replace(/&/g, " and ").replace(/['\u2019.]/g, "").replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim(); }
+  var jkIdx = null, jkIdxSig = null, jkBandMemo = {};
+  function jkBands() {
+    var sig = cfg.favMusic || "";
+    if (jkIdx && sig === jkIdxSig) return jkIdx;
+    GENRE_I = GENRE_I || new RegExp(GENRE_RE.source, "i");
+    var favs = favTerms().filter(function (f) { return f.length >= 2 && !GENRE_I.test(f); });
+    var got = {}, own = [], ownx = [], sim = [], simx = [], keys = [];
+    function add(name, into) {
+      var k = jkNorm(name).replace(/^the /, ""); if (!k || got[k] || JK_NEVER.indexOf(k) >= 0) return; got[k] = name; into.push(name);
+      keys.push({ k: k, name: name, one: k.indexOf(" ") < 0 });
+      (JK_ALIAS[name.toLowerCase()] || []).forEach(function (a) { keys.push({ k: jkNorm(a), name: name, one: a.indexOf(" ") < 0 }); });
+    }
+    favs.forEach(function (n) { add(n, own); }); JK_OWN.forEach(function (n) { add(n, own); }); JK_OWNX.forEach(function (n) { add(n, ownx); });
+    JK_SIM.forEach(function (n) { add(n, sim); }); JK_SIMX.forEach(function (n) { add(n, simx); });
+    keys.sort(function (a, b) { return b.k.length - a.k.length; });
+    jkIdxSig = sig; jkBandMemo = {};
+    return jkIdx = { own: own, ownx: ownx, sim: sim, simx: simx, keys: keys };
+  }
+  // Which known band a video is by. "" when none; "!" when it is on the never-show list.
+  function jkBandOf(v) {
+    var idx = jkBands(), mk = v.id + "|" + v.title; if (jkBandMemo[mk] != null) return jkBandMemo[mk];
+    var rawT = String(v.title || ""), nt = " " + jkNorm(rawT) + " ", chRaw = jkNorm(artistOf(v.channel)), ch = chRaw.replace(/^the /, "").replace(/ (official|band|music|vevo|tv)$/, ""), out = "";
+    for (var n = 0; n < JK_NEVER.length; n++) if (nt.indexOf(" " + JK_NEVER[n] + " ") >= 0 || ch === JK_NEVER[n]) return jkBandMemo[mk] = "!";
+    var sess = JK_SESS.test(chRaw), lead = nt.replace(/^ the /, " ");
+    for (var i = 0; i < idx.keys.length && !out; i++) {
+      var e = idx.keys[i];
+      if (ch === e.k) out = e.name;
+      else if (!e.one) { if (nt.indexOf(" " + e.k + " ") >= 0) out = e.name; }
+      else if (lead.indexOf(" " + e.k + " ") === 0) {
+var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/, "").slice(e.k.length);
+        if (sess || /^\s*[-\u2013\u2014|:(\["\u201c]/.test(rawL) || /^\s+(live|full set|full album|on audiotree|audiotree)\b/.test(rawL)) out = e.name;
+      }
+    }
+    return jkBandMemo[mk] = out;
+  }
+  function jkBandKey(name) { return jkNorm(name).replace(/^the /, ""); }
+  function jkTake(list, ptr, n, skip) {
+    var out = [], tries = 0, L = list.length; if (!L) return out;
+    while (out.length < n && tries < L) { var b = list[(jb[ptr] || 0) % L]; jb[ptr] = ((jb[ptr] || 0) + 1) % L; tries++; if ((jbl.t[jkBandKey(b)] || 0) > -4 && skip.indexOf(b) < 0) out.push(b); }
+    return out;
+  }
+  function jkQ(b, extra) { var one = jkBandKey(b).indexOf(" ") < 0; return '"' + b.replace(/"/g, "") + '"' + (extra ? " " + extra : (one ? " band" : "")); }
+
   // ---------- Jukebox ----------
   var jb = load("sf_jb", { seeds: [], items: [] }), jkKeepOnly = false, jkSel = 0, jkPage = 0, jkList = [], jkUI = null;
   jb.items = jb.items || []; jb.seeds = jb.seeds || [];
+  var jbl = load("sf_jbl", { t: {} });
+  if (load("sf_jbv", 0) < 2) {
+    // V38: drop the keyword-matched leftovers once; keepers stay. Forget single-word and genre learning.
+    jb.items = jb.items.filter(function (x) { return x.keep; }); jb.seeds = [];
+    Object.keys(jbl.t).forEach(function (k) { if (new RegExp("^(?:" + GENRE_RE.source + ")$", "i").test(k)) delete jbl.t[k]; });
+    save("sf_jb", jb); save("sf_jbl", jbl); save("sf_jbv", 2);
+  }
   function jbItem(v) { return { id: v.id, title: v.title, channel: v.channel, chId: v.chId, at: v.at, dur: v.dur || 0, cat: v.cat || "", views: v.views, live: "none", det: 1 }; }
   function jbAdd(v) { jbLearn(v, 1); if (!jb.items.some(function (x) { return x.id === v.id; })) { jb.items.unshift(jbItem(v)); jb.items = jb.items.slice(0, 150); save("sf_jb", jb); } toast("Added to the Jukebox.", null, null); }
   function jukeList() {
     var mw = mutedWordList(), si = {}, got = {}, out = [];
     subs.forEach(function (x) { si[x.id] = 1; });
-    jb.items.concat(jb.seeds.filter(function (v) { return !si[v.chId]; })).forEach(function (v) { if (got[v.id]) return; got[v.id] = 1; if (!v.keep && (jbl.t[artistOf(v.channel).toLowerCase()] || 0) <= -6) return; if (passes(v, false, mw, si)) out.push(v); });
+    jb.items.concat(jb.seeds.filter(function (v) { return !si[v.chId] && jkBandOf(v) && jkBandOf(v) !== "!"; })).forEach(function (v) { if (got[v.id]) return; got[v.id] = 1; var bd = jkBandOf(v); if (bd === "!") return; if (!v.keep && (jbl.t[bd ? jkBandKey(bd) : artistOf(v.channel).toLowerCase()] || 0) <= -6) return; if (passes(v, false, mw, si)) out.push(v); });
     if (jkKeepOnly) out = out.filter(function (v) { return v.keep; });
     var per = {}; out = out.filter(function (v) { var k = artistKey(v); per[k] = (per[k] || 0) + 1; return per[k] <= 3; });
     return jkSpread(out).slice(0, 120);
@@ -1975,7 +2056,8 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var keys = Object.keys(jbl.t), sig = (cfg.favMusic || "") + "|" + keys.length;
     if (sig !== akSig) { akSig = sig; akMemo = {}; GENRE_I = GENRE_I || new RegExp(GENRE_RE.source, "i"); akTerms = favTerms().concat(keys).map(function (f) { return f.toLowerCase(); }).filter(function (f) { return f.length >= 3 && !GENRE_I.test(f); }); }
     var mk = v.id + "|" + v.title; if (akMemo[mk]) return akMemo[mk];
-    return akMemo[mk] = artistKey0(v);
+    var bd = jkBandOf(v);
+    return akMemo[mk] = (bd && bd !== "!") ? jkBandKey(bd) : artistKey0(v);
   }
   function artistKey0(v) {
     var t = String(v.title || ""), tl = t.toLowerCase(), best = "";
@@ -2003,12 +2085,14 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   function jkThumb(id) { return "https://i.ytimg.com/vi/" + encodeURIComponent(id) + "/mqdefault.jpg"; }
   function jkMeta(v) { return [fmtOf(v) || "Music", v.channel, v.dur ? fmtDur(v.dur) : ""].filter(Boolean).join(" · "); }
   function jkImg(id) { var i = el("img"); i.alt = ""; i.loading = "lazy"; i.decoding = "async"; i.referrerPolicy = "no-referrer"; i.src = jkThumb(id); return i; }
+  function jkPer() { try { return DESK.matches ? 8 : 5; } catch (e) { return 5; } }
+  function jkThumbBig(id) { return "https://i.ytimg.com/vi/" + encodeURIComponent(id) + "/hqdefault.jpg"; }
   function jkStrip(turn) {
-    var u = jkUI, n = jkList.length, pages = Math.max(1, Math.ceil(n / 5));
+    var u = jkUI, n = jkList.length, P = jkPer(), pages = Math.max(1, Math.ceil(n / P));
     jkPage = Math.max(0, Math.min(pages - 1, jkPage));
     u.strip.textContent = "";
-    jkList.slice(jkPage * 5, jkPage * 5 + 5).forEach(function (v, k) {
-      var i = jkPage * 5 + k, r = el("button", "jk-row" + (i === jkSel ? " on" : "") + (seen[v.id] ? " seen" : "")); r.type = "button";
+    jkList.slice(jkPage * P, jkPage * P + P).forEach(function (v, k) {
+      var i = jkPage * P + k, r = el("button", "jk-row" + (i === jkSel ? " on" : "") + (seen[v.id] ? " seen" : "")); r.type = "button";
       r.appendChild(jkImg(v.id));
       var t = el("div"); t.appendChild(el("b", null, v.title)); t.appendChild(el("small", null, jkMeta(v))); r.appendChild(t);
       r.addEventListener("click", function () { jkSel = i; jkUpdate(true); });
@@ -2020,10 +2104,10 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
   function jkUpdate(scrollReel) {
     var u = jkUI, v = jkList[jkSel]; if (!u || !v) return;
-    u.cover.textContent = ""; u.cover.appendChild(jkImg(v.id));
+    u.cover.textContent = ""; var ci = jkImg(v.id); try { if (DESK.matches) ci.src = jkThumbBig(v.id); } catch (e) {} u.cover.appendChild(ci);
     u.title.textContent = v.title; u.meta.textContent = jkMeta(v);
     u.play.href = videoHref(v.id);
-    var want = Math.floor(jkSel / 5), turned = want !== jkPage;
+    var want = Math.floor(jkSel / jkPer()), turned = want !== jkPage;
     if (turned) jkPage = want;
     jkStrip(turned);
     var sl = u.reel.children;
@@ -2040,10 +2124,10 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var kv = el("button", "jk-kv" + (jkKeepOnly ? " on" : ""), jkKeepOnly ? "All" : "Keepers"); kv.type = "button";
     kv.addEventListener("click", function () { jkKeepOnly = !jkKeepOnly; jkSel = 0; jkPage = 0; render(); });
     if (!jkList.length) {
-      var w = el("div", "jk-win"); w.appendChild(el("div", "jk-title", "The jukebox is empty")); w.appendChild(el("div", "jk-meta", jkKeepOnly ? "No keepers yet. Tap the check on a song you like." : "Music videos you load or add will show up here."));
+      jk.classList.add("jk-empty"); var w = el("div", "jk-win"); w.appendChild(el("div", "jk-title", "The jukebox is empty")); w.appendChild(el("div", "jk-meta", jkKeepOnly ? "No keepers yet. Tap the check on a song you like." : "Music videos you load or add will show up here."));
       jk.appendChild(w);
       var c0 = el("div", "jk-ctl"); if (jkKeepOnly) c0.appendChild(kv); c0.appendChild(refill); jk.appendChild(c0);
-      jk.appendChild(el("div", "jk-cost", "Refill runs 3 searches (300 units): Tiny Desk, live sets and music videos.")); jkUI = null; return;
+      jk.appendChild(el("div", "jk-cost", "Refill runs 3 searches (300 units) for bands on your list and bands like them.")); jkUI = null; return;
     }
     var win = el("div", "jk-win"), cv = el("div", "jk-cv"), cover = el("div", "jk-cover");
     cv.appendChild(cover); win.appendChild(cv);
@@ -2066,12 +2150,12 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var pp = el("button", null, "‹ Prev page"), pn = el("button", null, "Next page ›"), pt = el("span");
     pp.type = "button"; pn.type = "button"; pager.appendChild(pp); pager.appendChild(pt); pager.appendChild(pn);
     jk.appendChild(strip); jk.appendChild(pager);
-    jk.appendChild(el("div", "jk-cost", "Play opens the video in YouTube. ✓ trains more like it; ✗ hides it (Undo for a few seconds). Refill runs 3 searches (300 units)."));
+    jk.appendChild(el("div", "jk-cost", "Play starts the video. ✓ trains more like it; ✗ hides it (Undo for a few seconds). Refill runs 3 searches (300 units) for your bands and similar bands."));
     jkUI = { cover: cover, title: title, meta: meta, play: play, strip: strip, pageTxt: pt, pp: pp, pn: pn, reel: reel };
     prev.addEventListener("click", function () { if (jkSel > 0) { jkSel--; jkUpdate(true); } });
     next.addEventListener("click", function () { if (jkSel < jkList.length - 1) { jkSel++; jkUpdate(true); } });
-    pp.addEventListener("click", function () { jkSel = Math.max(0, jkPage * 5 - 5); jkUpdate(true); });
-    pn.addEventListener("click", function () { jkSel = Math.min(jkList.length - 1, jkPage * 5 + 5); jkUpdate(true); });
+    pp.addEventListener("click", function () { jkSel = Math.max(0, jkPage * jkPer() - jkPer()); jkUpdate(true); });
+    pn.addEventListener("click", function () { jkSel = Math.min(jkList.length - 1, jkPage * jkPer() + jkPer()); jkUpdate(true); });
     play.addEventListener("click", function () { var v = jkList[jkSel]; if (!v) return; if (!seen[v.id]) { learn(v, 1); jbLearn(v, 1); } mark(v.id, true); setTimeout(function () { jkStrip(false); }, 50); });
     var jkBusy = 0;
     function jkStamp(kind, done) {
@@ -2115,36 +2199,34 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     jkUpdate(true);
   }
   function artistOf(name) { return String(name || "").replace(/\s*-\s*topic$/i, "").replace(/vevo$/i, "").trim(); }
-  var GENRE_RE = /\b(rock|jazz|blues|country|bluegrass|hip.?hop|rap|metal|punk|folk|indie|soul|funk|reggae|electronic|classical|r&b|pop|latin|gospel|ska|shoegaze|synth|americana|disco|house|techno|ambient|psychedelic|grunge|emo|swing|opera|k-?pop)\b/gi;
-  var jbl = load("sf_jbl", { t: {} });
   function jbLearn(v, w) {
-    var a = artistOf(v.channel).toLowerCase(), found = ((v.title || "") + " " + (v.channel || "")).toLowerCase().match(GENRE_RE) || [];
-    if (a) jbl.t[a] = (jbl.t[a] || 0) + w * 2;
-    found.forEach(function (g) { g = g.toLowerCase(); jbl.t[g] = (jbl.t[g] || 0) + w; });
+    var bd = jkBandOf(v), a = (bd && bd !== "!") ? jkBandKey(bd) : artistOf(v.channel).toLowerCase();
+    if (a) jbl.t[a] = Math.max(-12, Math.min(12, (jbl.t[a] || 0) + w * 2));
     var ks = Object.keys(jbl.t).sort(function (x, y) { return Math.abs(jbl.t[y]) - Math.abs(jbl.t[x]); });
-    ks.slice(80).forEach(function (k) { delete jbl.t[k]; });
+    ks.slice(120).forEach(function (k) { delete jbl.t[k]; });
     save("sf_jbl", jbl);
   }
   function favTerms() { return String(cfg.favMusic || "").split(/[\n,;]+/).map(function (x) { return x.trim(); }).filter(Boolean); }
-  function jukePool() {
-    var seenT = {}, out = [];
-    favTerms().concat(Object.keys(jbl.t).filter(function (k) { return jbl.t[k] > 0; }).sort(function (a, b) { return jbl.t[b] - jbl.t[a]; })).forEach(function (t) { var k = t.toLowerCase(); if (!seenT[k] && !(jbl.t[k] < 0)) { seenT[k] = 1; out.push(t); } });
-    return out;
-  }
+  // Half your own bands, half similar bands. Each search names four bands in full, joined with OR.
   function jukeQueries() {
-    var pool = jukePool(), n = jb.n || 0;
-    if (!pool.length) return ["new bands live session", "Tiny Desk concert"];
-    var pick = function (k) { return pool[(n * 3 + k * 7) % pool.length]; };
-    var t1 = pick(0), t2 = pick(1), t3 = pick(2);
-    var isG = function (t) { return new RegExp(GENRE_RE.source, "i").test(t); };
-    return [isG(t1) ? t1 + " new artists live session" : "bands like " + t1, isG(t2) ? t2 + " underrated bands" : "artists similar to " + t2, "Tiny Desk " + t3];
+    var idx = jkBands(), n = jb.n || 0, used = [];
+    function grab(list, ptr, k) { var g = jkTake(list, ptr, k, used); used = used.concat(g); return g; }
+    var withX = n % 2 === 0;
+    var a = grab(idx.own, "po", withX ? 1 : 2).concat(withX ? grab(idx.ownx, "pox", 1) : []).concat(grab(idx.sim, "ps", withX ? 1 : 2)).concat(withX ? grab(idx.simx, "psx", 1) : []);
+    var b = grab(idx.own, "po", 2).concat(grab(idx.sim, "ps", 2));
+    var c = grab(idx.own, "po", 2).concat(grab(idx.sim, "ps", 2));
+    return [
+      { q: a.map(function (x) { return jkQ(x, ""); }).join("|"), bands: a, cat: true },
+      { q: b.map(function (x) { return jkQ(x, "live session"); }).join("|"), bands: b, cat: true },
+      { q: c.map(function (x) { return jkQ(x, "hate5six"); }).join("|"), bands: c, cat: false }
+    ].filter(function (x) { return x.bands.length; });
   }
   function jukeRefill() {
     if (busy) return;
     if (!cfg.key) { show("settings"); setStatus("Add an API key to start.", true); return; }
     if (quotaLeft() < 340) { toast("Not enough of today's free quota left for a refill.", null, null); return; }
     var qs = jukeQueries(); jb.n = (jb.n || 0) + 1;
-    var favs = favTerms().map(function (x) { return x.toLowerCase(); });
+    if (!qs.length) { toast("No bands left to search for.", null, null); return; }
     start();
     var fresh = [], have = {}, lang = (navigator.language || "en").slice(0, 2), si = {};
     subs.forEach(function (x) { si[x.id] = 1; });
@@ -2152,7 +2234,8 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     qs.reduce(function (p, q, i) {
       return p.then(function () {
         setStatus("Refilling the jukebox (" + (i + 1) + " of " + qs.length + ")");
-        return api("search", { part: "snippet", type: "video", q: q, maxResults: 25, order: "relevance", videoCategoryId: "10", relevanceLanguage: lang, safeSearch: "moderate" }, null, 100).then(function (j) {
+        var sp = { part: "snippet", type: "video", q: q.q, maxResults: 50, order: "relevance", relevanceLanguage: lang, safeSearch: "moderate" }; if (q.cat) sp.videoCategoryId = "10";
+        return api("search", sp, null, 100).then(function (j) {
           (j.items || []).forEach(function (it) {
             var id = it.id && it.id.videoId, sn = it.snippet || {};
             if (!id || have[id] || seen[id] || hidden[id] || si[sn.channelId]) return; have[id] = 1;
@@ -2161,15 +2244,15 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
         });
       });
     }, Promise.resolve()).then(function () { return addDetails(fresh).catch(function () {}); }).then(function () {
-      var mw = mutedWordList(), known = 0, cnt = {}; jb.items.slice(0, 40).forEach(function (x) { var k = artistKey(x); cnt[k] = (cnt[k] || 0) + 1; });
+      var mw = mutedWordList(), cnt = {};
       var keep = fresh.filter(function (v) { return v.det && v.dur >= 120 && (!v.live || v.live === "none") && passes(v, false, mw, si); }).filter(function (v) {
-        var a = artistOf(v.channel).toLowerCase(), isFav = favs.some(function (f) { return a.indexOf(f) >= 0 || (jbl.t[a] || 0) > 1; });
-        if (isFav) { known++; return known <= 3; }
-        return true;
-      }).filter(function (v) { var a = artistKey(v); cnt[a] = (cnt[a] || 0) + 1; return cnt[a] <= 2; }).map(jbItem);
+        var bd = jkBandOf(v); if (!bd || bd === "!") return false;
+        var k = jkBandKey(bd); cnt[k] = (cnt[k] || 0) + 1; return cnt[k] <= 3;
+      }).map(function (v) { var it = jbItem(v); it.band = jkBandOf(v); return it; });
+      keep = jkSpread(keep);
       jb.items = keep.concat(jb.items).slice(0, 150); save("sf_jb", jb);
       jkSel = 0; jkPage = 0;
-      toast(keep.length ? "Added " + keep.length + " to the jukebox." : "Nothing new this time.", null, null);
+      toast(keep.length ? "Added " + keep.length + " songs by bands on your lists." : "Nothing new this time. Try Refill again for the next bands.", null, null);
       render();
     }).catch(function (e) { setStatus(explain(e), true); }).then(finish);
   }
@@ -3126,7 +3209,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 37;
+  var VERSION = 38;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -3340,7 +3423,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
 
   // ---------- diagnostics (no key, token or watch history) ----------
   function clean(t) { return String(t).replace(/AIza[\w-]+/g, "[key]").replace(/ya29\.[\w.-]+/g, "[token]").replace(/([?&](?:key|access_token)=)[^&\s"]+/g, "$1[x]"); }
-  if (load("sf_testhook", false)) window.__sf = { pvEnd: function () { pvEnded(); }, pvState: function () { return { id: pvV && pvV.id, st: pvSt }; }, shLog: SHLOG, shSet: function (t, d) { shT = t; shDur = d; }, noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
+  if (load("sf_testhook", false)) window.__sf = { jkBandOf: jkBandOf, jukeQueries: jukeQueries, pvEnd: function () { pvEnded(); }, pvState: function () { return { id: pvV && pvV.id, st: pvSt }; }, shLog: SHLOG, shSet: function (t, d) { shT = t; shDur = d; }, noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
   function diagText() {
     var sz = {}, tot = 0;
     try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i), n = (localStorage.getItem(k) || "").length; if (k.indexOf("sf_") === 0) { sz[k.slice(3)] = n; tot += n; } } } catch (e) {}
