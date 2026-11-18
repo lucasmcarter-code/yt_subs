@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-KAm7Xx7TzogbHzZUUhBV3lx9ISP2Mj0C4OpIvczHcIA=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-PpOGDLLC2KqmIlORpswqh8OamVaD7zj10zVrGSJ9h74=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -364,6 +364,13 @@ body.light .jk-turn { animation: none; }
 .sugg-top small { opacity: .7; font-size: 12px; }
 #settingsBtn { position: relative; --q: 0; --qc: var(--accent); }
 #settingsBtn::after { content: ""; position: absolute; inset: -3px; border-radius: 50%; pointer-events: none; background: conic-gradient(var(--qc) calc(var(--q) * 1%), rgba(255,255,255,.12) 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px)); }
+.qf { display: flex; gap: 8px; margin: 0 0 10px; }
+.digest { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; margin: 4px 0 12px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--card, rgba(255,255,255,.06)); color: var(--ink); text-align: left; font-size: 15px; }
+.digest small { opacity: .7; font-size: 12.5px; display: block; margin-top: 2px; }
+.ptr { position: fixed; left: 50%; top: calc(env(safe-area-inset-top) + 74px); transform: translateX(-50%); z-index: 12; padding: 8px 16px; border-radius: 18px; background: #2a2a30; color: #f3ece0; font-size: 13.5px; pointer-events: none; }
+.taste-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+#tasteBox { margin: 4px 0 14px; }
+#tasteBox .btn { margin-top: 10px; }
 .sh-chrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; }
 .sh-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 6px 0 10px; }
 .sh-top h2 { margin: 0; font: italic 700 26px/1 Georgia, "Caveat", serif; }
@@ -450,7 +457,10 @@ body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px)
       <button class="chip" id="sortBtn" type="button" aria-pressed="false">For you</button>
       <button class="chip" id="hideSeenBtn" type="button" aria-pressed="false">Hide watched</button>
     </div>
+    <div class="qf" id="qf" hidden><button class="chip" id="qfShort" type="button" aria-pressed="false">Under 10 min</button><button class="chip" id="qfLong" type="button" aria-pressed="false">Over 30 min</button></div>
     <div class="status" id="status" role="status"></div>
+    <div id="digestBox" hidden></div>
+    <div id="tasteBox" hidden></div>
     <div id="laterBox" hidden></div>
     <div id="feed"></div>
     <div id="srchMoreBox" hidden><button class="btn" id="srchMore" type="button">Load more (100 units)</button></div>
@@ -556,6 +566,7 @@ body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px)
     </div>
     <h3>Diagnostics</h3>
     <p>If something looks wrong, tap Copy and paste the result into chat. It has no API key, sign-in token or watch history.</p>
+    <div class="field"><label>What I've learned</label><div class="hint">Built from your Keepers, Nahs, thumbs and watching. Tap Not true to make me forget a lesson.</div><div id="tasteSet"></div></div>
     <div class="field"><label>Backup</label><div class="hint">Saves your keepers, hidden items, favorites, learning and follows into one file. It leaves out your API key and client ID.</div>
       <div class="btn-row"><button class="btn ghost" id="expBtn" type="button">Export backup</button><button class="btn ghost" id="impBtn" type="button">Import backup</button></div>
       <input type="file" id="impFile" accept="application/json,.json" hidden></div>
@@ -578,6 +589,7 @@ body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px)
   </div>
   <div class="sh-cap"><b id="shCh"></b><span id="shTi"></span></div>
 </div>
+<div class="ptr" id="ptr" hidden>Release to refresh</div>
 <div class="toast" id="toast" hidden><span id="toastMsg"></span><button type="button" id="toastAct"></button></div>
 
 <script>
@@ -619,6 +631,8 @@ body.shOn .toast { z-index: 40; bottom: calc(env(safe-area-inset-bottom) + 24px)
   var rec = load("sf_rec", { at: 0, items: [] });
   var recNo = load("sf_recNo", {}), recYes = load("sf_recYes", {});
   var later = load("sf_later", []);
+  var visit = load("sf_visit", { prev: 0, cur: 0 }), qfLen = "";
+  (function () { var now = Date.now(); if (!visit.cur || now - visit.cur > 30 * 60000) visit.prev = visit.cur || 0; visit.cur = now; try { localStorage.setItem("sf_visit", JSON.stringify(visit)); } catch (e) {} })();
   var holdFired = false;
   var gsiLoading = false;
   var busy = false;
@@ -2114,51 +2128,31 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     });
     box.appendChild(g);
   }
-  var shPool = {}, shFb = 0;
-  function shCur() { var v = shList[shI]; return v ? shPool[v.id] : null; }
-  function shCmd(func, args, ent) { ent = ent || shCur(); try { if (ent && ent.f && ent.f.contentWindow) ent.f.contentWindow.postMessage(JSON.stringify({ event: "command", func: func, args: args || [] }), "*"); } catch (e) {} }
-  function shSrc(id, muted) {
+  var shF = null, shSt = -1, shLoadT = 0, shFb = 0, shPend = false;
+  function shCmd(func, args) { try { if (shF && shF.contentWindow) shF.contentWindow.postMessage(JSON.stringify({ event: "command", func: func, args: args || [] }), "*"); } catch (e) {} }
+  function shSrc(id) {
     var o = /^https?:/.test(location.protocol) ? "&origin=" + encodeURIComponent(location.origin) : "";
-    return "https://www.youtube.com/embed/" + encodeURIComponent(id) + "?autoplay=1&mute=" + (muted ? 1 : 0) + "&playsinline=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&enablejsapi=1" + o;
-  }
-  function shMk(v, cur) {
-    if (shPool[v.id]) return;
-    var f = el("iframe"); f.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture"); f.setAttribute("title", "Short"); f.referrerPolicy = "strict-origin-when-cross-origin";
-    var ent = { id: v.id, f: f, st: -1 }; shPool[v.id] = ent;
-    f.addEventListener("load", function () { try { f.contentWindow.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), "*"); } catch (e) {} });
-    f.src = shSrc(v.id, !cur); $("shVid").appendChild(f);
+    return "https://www.youtube.com/embed/" + encodeURIComponent(id) + "?autoplay=1&playsinline=1&controls=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&enablejsapi=1" + o;
   }
   function shPoster(v) {
     var im = $("shPoster"); if (!v) { im.hidden = true; return; }
     im.hidden = false; im.style.opacity = "1"; im.onerror = function () { im.onerror = null; im.src = jkThumb(v.id); };
     im.src = "https://i.ytimg.com/vi/" + encodeURIComponent(v.id) + "/oar2.jpg";
   }
-  function shEnsure() {
-    var want = {}, order = [0, 1, 2, -1];
-    order.forEach(function (d, k) {
-      var v = shList[shI + d]; if (!v) return; want[v.id] = 1;
-      if (shPool[v.id]) return;
-      if (d === 0) shMk(v, true); else setTimeout(function () { var w = shList[shI + d]; if (w && !shPool[w.id] && $("shOv") && !$("shOv").hidden) shMk(w, false); }, 700 * k);
-    });
-    Object.keys(shPool).forEach(function (id) { if (!want[id]) { var e = shPool[id]; if (e.f.parentNode) e.f.parentNode.removeChild(e.f); delete shPool[id]; } });
-  }
+  function shArm() { clearTimeout(shFb); shFb = setTimeout(function () { if (!$("shOv").hidden && shSt !== 1 && shSt !== 3) $("shPlay").hidden = false; }, 2500); }
   function shAct() {
     var v = shList[shI]; if (!v) return;
-    shEnsure();
-    var cur = shPool[v.id];
-    Object.keys(shPool).forEach(function (id) { var e = shPool[id]; e.f.classList.toggle("cur", e === cur); if (e !== cur && e.st === 1) { shCmd("pauseVideo", [], e); } });
-    shPoster(cur && cur.st === 1 ? null : v);
-    if (cur) {
-      $("shPlay").hidden = true;
-      shCmd("unMute", [], cur); shCmd("seekTo", [0, true], cur); shCmd("playVideo", [], cur);
-      clearTimeout(shFb); shFb = setTimeout(function () {
-        var c2 = shCur(); if (!c2 || c2 !== cur || $("shOv").hidden || cur.st === 1) return;
-        shCmd("pauseVideo", [], cur); $("shPlay").hidden = false;
-      }, 2200);
+    $("shPlay").hidden = true; shPoster(v); shInfo(); shSt = -1; clearTimeout(shLoadT); clearTimeout(shFb);
+    if (!shF) {
+      var f = el("iframe"); f.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture"); f.setAttribute("title", "Short"); f.referrerPolicy = "strict-origin-when-cross-origin";
+      f.addEventListener("load", function () { try { f.contentWindow.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), "*"); } catch (e) {} });
+      f.src = shSrc(v.id); $("shVid").appendChild(f); shF = f; shArm(); return;
     }
-    shInfo();
+    shPend = true;
+    shLoadT = setTimeout(function () { shPend = false; var w = shList[shI]; if (!w) return; shCmd("loadVideoById", [w.id]); shCmd("unMute"); shArm(); }, 260);
   }
-  function shTapPlay() { var c = shCur(); if (!c) return; $("shPlay").hidden = true; shCmd("unMute", [], c); shCmd("playVideo", [], c); }
+  function shTapPlay() { $("shPlay").hidden = true; shCmd("unMute"); shCmd("playVideo"); shArm(); }
+  function shTap() { if (shSt === 1) { shCmd("pauseVideo"); shSt = 2; $("shPlay").hidden = false; } else shTapPlay(); }
   function shOpen(i) {
     shI = i; document.body.classList.add("shOn"); $("shOv").hidden = false;
     if (!shList[shI]) return; shAct();
@@ -2170,7 +2164,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
   function shClose() {
     $("shOv").hidden = true; document.body.classList.remove("shOn"); clearTimeout(shFb);
-    Object.keys(shPool).forEach(function (id) { var e = shPool[id]; if (e.f.parentNode) e.f.parentNode.removeChild(e.f); }); shPool = {};
+    clearTimeout(shLoadT); if (shF && shF.parentNode) shF.parentNode.removeChild(shF); shF = null; shSt = -1;
     if (tab === "shorts") render();
   }
   function shGo(d) {
@@ -2225,12 +2219,11 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     if (!d) return;
     var st = d.event === "onStateChange" ? d.info : (d.info && d.info.playerState != null ? d.info.playerState : null);
     if (st == null) return;
-    var ent = null; Object.keys(shPool).forEach(function (id) { if (shPool[id].f.contentWindow === e.source) ent = shPool[id]; });
-    if (!ent) return; ent.st = st; var cur = shCur();
-    if (ent === cur) {
-      if (st === 1) { clearTimeout(shFb); $("shPlay").hidden = true; var pi = $("shPoster"); pi.style.opacity = "0"; setTimeout(function () { if (ent.st === 1) pi.hidden = true; }, 300); }
-      if (st === 0) { shCmd("seekTo", [0, true], ent); shCmd("playVideo", [], ent); }
-    } else if (st === 1) { shCmd("pauseVideo", [], ent); shCmd("seekTo", [0, true], ent); }
+    if (!shF || e.source !== shF.contentWindow) return;
+    shSt = st;
+    if (st === 1) { clearTimeout(shFb); $("shPlay").hidden = true; shCmd("unMute"); var pi = $("shPoster"); pi.style.opacity = "0"; setTimeout(function () { if (shSt === 1) pi.hidden = true; }, 300); }
+    else if (st === 0) { shCmd("seekTo", [0, true]); shCmd("playVideo"); }
+    else if ((st === 2 || st === 5) && !shPend) { clearTimeout(shFb); $("shPlay").hidden = false; }
   });
   (function () {
     var hit = $("shHit"), y0 = 0, t0 = 0, x0 = 0;
@@ -2238,14 +2231,26 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     hit.addEventListener("pointerup", function (e) {
       var dy = e.clientY - y0, dx = e.clientX - x0;
       if (Math.abs(dy) > 50 && Math.abs(dy) > Math.abs(dx)) { shGo(dy < 0 ? 1 : -1); return; }
-      if (Math.abs(dy) < 12 && Math.abs(dx) < 12) { var ce = shCur(); if (ce && ce.st === 1) shCmd("pauseVideo"); else shTapPlay(); }
+      if (Math.abs(dy) < 12 && Math.abs(dx) < 12) shTap();
     });
-    $("shX").addEventListener("click", shClose); $("shUp").addEventListener("click", shKeep); $("shDn").addEventListener("click", shNah); $("shMore").addEventListener("click", function () { var v = shList[shI]; if (!v) return; openSheet(v.channel, [{ label: "Hide Shorts from " + v.channel, pick: shMute }]); });
+    $("shX").addEventListener("click", shClose); $("shUp").addEventListener("click", shKeep); $("shDn").addEventListener("click", shNah); $("shMore").addEventListener("click", function () { var v = shList[shI]; if (!v) return; var sv = isSaved(v.id); openSheet(v.channel, [{ label: sv ? "Remove from Watch later" : "Save to Watch later", pick: function () { toggleLater({ id: v.id, title: v.title, channel: v.channel, chId: v.chId, at: v.at, thumb: jkThumb(v.id), dur: 0, cat: "" }); } }, { label: "Hide Shorts from " + v.channel, pick: shMute }]); });
     $("shPlay").addEventListener("click", shTapPlay);
   })();
 
+  // ---------- pull to refresh (Subs) ----------
+  (function () {
+    var y0 = null, pulled = 0, ptr = $("ptr");
+    document.addEventListener("touchstart", function (e) { y0 = (tab === "subs" && !LAND.matches && window.scrollY <= 0 && e.touches.length === 1 && !document.body.classList.contains("shOn")) ? e.touches[0].clientY : null; pulled = 0; }, { passive: true });
+    document.addEventListener("touchmove", function (e) {
+      if (y0 == null) return; pulled = e.touches[0].clientY - y0;
+      if (window.scrollY > 0) { y0 = null; ptr.hidden = true; return; }
+      ptr.hidden = pulled < 40; ptr.textContent = pulled > 110 ? "Release to refresh" : "Pull to refresh";
+    }, { passive: true });
+    document.addEventListener("touchend", function () { var go = y0 != null && pulled > 110; y0 = null; ptr.hidden = true; if (go && !busy) $("refreshBtn").click(); }, { passive: true });
+  })();
+
   // ---------- backup ----------
-  var BK_KEYS = ["sf_folSort", "sf_folRev", "sf_cfg", "sf_subs", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_chTags", "sf_jb", "sf_jbl", "sf_shorts", "sf_shch", "sf_rec", "sf_recNo", "sf_recYes", "sf_seeds", "sf_later", "sf_sh", "sf_unf", "sf_dboost", "sf_chTheme"];
+  var BK_KEYS = ["sf_tasteSeen", "sf_visit", "sf_folSort", "sf_folRev", "sf_cfg", "sf_subs", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_chTags", "sf_jb", "sf_jbl", "sf_shorts", "sf_shch", "sf_rec", "sf_recNo", "sf_recYes", "sf_seeds", "sf_later", "sf_sh", "sf_unf", "sf_dboost", "sf_chTheme"];
   function bkMake() {
     var data = {};
     BK_KEYS.forEach(function (k) { var raw = localStorage.getItem(k); if (raw == null) return; try { data[k] = JSON.parse(raw); } catch (e) {} });
@@ -2702,7 +2707,8 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     $("chanPanel").hidden = !isChan;
     $("search").placeholder = "Filter";
     $("hideSeenBtn").hidden = false;
-    renderLater(false);
+    renderLater(false); renderDigest(); renderTasteCard();
+    $("qf").hidden = !(tab === "subs");
     if (isChan) { renderChannels(box); return; }
     if (isSrch) { renderSearch(box); return; }
     if (isJuke) { renderJuke(box); return; }
@@ -2715,6 +2721,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     $("sortBtn").hidden = isDisc;
     $("sortBtn").textContent = SORTS[sortMode] || SORTS.new; $("sortBtn").setAttribute("aria-pressed", String(sortMode !== "new"));
     $("hideSeenBtn").setAttribute("aria-pressed", String(!!hideSeen));
+    $("qfShort").setAttribute("aria-pressed", String(qfLen === "short")); $("qfLong").setAttribute("aria-pressed", String(qfLen === "long"));
 
     var q = $("search").value.trim().toLowerCase();
     var mw = mutedWordList(), subIds = {};
@@ -2726,6 +2733,8 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       if (!passes(v, isDisc, mw, subIds)) return false;
       if (isDisc && !topicSet[(v.topic || "").toLowerCase()]) return false;
       if (hideSeen && seen[v.id] && !kept[v.id]) return false;
+      if (!isDisc && qfLen === "short" && !(v.dur > 0 && v.dur < 600)) return false;
+      if (!isDisc && qfLen === "long" && !(v.dur > 1800)) return false;
       if (q && (v.title + " " + v.channel).toLowerCase().indexOf(q) < 0) return false;
       return true;
     });
@@ -2741,7 +2750,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       if (src.at) setStatus(items.length + " picks from your topics. Updated " + ago(src.at) + ".");
       else setStatus("Tap refresh to search your topics.");
     } else if (src.at) {
-      setStatus(items.length + " videos from " + subs.length + " channels. Updated " + ago(src.at) + ".");
+      setStatus("");
     }
     if (!items.length) {
       box.appendChild(el("p", "empty", src.items.length ? "Nothing to show. Clear the filter or show watched videos." : "No videos yet. Tap refresh."));
@@ -2792,7 +2801,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     $("topics").value = cfg.topics || "";
     $("minViews").value = cfg.minViews != null ? cfg.minViews : 25000; $("refreshCap").value = cfg.refreshCap || 4;
     $("mutedWords").value = cfg.mutedWords || "";
-    $("hideShorts").checked = cfg.hideShorts !== false; renderShCh();
+    $("hideShorts").checked = cfg.hideShorts !== false; renderShCh(); renderTaste($("tasteSet"), 6, false);
     $("openInApp").checked = !!cfg.openInApp;
     $("sway").checked = cfg.sway !== false; $("srchInf").checked = cfg.srchInf !== false; $("favMusic").value = cfg.favMusic || "";
     $("lightMode").checked = !!light.on;
@@ -2881,6 +2890,8 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
         save("sf_folSort", folSort); save("sf_folRev", folRev); render(); window.scrollTo(0, 0); } }; }));
       return; }
     openSheet("Sort videos", Object.keys(SORTS).map(function (k) { return { label: SORTS[k], checked: sortMode === k, pick: function () { sortMode = k; save("sf_sort", sortMode); render(); window.scrollTo(0, 0); } }; })); });
+  $("qfShort").addEventListener("click", function () { qfLen = qfLen === "short" ? "" : "short"; render(); });
+  $("qfLong").addEventListener("click", function () { qfLen = qfLen === "long" ? "" : "long"; render(); });
   $("hideSeenBtn").addEventListener("click", function () { hideSeen = !hideSeen; save("sf_hideSeen", hideSeen); render(); });
   $("clearSeenBtn").addEventListener("click", function () { seen = {}; save("sf_seen", seen); setStatus("Watched marks cleared."); });
   $("resetLearnBtn").addEventListener("click", function () {
@@ -2975,7 +2986,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 30;
+  var VERSION = 31;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -3041,6 +3052,50 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   // Sideways phone: the cards become one strip that scrolls left to right.
   var LAND = window.matchMedia("(orientation: landscape) and (max-height: 520px)");
   function scrollPos() { return LAND.matches ? $("feed").scrollLeft : window.scrollY; }
+  setInterval(function () { visit.cur = Date.now(); try { localStorage.setItem("sf_visit", JSON.stringify(visit)); } catch (e) {} }, 60000);
+  function renderDigest() {
+    var box = $("digestBox"); box.textContent = ""; box.hidden = true;
+    if (tab !== "subs" || !feed.at) return;
+    var since = visit.prev || (Date.now() - 864e5), n = 0, chs = {};
+    feed.items.forEach(function (v) { if (new Date(v.at).getTime() > since && !seen[v.id] && !hidden[v.id]) { n++; chs[v.sid || v.chId] = 1; } });
+    var m = Object.keys(chs).length, tm = new Date(feed.at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    var b = el("button", "digest"); b.type = "button";
+    var l = el("div", null, n ? n + " new from " + m + (m === 1 ? " channel" : " channels") : "Nothing new since your last visit"); l.appendChild(el("small", null, "Updated " + tm));
+    b.appendChild(l); if (n) b.appendChild(el("span", null, "\u2191"));
+    b.addEventListener("click", function () { toTop(); });
+    box.appendChild(b); box.hidden = false;
+  }
+
+  // ---------- weekly taste summary ----------
+  function tasteLines(max) {
+    var out = [];
+    function top(map, pos, n, min) { return Object.keys(map).filter(function (k) { return pos ? map[k] >= min : map[k] <= -min; }).sort(function (a, b) { return pos ? map[b] - map[a] : map[a] - map[b]; }).slice(0, n); }
+    top(model.ch, true, max, 1.5).forEach(function (id) { out.push({ txt: "You like videos from " + subTitle(id), drop: function () { delete model.ch[id]; save("sf_model", model); } }); });
+    var pw = top(model.w, true, max, 1.2); if (pw.length) out.push({ txt: "You watch a lot about: " + pw.join(", "), drop: function () { pw.forEach(function (w) { delete model.w[w]; }); save("sf_model", model); } });
+    top(jbl.t, true, max, 2).forEach(function (t) { out.push({ txt: "Jukebox: you like " + t, drop: function () { delete jbl.t[t]; save("sf_jbl", jbl); } }); });
+    top(model.ch, false, max, 2.5).forEach(function (id) { out.push({ txt: "You tend to skip " + subTitle(id), drop: function () { delete model.ch[id]; save("sf_model", model); } }); });
+    var nw = top(model.w, false, max, 1.2); if (nw.length) out.push({ txt: "You skip videos about: " + nw.join(", "), drop: function () { nw.forEach(function (w) { delete model.w[w]; }); save("sf_model", model); } });
+    return out;
+  }
+  function renderTaste(box, max, onDone) {
+    if (!box) return; box.textContent = "";
+    var lines = tasteLines(max);
+    if ((model.n || 0) < 10 || !lines.length) { box.appendChild(el("div", "hint", "Still learning. Use Keeper and Nah, thumbs, and watch a few videos.")); return; }
+    lines.forEach(function (l) {
+      var r = el("div", "taste-row"); r.appendChild(el("span", null, l.txt));
+      var b = el("button", "chip", "Not true"); b.type = "button"; b.addEventListener("click", function () { l.drop(); renderTaste(box, max, onDone); });
+      r.appendChild(b); box.appendChild(r);
+    });
+  }
+  function weekKey() { var d = new Date(), j = new Date(d.getFullYear(), 0, 1); return d.getFullYear() + "-" + Math.floor(((d - j) / 864e5 + j.getDay()) / 7); }
+  function renderTasteCard() {
+    var box = $("tasteBox"); box.textContent = ""; box.hidden = true;
+    if (tab !== "subs" || new Date().getDay() !== 0 || load("sf_tasteSeen", "") === weekKey() || (model.n || 0) < 10 || !tasteLines(3).length) return;
+    var h = el("h2", "day", "What I learned this week"); box.appendChild(h);
+    var body = el("div"); box.appendChild(body); renderTaste(body, 3, true);
+    var ok = el("button", "btn small", "Got it"); ok.type = "button"; ok.addEventListener("click", function () { save("sf_tasteSeen", weekKey()); box.hidden = true; });
+    box.appendChild(ok); box.hidden = false;
+  }
   function toTop() {
     var smooth = { top: 0, left: 0, behavior: "smooth" };
     if (LAND.matches) $("feed").scrollTo(smooth); else window.scrollTo(smooth);
