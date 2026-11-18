@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-W5krwwMZm2t91l2q0NdZoU3XQQjYalkMtf1PIDk9/4M=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ppVs8icQ239AhwQd9mf11FrtkpzliRYxv56dSTRoLYA=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3073,7 +3073,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 35;
+  var VERSION = 36;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -3329,6 +3329,26 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var t = "CRASH REPORT\n" + diagText(), box = $("diagBox"); box.value = t; box.hidden = false;
     function done(ok) { toast(ok ? "Crash report copied. Paste it in chat." : "Select the text below and copy it."); if (!ok) { box.focus(); box.select(); } }
     try { navigator.clipboard.writeText(t).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
+  });
+  // Show/Copy buttons for the API key and client ID
+  function copyText(t, ok) {
+    function fb() {
+      var ta = document.createElement("textarea"); ta.value = t; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+      document.body.appendChild(ta); ta.focus(); ta.select(); ta.setSelectionRange(0, t.length);
+      var r = false; try { r = document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta); ok(r);
+    }
+    try { navigator.clipboard.writeText(t).then(function () { ok(true); }, fb); } catch (e) { fb(); }
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest("button[data-show],button[data-copy]") : null; if (!b) return;
+    var id = b.getAttribute("data-show") || b.getAttribute("data-copy"), inp = $(id); if (!inp) return;
+    if (b.hasAttribute("data-show")) {
+      var hide = inp.type === "password"; inp.type = hide ? "text" : "password"; b.textContent = hide ? "Hide" : "Show";
+    } else {
+      if (!inp.value) { toast("Nothing to copy yet.", null, null); return; }
+      copyText(inp.value, function (ok) { toast(ok ? "Copied." : "Couldn't copy. Tap Show, then select the text.", null, null); });
+    }
   });
   // ---------- start ----------
   if (cfg.key && subs.length) {
