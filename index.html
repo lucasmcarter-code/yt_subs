@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-Tu9TGKNlHUEVJBXQKGIvz+u3cmM3xAp9sFjebr+nfMY=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-qkpAPPZTYGA0E2YnJmUIqE2JLmxV1t4UQ9DYHZj+jPE=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -498,6 +498,22 @@ body.pvOn .toast { z-index: 80; }
 @media (min-width: 900px) and (min-height: 521px) {
   .jk-desk { display: inline-flex !important; }
 }
+#bellBtn { position: relative; }
+#bellBtn.dot::after { content: ""; position: absolute; top: 7px; right: 8px; width: 10px; height: 10px; border-radius: 50%; background: #E5484D; border: 2px solid var(--surface); }
+.nt { padding: 14px 4px; border-top: 1px solid var(--line); display: flex; gap: 12px; align-items: flex-start; }
+.nt:first-of-type { border-top: 0; }
+.nt > div { flex: 1; min-width: 0; }
+.nt b { display: block; font-weight: 600; font-size: 15px; line-height: 1.35; }
+.nt small { display: block; color: var(--muted); font-size: 13px; margin-top: 3px; line-height: 1.4; }
+.nt.urgent b::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #E5484D; margin-right: 8px; vertical-align: 1px; }
+.nt .btn { flex: none; }
+.nt-none { padding: 18px 4px; color: var(--muted); }
+@media (max-width: 430px) {
+  .bar-row { gap: 6px; }
+  .bar-row .icon-btn { width: 38px; height: 38px; }
+  .brand { font-size: 27px; gap: 6px; }
+  .brand svg { width: 26px; height: 26px; }
+}
 </style>
 </head>
 <body>
@@ -511,6 +527,7 @@ body.pvOn .toast { z-index: 80; }
       <button class="icon-btn" id="refreshBtn" type="button" aria-label="Refresh feed">
         <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 4v5h-5"/></svg>
       </button>
+      <button class="icon-btn" id="bellBtn" type="button" aria-label="Notices"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></button>
       <button class="icon-btn" id="settingsBtn" type="button" aria-label="Open settings">
         <svg viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h8M16 18h4"/><circle cx="16" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="14" cy="18" r="2"/></svg>
       </button>
@@ -837,6 +854,7 @@ body.pvOn .toast { z-index: 80; }
   function quotaOut() {
     var sh = qShare(); if (sh.out) return; var mine = quotaUsed(); sh.out = 1; sh.by[devId] = quota().used; save("sf_qshare", sh); quotaRing();
     if (mine < 8500) toast("The key is out of quota for today. Someone else on this key used the rest.", null, null);
+    bellDraw();
   }
   function quotaFlush() { if (qT) { clearTimeout(qT); qT = 0; save("sf_quota", qMem); } }
   function spend(n) { var q = quota(); q.used += n; if (!qT) qT = setTimeout(function () { qT = 0; save("sf_quota", qMem); qShareWrite(false); quotaRing(); }, 800); }
@@ -847,6 +865,7 @@ body.pvOn .toast { z-index: 80; }
     var pct = Math.min(100, quotaUsed() / 100);
     b.style.setProperty("--q", String(Math.round(pct))); b.style.setProperty("--qc", pct >= 95 ? "#E5484D" : pct >= 80 ? "#F2B03C" : "var(--accent)");
     b.setAttribute("aria-label", "Open settings. " + Math.round(pct) + " percent of today's quota used");
+    if (typeof bellDraw === "function" && typeof notes !== "undefined" && notes) bellDraw();
   }
   function quotaLeft() { return Math.max(0, 10000 - quotaUsed()); }
 
@@ -1755,7 +1774,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
         setStatus("Checking channel " + n + " of " + todo.length);
       });
     }).then(function (lists) {
-      if (lists && lists.skipped && lists.skipped.length) setTimeout(function () { toast("Skipped " + lists.skipped.length + (lists.skipped.length === 1 ? " channel that failed: " + lists.skipped[0] : " channels that failed") + ". It will retry next refresh.", null, null); }, 600);
+      if (lists && lists.skipped && lists.skipped.length) note("skip", "Skipped " + lists.skipped.length + (lists.skipped.length === 1 ? " channel that failed: " + lists.skipped[0] : " channels that failed") + ".", { urgent: true, once: true, sub: "It will retry on the next refresh." }); else unnote("skip");
       save("sf_chk", chk);
       // Videos we already know keep their length and category, so they are not looked up again.
       var known = {};
@@ -2862,7 +2881,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   function renderChannels(box) {
     renderSeeds();
     var items = rec.items.filter(function (c) { return !recNo[c.id] && !mutedCh[c.id]; });
-    if (rec.at) setStatus(items.length + " suggested channels. Updated " + ago(rec.at) + ".");
+    if (rec.at) info(items.length + " suggested channels. Updated " + ago(rec.at) + ".");
     else if (!$("status").textContent) setStatus("");
     if (!items.length) {
       box.appendChild(el("p", "empty", rec.at ? "No suggestions left." : "Choose a few channels above, then tap Find similar channels."));
@@ -3118,14 +3137,14 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     });
 
     $("refreshBtn").classList.toggle("off", isDisc && refreshesLeft() === 0);
-    if (isDisc) discBar(box);
+
     if (isDisc && !topicList().length && !searchTopics().length) {
       setStatus("");
       box.appendChild(el("p", "empty", "Add a few topics in settings, such as astronomy or synth music, and Discover will find recent videos on them."));
       return;
     }
     if (isDisc) {
-      if (src.at) setStatus(items.length + " picks from your topics. Updated " + ago(src.at) + ".");
+      if (src.at) info(items.length + " picks from your topics. Updated " + ago(src.at) + ".");
       else setStatus("Tap refresh to search your topics.");
     } else if (src.at) {
       setStatus("");
@@ -3368,7 +3387,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 41;
+  var VERSION = 42;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -3436,7 +3455,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   setInterval(function () { visit.cur = Date.now(); try { localStorage.setItem("sf_visit", JSON.stringify(visit)); } catch (e) {} }, 60000);
   function renderDigest() {
     var box = $("digestBox"); box.textContent = ""; box.hidden = true;
-    if (tab !== "subs" || !feed.at) return;
+    return;
     var since = visit.prev || (Date.now() - 864e5), n = 0, chs = {};
     feed.items.forEach(function (v) { if (new Date(v.at).getTime() > since && !seen[v.id] && !hidden[v.id]) { n++; chs[v.sid || v.chId] = 1; } });
     var m = Object.keys(chs).length, tm = new Date(feed.at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
@@ -3471,6 +3490,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   function weekKey() { var d = new Date(), j = new Date(d.getFullYear(), 0, 1); return d.getFullYear() + "-" + Math.floor(((d - j) / 864e5 + j.getDay()) / 7); }
   function renderTasteCard() {
     var box = $("tasteBox"); box.textContent = ""; box.hidden = true;
+    return;
     if (tab !== "subs" || new Date().getDay() !== 0 || load("sf_tasteSeen", "") === weekKey() || (model.n || 0) < 10 || !tasteLines(3).length) return;
     var h = el("h2", "day", "What I learned this week"); box.appendChild(h);
     var body = el("div"); box.appendChild(body); renderTaste(body, 3, true);
@@ -3573,11 +3593,13 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     fetch(location.pathname, { cache: "no-store", credentials: "omit" }).then(function (r) { return r.text(); }).then(function (t) {
       var m = /var VERSION = (\d+);/.exec(t), nv = m ? +m[1] : 0;
       upd = nv > VERSION ? "newer available: " + nv : nv ? "up to date" : "could not read";
+      if (nv > VERSION) note("upd", "Version " + nv + " is ready.", { urgent: true, act: "Reload", fn: function () { location.replace(location.pathname + "?r=" + Date.now()); } }); else unnote("upd");
       $("updMsg").textContent = nv > VERSION ? "Version " + nv + " is ready. Tap Reload newest." : nv ? "You have the newest version." : "Could not check. Tap Reload newest to be sure.";
     }).catch(function (e) { upd = "check failed"; logErr("update", e && e.message || e); $("updMsg").textContent = "Could not check. Tap Reload newest to be sure."; });
   }
   $("reloadBtn").addEventListener("click", function () { location.replace(location.pathname + "?r=" + Date.now()); });
   var updAt = 0;
+  setTimeout(function () { if (cfg.key && Date.now() - load("sf_updAt", 0) > 6 * 3600000) { save("sf_updAt", Date.now()); updAt = Date.now(); checkUpdate(); } }, 4000);
   $("settingsBtn").addEventListener("click", function () { if (Date.now() - updAt > 10 * 60000) { updAt = Date.now(); checkUpdate(); } });
 
   // ---------- diagnostics (no key, token or watch history) ----------
@@ -3862,7 +3884,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       var multi = "--" + bd + "\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n" + JSON.stringify({ name: "north-star-sync.json", parents: ["appDataFolder"] }) + "\r\n--" + bd + "\r\nContent-Type: application/json\r\n\r\n" + body + "\r\n--" + bd + "--";
       return syncFetch(tok, DRIVE_UP + "?uploadType=multipart&fields=id", { method: "POST", headers: { "Content-Type": "multipart/related; boundary=" + bd }, body: multi }).then(function (r) { return r.json(); }).then(function (j) { sync.fileId = j.id || ""; });
     }).then(function () {
-      sync.at = Date.now(); syncSaveState(); syncBusy = false; syncLine();
+      sync.at = Date.now(); syncSaveState(); syncBusy = false; syncLine(); unnote("sync");
       if (reload) { toast("Synced. Loading the newer data.", null, null); try { sessionStorage.setItem("sf_syncr", "1"); } catch (e) {} setTimeout(function () { location.reload(); }, 700); }
       else if (interactive) toast("Synced.", null, null);
       if (syncPending) { syncPending = false; syncT = setTimeout(function () { syncNow(false); }, 3000); }
@@ -3873,7 +3895,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     });
   }
   var syncNudged = false;
-  function syncNudge() { if (syncNudged) return; syncNudged = true; toast("Sync needs a quick Google sign-in.", "Sync", function () { syncNudged = false; syncNow(true); }); }
+  function syncNudge() { note("sync", "Sync needs a quick Google sign-in.", { urgent: true, sub: "Until then this browser keeps working and saves locally.", act: "Sign in", fn: function () { syncNow(true); } }); }
   function syncLine(msg, bad) {
     var l = $("syncLine"); if (!l) return;
     $("syncBtn").textContent = sync.on ? "Sync now" : "Turn on sync"; $("syncOffBtn").hidden = !sync.on;
@@ -3973,6 +3995,57 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     if (!cfg.channel && !subs.length) { setStatus("Do step 2 first: sign in with Google, or add your channel handle.", true); return; }
     setStatus("Loading"); tab = "subs"; save("sf_tab", tab); refreshSubs({ reimport: !!cfg.channel && !subs.length });
   });
+  // ---------- bell: status notices live here, not on the page ----------
+  var notes = {}, infoMsg = {};
+  function note(id, text, o) { o = o || {}; notes[id] = { text: text, urgent: !!o.urgent, once: !!o.once, sub: o.sub || "", act: o.act || "", fn: o.fn || null }; bellDraw(); }
+  function unnote(id) { if (notes[id]) { delete notes[id]; bellDraw(); } }
+  function info(msg) { infoMsg[tab] = msg; setStatus(""); }
+  function bellItems() {
+    var out = [], used = quotaUsed(), pct = Math.round(used / 100), sh = qShare();
+    Object.keys(notes).forEach(function (k) { var n = notes[k]; out.push({ id: k, text: n.text, sub: n.sub, urgent: n.urgent, act: n.act, fn: n.fn }); });
+    if (sh.out || used >= 10000) out.push({ id: "quota", text: "Today's YouTube quota is used up.", sub: "Refreshes and searches will fail until it resets at midnight Pacific time.", urgent: true });
+    else if (pct >= 90) out.push({ id: "quota", text: pct + "% of today's YouTube quota is used.", sub: "Searches and refills cost the most. It resets at midnight Pacific time.", urgent: true });
+    if (!cfg.key) return out;
+    if (new Date().getDay() === 0 && load("sf_tasteSeen", "") !== weekKey() && (model.n || 0) >= 10) {
+      var tl = tasteLines(3); if (tl.length) out.push({ id: "taste", text: "What I learned this week", sub: tl.map(function (x) { return x.txt; }).join(". ") + ". Settings has the full list.", act: "Got it", fn: function () { save("sf_tasteSeen", weekKey()); } });
+    }
+    if (feed.at) {
+      var since = visit.prev || (Date.now() - 864e5), n = 0, chs = {};
+      feed.items.forEach(function (v) { if (new Date(v.at).getTime() > since && !seen[v.id] && !hidden[v.id]) { n++; chs[v.sid || v.chId] = 1; } });
+      var m = Object.keys(chs).length;
+      out.push({ id: "digest", text: n ? n + " new from " + m + (m === 1 ? " channel" : " channels") + " since your last visit" : "Nothing new since your last visit", sub: "Subs updated " + new Date(feed.at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) + ".", act: n ? "Show" : "", fn: function () { setTab("subs"); toTop(); } });
+    }
+    var cap = cfg.refreshCap || 4, left = refreshesLeft(), room = quotaLeft();
+    if (room < 600) left = 0;
+    out.push({ id: "disc", text: left + " of " + cap + " Discover refreshes left today.", sub: room < 600 && refreshesLeft() > 0 ? "The shared quota is nearly gone, so none are available until the reset." : "Each one searches your topics for a new batch of picks." });
+    Object.keys(infoMsg).forEach(function (k) { out.push({ id: "info-" + k, text: infoMsg[k], sub: k === "disc" ? "Discover" : "" }); });
+    if (pct < 90) out.push({ id: "quota", text: pct + "% of today's YouTube quota is used.", sub: "Adds up this browser and your other synced browsers." });
+    if (sync.on) out.push({ id: "syncok", text: "Sync is on.", sub: "Last synced " + (sync.at ? ago(sync.at) : "never") + "." });
+    return out;
+  }
+  function bellDraw() {
+    var b = $("bellBtn"); if (!b) return; var n = 0;
+    try { n = bellItems().filter(function (x) { return x.urgent; }).length; } catch (e) {}
+    b.classList.toggle("dot", n > 0); b.setAttribute("aria-label", n ? "Notices, " + n + " need attention" : "Notices");
+  }
+  function openBell() {
+    if (sheetClose) sheetClose();
+    var wrap = el("div", "sh-wrap"), veil = el("div", "sh-veil"), sh = el("div", "sh"), items = bellItems();
+    function close() { wrap.remove(); if (sheetClose === close) sheetClose = null; Object.keys(notes).forEach(function (k) { if (notes[k].once) delete notes[k]; }); bellDraw(); }
+    sheetClose = close; veil.addEventListener("click", close);
+    sh.appendChild(el("div", "sh-grab")); sh.appendChild(el("h4", null, "Notices"));
+    items.sort(function (a, b) { return (b.urgent ? 1 : 0) - (a.urgent ? 1 : 0); });
+    if (!items.length) sh.appendChild(el("div", "nt-none", "Nothing right now."));
+    items.forEach(function (it) {
+      var r = el("div", "nt" + (it.urgent ? " urgent" : "")), d = el("div"); r.setAttribute("data-nt", it.id);
+      d.appendChild(el("b", null, it.text)); if (it.sub) d.appendChild(el("small", null, it.sub)); r.appendChild(d);
+      if (it.act && it.fn) { var b = el("button", "btn small", it.act); b.type = "button"; b.addEventListener("click", function () { close(); it.fn(); bellDraw(); }); r.appendChild(b); }
+      sh.appendChild(r);
+    });
+    wrap.appendChild(veil); wrap.appendChild(sh); document.body.appendChild(wrap);
+  }
+  $("bellBtn").addEventListener("click", openBell);
+  setInterval(bellDraw, 60000); setTimeout(bellDraw, 1500);
   // ---------- start ----------
   if (cfg.key && subs.length) {
     show("feed");
