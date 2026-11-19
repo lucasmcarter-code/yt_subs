@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-qkpAPPZTYGA0E2YnJmUIqE2JLmxV1t4UQ9DYHZj+jPE=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-wrFe81oAGRb7/qzNA4gLMuy6t+guDiP8AxQNwcrFDwM=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -257,34 +257,34 @@ body.light #feed { scroll-snap-type: none !important; }
 .top-btn[hidden] { display: none; }
 .bar { cursor: pointer; }
 @media (orientation: landscape) and (max-height: 520px) {
-  #feed { display: flex; flex-direction: row; align-items: flex-start; overflow-x: auto; overflow-y: hidden; width: 100vw; margin-left: calc(50% - 50vw); padding: 16px 28px 30px; box-sizing: border-box; scroll-snap-type: x proximity; scroll-padding: 0 28px; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; background: linear-gradient(rgba(236, 223, 206, 0.42), rgba(236, 223, 206, 0.42)) 0 16px / 100% 2px no-repeat; }
-  #feed::-webkit-scrollbar { display: none; }
-  #feed .list { display: contents; }
-  #feed .vid { flex: none; box-sizing: border-box; width: max(220px, calc((60vh - 118px) * 1.7778 + 20px)); margin: 0 14px; scroll-snap-align: center; scroll-snap-stop: normal; }
-  #feed .day { flex: none; writing-mode: vertical-rl; margin: 14px 6px 0; white-space: nowrap; align-self: flex-start; font-size: 24px; }
-  #feed .day small { display: block; margin-top: 8px; }
-  #feed .more-marker { flex: none; width: 1px; }
-  #feed .title { -webkit-line-clamp: 2; }
-  #feed .vid .sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #feed .f-grid, #feed .pl-list { display: contents; }
-  #feed .f-head { display: none; }
-  #feed .f-card { flex: none; width: 190px; margin: 0 14px; scroll-snap-align: center; }
-  #feed .stk { flex: none; width: 250px; margin: 0 14px; scroll-snap-align: center; }
-  .tab { flex-direction: row; gap: 6px; height: 38px; font-size: 12px; }
-  .ch-av, .ch-sub { display: none; }
-  .ch-top { margin-top: 0; }
-  #chHead .ch-name { font-size: 18px; }
-  .ch-bar { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
-  .ch-bar .seg { margin: 0; width: 210px; flex: none; }
-  .ch-bar .seg button { height: 28px; }
-  #chHead { padding-top: 0; }
-  .tabs { max-width: 520px; }
-  .tools, #status { display: none; }
-  .tab { height: 38px; }
-  .tabs { bottom: calc(env(safe-area-inset-bottom) + 8px); max-width: 420px; }
-  .top-btn { bottom: calc(env(safe-area-inset-bottom) + 66px); width: 40px; height: 40px; }
-  body { padding-bottom: 0; }
-  #feed { padding-bottom: 64px; }
+  body:not(.tv) #feed { display: flex; flex-direction: row; align-items: flex-start; overflow-x: auto; overflow-y: hidden; width: 100vw; margin-left: calc(50% - 50vw); padding: 16px 28px 30px; box-sizing: border-box; scroll-snap-type: x proximity; scroll-padding: 0 28px; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; background: linear-gradient(rgba(236, 223, 206, 0.42), rgba(236, 223, 206, 0.42)) 0 16px / 100% 2px no-repeat; }
+  body:not(.tv) #feed::-webkit-scrollbar { display: none; }
+  body:not(.tv) #feed .list { display: contents; }
+  body:not(.tv) #feed .vid { flex: none; box-sizing: border-box; width: max(220px, calc((60vh - 118px) * 1.7778 + 20px)); margin: 0 14px; scroll-snap-align: center; scroll-snap-stop: normal; }
+  body:not(.tv) #feed .day { flex: none; writing-mode: vertical-rl; margin: 14px 6px 0; white-space: nowrap; align-self: flex-start; font-size: 24px; }
+  body:not(.tv) #feed .day small { display: block; margin-top: 8px; }
+  body:not(.tv) #feed .more-marker { flex: none; width: 1px; }
+  body:not(.tv) #feed .title { -webkit-line-clamp: 2; }
+  body:not(.tv) #feed .vid .sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  body:not(.tv) #feed .f-grid, body:not(.tv) #feed .pl-list { display: contents; }
+  body:not(.tv) #feed .f-head { display: none; }
+  body:not(.tv) #feed .f-card { flex: none; width: 190px; margin: 0 14px; scroll-snap-align: center; }
+  body:not(.tv) #feed .stk { flex: none; width: 250px; margin: 0 14px; scroll-snap-align: center; }
+  body:not(.tv) .tab { flex-direction: row; gap: 6px; height: 38px; font-size: 12px; }
+  body:not(.tv) .ch-av, body:not(.tv) .ch-sub { display: none; }
+  body:not(.tv) .ch-top { margin-top: 0; }
+  body:not(.tv) #chHead .ch-name { font-size: 18px; }
+  body:not(.tv) .ch-bar { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  body:not(.tv) .ch-bar .seg { margin: 0; width: 210px; flex: none; }
+  body:not(.tv) .ch-bar .seg button { height: 28px; }
+  body:not(.tv) #chHead { padding-top: 0; }
+  body:not(.tv) .tabs { max-width: 520px; }
+  body:not(.tv) .tools, body:not(.tv) #status { display: none; }
+  body:not(.tv) .tab { height: 38px; }
+  body:not(.tv) .tabs { bottom: calc(env(safe-area-inset-bottom) + 8px); max-width: 420px; }
+  body:not(.tv) .top-btn { bottom: calc(env(safe-area-inset-bottom) + 66px); width: 40px; height: 40px; }
+  body:not(.tv) { padding-bottom: 0; }
+  body:not(.tv) #feed { padding-bottom: 64px; }
 }
 .brand { white-space: nowrap; overflow: hidden; }
 .tools { flex-wrap: nowrap; }
@@ -465,6 +465,65 @@ body.pvOn .toast { z-index: 80; }
   .jk.jk-empty { display: block; max-width: 640px; margin-left: auto; margin-right: auto; }
   .sh-ov { left: 50%; right: auto; width: min(100vw, calc(100vh * 9 / 16)); transform: translateX(-50%); box-shadow: 0 0 0 100vmax #000; }
 }
+body.tv { padding-bottom: 40px; }
+body.tv .wrap { max-width: none; padding-left: 248px; padding-right: 32px; }
+body.tv .brand { position: fixed; left: 22px; z-index: 8; }
+body.tv .bar-row { justify-content: flex-end; }
+body.tv header.bar { margin-left: 216px; z-index: 8; }
+body.tv header.bar .wrap { padding-left: 32px; }
+body.tv .tabs { left: 0; right: auto; top: 0; bottom: 0; width: 216px; max-width: none; margin: 0; z-index: 7; flex-direction: column; justify-content: flex-start; gap: 6px; padding: 84px 14px 20px; border-radius: 0; border-right: 1px solid var(--line); box-shadow: none; }
+body.tv .tab { flex: none; flex-direction: row; justify-content: flex-start; gap: 14px; padding: 0 16px; border-radius: 14px; }
+body.tv .chans { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+body.tv .f-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); column-gap: 22px; }
+body.tv .sh-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 16px; padding-bottom: 40px; }
+body.tv .later-row { margin: 0; padding-left: 4px; padding-right: 4px; }
+body.tv .toast { left: 248px; right: auto; max-width: 520px; bottom: 24px; }
+body.tv .top-btn { bottom: 28px; right: 28px; }
+body.tv .vid, body.tv .f-card, body.tv .later-card, body.tv .sh-card, body.tv .stk { cursor: pointer; }
+body.tv .vid:hover { z-index: 1; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 26px 40px -14px rgba(0, 0, 0, 0.75); }
+body.tv #settingsView, body.tv #srchPanel, body.tv #chanPanel { max-width: 760px; }
+body.tv.juke #feed { max-width: 1320px; }
+body.tv .jk { max-width: none; margin: 18px 0 24px; display: grid; grid-template-columns: minmax(320px, 36%) 1fr; grid-template-areas: "win strip" "ctl strip" "cost pager"; gap: 18px 30px; align-items: start; padding: 118px 40px 54px; border-width: 6px; border-radius: 300px 300px 30px 30px / 170px 170px 30px 30px; box-shadow: 8px 10px 0 #2a2622, inset 0 0 0 7px #f1c9a3, inset 0 0 0 13px #b8683f, inset 0 0 0 16px #f6d9a8; }
+body.tv .jk::before { content: ""; position: absolute; left: 12%; right: 12%; top: 92px; height: 6px; border-radius: 3px; background: repeating-linear-gradient(90deg, #fff3dc 0 14px, transparent 14px 26px); opacity: .85; }
+body.tv .jk::after { content: ""; position: absolute; left: 40px; right: 40px; bottom: 16px; height: 22px; border: 3px solid #2a2622; border-radius: 8px; background: repeating-linear-gradient(90deg, #2a2622 0 4px, #6b3d26 4px 10px); }
+body.tv .jk-sign { top: 26px; font-size: 62px; }
+body.tv .jk-win { grid-area: win; padding: 30px 22px 20px; border-width: 5px; }
+body.tv .jk-cv { width: 70%; }
+body.tv .jk-title { font-size: 36px; margin-top: 20px; }
+body.tv .jk-meta { font-size: 14px; }
+body.tv .jk-ctl { grid-area: ctl; margin: 0; }
+body.tv .jk-ctl button, body.tv .jk-play { height: 50px; min-width: 50px; font-size: 16px; padding: 0 18px; border-radius: 25px; }
+body.tv .jk-strip { grid-area: strip; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; padding: 16px; border-width: 5px; border-radius: 16px; align-content: start; min-height: 0; }
+body.tv .jk-row { flex-direction: column; align-items: stretch; gap: 8px; padding: 8px; background: #fffaf0; border: 2px solid #2a2622; box-shadow: 2px 3px 0 #2a2622; cursor: pointer; }
+body.tv .jk-row:hover { transform: translate(-1px, -2px); }
+body.tv .jk-row.on { background: #f1c9a3; outline: 3px solid #2a2622; }
+body.tv .jk-row img { width: 100%; }
+body.tv .jk-row b { font-size: 22px; }
+body.tv .jk-row small { font-size: 12.5px; }
+body.tv .jk-pager { grid-area: pager; padding: 0 4px; color: #fff3dc; }
+body.tv .jk-cost { grid-area: cost; margin: 0; text-align: left; align-self: center; }
+body.tv .jk.jk-empty { display: block; max-width: 640px; margin-left: auto; margin-right: auto; }
+body.tv .sh-ov { left: 50%; right: auto; width: min(100vw, calc(100vh * 9 / 16)); transform: translateX(-50%); box-shadow: 0 0 0 100vmax #000; }
+body.tv .jk-desk { display: inline-flex !important; }
+body.tv { --tvs: 0px; --tvtop: 70px; }
+body.tv.tvp, body.tv.tvalw { --tvs: var(--tvtop); }
+body.tv header.bar { padding-top: var(--tvs); transition: padding-top .2s; }
+body.tv .brand { top: calc(16px + var(--tvs)); transition: top .2s; }
+body.tv .tabs { padding-top: calc(84px + var(--tvs)); transition: padding-top .2s; }
+body.tv .brand { flex: none; width: 190px; font-size: 23px; }
+body.tv .brand svg { width: 30px; height: 30px; }
+body.tv .tab { height: 60px; font-size: 18px; }
+body.tv .tab svg { width: 26px; height: 26px; }
+body.tv .icon-btn { width: 54px; height: 54px; }
+body.tv .list { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 44px 32px; }
+body.tv .title { font-size: 20px; }
+body.tv.pvOn .tabs, body.tv.pvOn .brand { visibility: hidden; }
+body.tv :focus, body.tv :focus-visible { outline: 5px solid var(--accent); outline-offset: 4px; }
+body.tv input:focus, body.tv textarea:focus, body.tv select:focus { outline-offset: 2px; }
+body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:focus { z-index: 2; }
+.grp-badge { position: absolute; left: 8px; top: 8px; z-index: 3; height: 28px; padding: 0 12px; border: 0; border-radius: 14px; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 13px; box-shadow: 0 2px 6px rgba(0,0,0,.4); }
+.vid.grp-child { margin-left: 18px; border-left: 4px solid var(--accent); padding-left: 6px; }
+.resume { font-size: 12px; font-weight: 700; color: var(--accent); margin: 3px 2px 0; }
 .jk-mode { display: flex; gap: 8px; justify-content: center; width: 100%; margin-bottom: 4px; }
 .jk-empty .jk-mode { margin: 14px 0 0; }
 .jk-mode button { height: 40px; border: 3px solid #2a2622; border-radius: 20px; background: #f1c9a3; color: #2a2622; font: 700 14px/1 "Manrope", system-ui, sans-serif; box-shadow: 2px 3px 0 #2a2622; padding: 0 18px; }
@@ -685,6 +744,11 @@ body.pvOn .toast { z-index: 80; }
     <div class="btn-row"><button class="btn ghost small" id="srchClear" type="button">Clear remembered searches</button></div>
     <label class="check"><input type="checkbox" id="hideShorts" checked> Leave out Shorts and live streams (from Subs and Discover)</label>
     <div class="field"><label>Channels hidden from the Shorts tab</label><div id="shChList"></div></div>
+    <div class="field"><label for="tvMode">TV mode</label><select id="tvMode"><option value="auto">Automatic (on for LG TVs)</option><option value="on">Always on</option><option value="off">Off</option></select>
+      <div class="hint">Big cards, remote-control arrows, and the wall layout with a side bar. Saved on this device only.</div>
+      <label for="tvTop" class="cb-l">Space for the TV browser bar</label><select id="tvTop"><option value="0">None</option><option value="40">Small</option><option value="70">Medium</option><option value="100">Large</option><option value="130">Extra large</option></select>
+      <label for="tvWhen" class="cb-l">Make that space</label><select id="tvWhen"><option value="ptr">Only while the pointer is moving</option><option value="alw">Always</option></select>
+      <div class="hint">The LG browser bar slides over the top when you use the pointer. The side bar and top buttons move down so it never covers them.</div></div>
     <label class="check"><input type="checkbox" id="openInApp"> Use the direct app link (may show an "Open in YouTube?" prompt)</label>
     <label class="check"><input type="checkbox" id="sway" checked> Cards swing when you scroll</label>
     <label class="check"><input type="checkbox" id="lightMode"> Light mode: no swing, flat shadows, fewer cards drawn at once (turns on by itself after a crash)</label>
@@ -708,7 +772,7 @@ body.pvOn .toast { z-index: 80; }
     <div class="field"><label>What I've learned</label><div class="hint">Built from your Keepers, Nahs, thumbs and watching. Tap Not true to make me forget a lesson.</div><div id="tasteSet"></div></div>
     <div class="field" id="syncBox"><label>Sync between browsers</label>
         <p class="hint" id="syncLine">Off. Keeps your channels, watched marks, taste and Jukebox the same on every browser, using a private app folder in your Google Drive.</p>
-        <div class="btn-row"><button class="btn" id="syncBtn" type="button">Turn on sync</button><button class="btn ghost" id="syncOffBtn" type="button" hidden>Turn off</button></div>
+        <div class="btn-row"><button class="btn" id="syncBtn" type="button">Turn on sync</button><button class="btn ghost" id="syncOffBtn" type="button" hidden>Turn off</button><button class="btn ghost" id="syncRestoreBtn" type="button" hidden>Restore previous settings</button></div>
         <details class="help"><summary>One-time setup</summary><p>In Google Cloud Console, open the project that holds your OAuth client ID, go to APIs and Services, Library, find "Google Drive API" and press Enable. Then press Turn on sync here and approve the Google prompt. Do the Turn on step once in each browser.</p></details>
       </div>
     <div class="field"><label>Backup</label><div class="hint">Saves your keepers, hidden items, favorites, learning and follows into one file. It leaves out your API key and client ID.</div>
@@ -789,7 +853,7 @@ body.pvOn .toast { z-index: 80; }
   var tab = load("sf_tab", "subs"); if (tab === "chan") tab = "srch";
   var discFind = false;
   var sortMode = load("sf_sort", "new");
-  var SORTS = { "new": "Newest", old: "Oldest", you: "For you", views: "Most viewed", short: "Shortest", "long": "Longest" };
+  var SORTS = { "new": "Newest", old: "Oldest", you: "For you", views: "Most viewed", short: "Shortest", "long": "Longest", chan: "By channel" };
   if (!SORTS[sortMode]) sortMode = "new";
   var seeds = load("sf_seeds", []);
   var rec = load("sf_rec", { at: 0, items: [] });
@@ -1090,6 +1154,43 @@ body.pvOn .toast { z-index: 80; }
     if (entries.some(function (en) { return en.isIntersecting; })) appendMore();
   }, { rootMargin: "900px 900px" }) : null;
   var appending = false;
+  // Several regular uploads from one channel inside 24 hours become one card; the longest video leads.
+  function groupItems(items) {
+    var H = 864e5, byCh = {}, lead = {}, objs = {}, meta = {}, out = [], done = {};
+    function ok(v) { return v.dur > 60 && (!v.live || v.live === "none"); }
+    items.forEach(function (v) { if (!ok(v)) return; var k = v.sid || v.chId; (byCh[k] = byCh[k] || []).push(v); objs[v.id] = v; });
+    Object.keys(byCh).forEach(function (k) {
+      var l = byCh[k].slice().sort(function (a, b) { return String(b.at).localeCompare(String(a.at)); }), i = 0;
+      while (i < l.length) {
+        var top = new Date(l[i].at).getTime(), g = [l[i]], j = i + 1;
+        while (j < l.length && top - new Date(l[j].at).getTime() <= H) { g.push(l[j]); j++; }
+        if (g.length > 1) {
+          var ld = g.slice().sort(function (a, b) { return (b.dur || 0) - (a.dur || 0) || String(b.at).localeCompare(String(a.at)); })[0];
+          meta[ld.id] = { others: g.filter(function (x) { return x !== ld; }).sort(function (a, b) { return String(b.at).localeCompare(String(a.at)); }), at: ld.at };
+          g.forEach(function (x) { lead[x.id] = ld.id; });
+        }
+        i = j;
+      }
+    });
+    items.forEach(function (v) {
+      var l = lead[v.id];
+      if (!l) { out.push(v); return; }
+      if (done[l]) return; done[l] = 1; meta[l].at = v.at; out.push(objs[l]);
+    });
+    return { items: out, meta: meta };
+  }
+  function groupBadge(a, gm) {
+    var n = gm.others.length, b = el("button", "grp-badge", "+" + n + " more"), rows = [];
+    b.type = "button"; b.setAttribute("aria-expanded", "false");
+    (a.querySelector(".thumb") || a).appendChild(b);
+    b.addEventListener("click", function (ev) {
+      ev.preventDefault(); ev.stopPropagation();
+      if (rows.length) { rows.forEach(function (r) { if (r.parentNode) r.parentNode.removeChild(r); }); rows = []; b.textContent = "+" + n + " more"; b.setAttribute("aria-expanded", "false"); return; }
+      var prev = a;
+      gm.others.forEach(function (o) { var r = row(o); r.classList.add("grp-child"); prev.parentNode.insertBefore(r, prev.nextSibling); prev = r; rows.push(r); });
+      b.textContent = "Hide"; b.setAttribute("aria-expanded", "true");
+    });
+  }
   function appendMore() {
     if (!view || view.pos >= view.items.length || appending) return;
     appending = true;
@@ -1103,7 +1204,7 @@ body.pvOn .toast { z-index: 80; }
       if (view.ranked) {
         if (!view.list) { view.list = el("div", "list"); view.list.style.marginTop = "18px"; box.appendChild(view.list); }
       } else {
-        var d = new Date(v.at), k = dayKey(d);
+        var gm0 = view.grp && view.grp[v.id], d = new Date(gm0 ? gm0.at : v.at), k = dayKey(d);
         if (k !== view.day) {
           view.day = k;
           var h = el("h2", "day", dayLabel(d));
@@ -1112,7 +1213,8 @@ body.pvOn .toast { z-index: 80; }
           view.list = el("div", "list"); box.appendChild(view.list);
         }
       }
-      view.list.appendChild(row(v));
+      var rw = row(v); view.list.appendChild(rw);
+      if (view.grp && view.grp[v.id]) groupBadge(rw, view.grp[v.id]);
     }
     view.pos = end;
     if (view.pos < view.items.length && moreObs) {
@@ -2647,7 +2749,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   })();
 
   // ---------- backup ----------
-  var BK_KEYS = ["sf_jkb", "sf_tasteSeen", "sf_visit", "sf_folSort", "sf_folRev", "sf_cfg", "sf_subs", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_chTags", "sf_jb", "sf_jbl", "sf_shorts", "sf_shch", "sf_rec", "sf_recNo", "sf_recYes", "sf_seeds", "sf_later", "sf_sh", "sf_unf", "sf_dboost", "sf_chTheme"];
+  var BK_KEYS = ["sf_jkb", "sf_tasteSeen", "sf_visit", "sf_folSort", "sf_folRev", "sf_cfg", "sf_subs", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_chTags", "sf_jb", "sf_jbl", "sf_shorts", "sf_shch", "sf_rec", "sf_recNo", "sf_recYes", "sf_seeds", "sf_later", "sf_sh", "sf_unf", "sf_dboost", "sf_chTheme", "sf_resume"];
   function bkMake() {
     var data = {};
     BK_KEYS.forEach(function (k) { var raw = localStorage.getItem(k); if (raw == null) return; try { data[k] = JSON.parse(raw); } catch (e) {} });
@@ -3045,6 +3147,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     meta.appendChild(el("h3", "title", v.title));
     var nt = noteEl(v); if (nt) meta.appendChild(nt);
     meta.appendChild(el("div", "sub", v.channel + " · " + ago(new Date(v.at).getTime()) + (v.views != null ? " · " + fmtCount(v.views) + " views" : "") + (v.topic ? " · " + v.topic : "")));
+    if (resume && resume[v.id] && resume[v.id].t > 15) meta.appendChild(el("div", "resume", "Resume at " + fmtDur(resume[v.id].t)));
     a.appendChild(meta);
 
     var acts = el("div", "acts");
@@ -3154,10 +3257,10 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       return;
     }
 
-    var flat = !isDisc && (sortMode === "views" || sortMode === "short" || sortMode === "long");
+    var flat = !isDisc && (sortMode === "views" || sortMode === "short" || sortMode === "long" || sortMode === "chan");
     var ranked = isDisc || sortMode === "you" || flat;
     if (!ranked) items.sort(function (a, b) { return sortMode === "old" ? String(a.at).localeCompare(String(b.at)) : String(b.at).localeCompare(String(a.at)); });
-    if (flat) items.sort(function (a, b) { return sortMode === "views" ? (b.views || 0) - (a.views || 0) : sortMode === "short" ? (a.dur || 9e9) - (b.dur || 9e9) : (b.dur || 0) - (a.dur || 0); });
+    if (flat) items.sort(function (a, b) { if (sortMode === "chan") return String(a.channel).toLowerCase().localeCompare(String(b.channel).toLowerCase()) || String(b.at).localeCompare(String(a.at)); return sortMode === "views" ? (b.views || 0) - (a.views || 0) : sortMode === "short" ? (a.dur || 9e9) - (b.dur || 9e9) : (b.dur || 0) - (a.dur || 0); });
     else if (ranked) {
       var half = isDisc ? 365 : 3;
       items.forEach(function (v) { v._r = affinity(v) + 4 * Math.exp(-ageDays(v) / half); });
@@ -3172,9 +3275,10 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
         items = mixed;
       }
     }
-    var counts = {};
+    var counts = {}, grp = null;
     if (!ranked) items.forEach(function (v) { var k = dayKey(new Date(v.at)); counts[k] = (counts[k] || 0) + 1; });
-    view = { items: items, pos: 0, ranked: ranked, counts: counts, day: null, list: null, marker: null, win: null };
+    if (!isDisc && !ranked) { grp = groupItems(items); items = grp.items; grp = grp.meta; }
+    view = { items: items, pos: 0, ranked: ranked, counts: counts, grp: grp, day: null, list: null, marker: null, win: null };
     if (LAND.matches && ranked) winInit(); else appendMore();
   }
 
@@ -3387,7 +3491,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 42;
+  var VERSION = 43;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -3450,7 +3554,11 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
   function physKick() { if (!ph.raf) { ph.last = 0; ph.raf = requestAnimationFrame(physFrame); } }
   // Sideways phone: the cards become one strip that scrolls left to right.
-  var LAND = window.matchMedia("(orientation: landscape) and (max-height: 520px)");
+  var TVPREF = load("sf_tv", "auto"), TVTOP = +load("sf_tvtop", 70), TVWHEN = load("sf_tvwhen", "ptr");
+  var TV = TVPREF === "on" || (TVPREF === "auto" && /Web0S|webOS|SMART-TV|SmartTV|NetCast/i.test(navigator.userAgent || ""));
+  function fakeMQ(v) { return { matches: v, addEventListener: function () {}, removeEventListener: function () {}, addListener: function () {}, removeListener: function () {} }; }
+  if (TV) { document.body.classList.add("tv"); document.body.style.setProperty("--tvtop", TVTOP + "px"); document.body.classList.toggle("tvalw", TVWHEN === "alw"); }
+  var LAND = TV ? fakeMQ(false) : window.matchMedia("(orientation: landscape) and (max-height: 520px)");
   function scrollPos() { return LAND.matches ? $("feed").scrollLeft : window.scrollY; }
   setInterval(function () { visit.cur = Date.now(); try { localStorage.setItem("sf_visit", JSON.stringify(visit)); } catch (e) {} }, 60000);
   function renderDigest() {
@@ -3668,7 +3776,19 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     }
   });
   // ---------- desktop: pop-up player and keyboard ----------
-  var DESK = window.matchMedia("(min-width: 900px) and (min-height: 521px)");
+  var DESK = TV ? fakeMQ(true) : window.matchMedia("(min-width: 900px) and (min-height: 521px)");
+  var resume = load("sf_resume", {}), resumeAt = 0;
+  function resumeSave(final) {
+    if (!pvV || pvJuke || !pvV.id) return;
+    var id = pvV.id, t = Math.floor(pvT || 0);
+    if (!final && Date.now() - resumeAt < 10000) return; resumeAt = Date.now();
+    var e = (pvDur && pvDur - t < 20) || t < 15 ? { t: 0, d: Math.floor(pvDur || 0), at: Date.now() } : { t: t, d: Math.floor(pvDur || 0), at: Date.now() };
+    if (e.t === 0 && !(resume[id] && resume[id].t)) return;
+    resume[id] = e;
+    try { var card = document.querySelector('.vid[data-id="' + id + '"]'), old = card && card.querySelector(".resume"); if (old) old.remove(); if (card && e.t > 15) { var rm = el("div", "resume", "Resume at " + fmtDur(e.t)); var mt = card.querySelector(".meta"); if (mt) mt.appendChild(rm); } } catch (x) {}
+    var cut = Date.now() - 45 * 864e5; Object.keys(resume).forEach(function (k) { if (resume[k].at < cut) delete resume[k]; });
+    save("sf_resume", resume);
+  }
   var pvV = null, pvF = null, pvSt = -1, pvT = 0, pvDur = 0, pvMuted = false, pvJuke = false;
   // The YouTube frame swallows keys once clicked, so hand the keyboard back to the page: Esc, space and arrows keep working.
   setInterval(function () { if (pvF && document.activeElement === pvF && !document.fullscreenElement) { try { pvF.blur(); window.focus(); } catch (e) {} } }, 300);
@@ -3680,7 +3800,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     var box = $("pvFrame"); box.textContent = "";
     var f = document.createElement("iframe");
     f.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen"; f.allowFullscreen = true; f.title = v.title || "Video";
-    f.src = "https://www.youtube.com/embed/" + encodeURIComponent(v.id) + "?autoplay=1&enablejsapi=1&playsinline=1&rel=0&origin=" + encodeURIComponent(location.origin);
+    f.src = "https://www.youtube.com/embed/" + encodeURIComponent(v.id) + "?autoplay=1&enablejsapi=1&playsinline=1&rel=0" + (!juke && resume[v.id] && resume[v.id].t > 15 ? "&start=" + resume[v.id].t : "") + "&origin=" + encodeURIComponent(location.origin);
     f.addEventListener("load", function () { try { f.contentWindow.postMessage(JSON.stringify({ event: "listening", id: 1, channel: "widget" }), "https://www.youtube.com"); } catch (e) {} });
     box.appendChild(f); pvF = f;
     $("pvTi").textContent = v.title || ""; $("pvCh").textContent = v.channel || "";
@@ -3692,11 +3812,13 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
   function pvClose() {
     if ($("pv").hidden) return;
+    resumeSave(true);
     $("pv").hidden = true; document.body.classList.remove("pvOn"); $("pvFrame").textContent = ""; pvF = null; pvV = null;
     if (pvJuke) { pvJuke = false; jkPlayingId = ""; if (tab === "juke" && jkUI) jkStrip(false); }
   }
   function pvEnded() {
     var cur = pvV; if (!cur) return;
+    if (!pvJuke) { pvT = 0; resumeSave(true); }
     if (pvJuke) { if (jkAuto) jkSkip(); return; }
     if (isSaved(cur.id)) { later = later.filter(function (x) { return x.id !== cur.id; }); save("sf_later", later); setSavedTags(cur.id, false); renderLater(true); pvLaterBtn(); }
     var n = pvNextPick();
@@ -3720,7 +3842,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     var d; try { d = typeof e.data === "string" ? JSON.parse(e.data) : e.data; } catch (x) { return; }
     if (!d || !d.info || typeof d.info !== "object") return;
     if (d.info.duration > 0) pvDur = d.info.duration;
-    if (typeof d.info.currentTime === "number") pvT = d.info.currentTime;
+    if (typeof d.info.currentTime === "number") { pvT = d.info.currentTime; if (pvSt === 1) resumeSave(false); }
     if (typeof d.info.playerState === "number") { var was = pvSt; pvSt = d.info.playerState; if (pvSt === 0 && was !== 0) pvEnded(); if (pvSt === 1 && !pvJuke) $("pvNext").hidden = true; }
   });
   $("pvX").addEventListener("click", pvClose);
@@ -3828,6 +3950,27 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     if (a && b && typeof a === "object" && typeof b === "object" && !Array.isArray(a) && !Array.isArray(b)) { var o = {}; Object.keys(b).forEach(function (k) { o[k] = b[k]; }); Object.keys(a).forEach(function (k) { o[k] = (k in b) ? ((Array.isArray(a[k]) && Array.isArray(b[k])) ? syncUnion(a[k], b[k]) : a[k]) : a[k]; }); return o; }
     return a == null ? b : a;
   }
+  function cfgBlank(k, v) {
+    if (v == null || v === "") return true;
+    if (Array.isArray(v)) return !v.length || JSON.stringify(v) === JSON.stringify(DEFAULT_CFG[k]);
+    return typeof v !== "object" && Object.prototype.hasOwnProperty.call(DEFAULT_CFG, k) && v === DEFAULT_CFG[k];
+  }
+  // Settings merge: a blank or default value never replaces a filled one, so a fresh browser cannot wipe your real settings.
+  function mergeCfg(L, R, first) {
+    L = L || {}; R = R || {}; var o = {}, ks = {};
+    Object.keys(L).concat(Object.keys(R)).forEach(function (k) { ks[k] = 1; });
+    Object.keys(ks).forEach(function (k) {
+      if (k === "key" || k === "clientId") { o[k] = L[k]; return; }
+      var lv = L[k], rv = R[k], lb = cfgBlank(k, lv), rb = cfgBlank(k, rv);
+      if (rb && !lb) o[k] = lv; else if (lb && !rb) o[k] = rv; else if (lb && rb) o[k] = lv !== undefined ? lv : rv;
+      else if (first && (k === "topics" || k === "mutedWords" || k === "favMusic")) {
+        var seenW = {}, outW = []; (String(lv) + "," + String(rv)).split(",").forEach(function (w) { w = w.trim(); var kk = w.toLowerCase(); if (w && !seenW[kk]) { seenW[kk] = 1; outW.push(w); } }); o[k] = outW.join(", ");
+      }
+      else if (first && Array.isArray(lv) && Array.isArray(rv)) o[k] = syncUnion(lv, rv);
+      else o[k] = first ? lv : rv;
+    });
+    return o;
+  }
   function syncLocal(k) { var raw = null; try { raw = localStorage.getItem(k); } catch (e) {} if (raw == null) return undefined; try { return JSON.parse(raw); } catch (e) { return undefined; } }
   // Folds the Drive copy into this browser. Returns { changed: keys taken from Drive, push: true when this browser has something newer }.
   function syncFold(remote) {
@@ -3840,6 +3983,8 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
         if (!R.v || R.v.day !== L.day) val = (R.v && R.v.day > L.day) ? R.v : L;
         else { val = { day: L.day, by: {}, out: (L.out || R.v.out) ? 1 : 0 }; [R.v.by || {}, L.by || {}].forEach(function (m) { Object.keys(m).forEach(function (d) { val.by[d] = Math.max(val.by[d] || 0, +m[d] || 0); }); }); }
       }
+      else if (k === "sf_cfg" && (first || R.t > lt)) val = mergeCfg(L, R.v, first);
+      else if (k === "sf_resume") { val = Object.assign({}, R.v || {}); Object.keys(L || {}).forEach(function (id) { if (!val[id] || (val[id].at || 0) < (L[id].at || 0)) val[id] = L[id]; }); }
       else if (first || SYNC_UNION[k]) {
         if (k === "sf_model") val = ((R.v && R.v.n) || 0) > ((L && L.n) || 0) ? R.v : L;
         else if (k === "sf_cfg" || k === "sf_folSort" || k === "sf_folRev") val = L;
@@ -3849,7 +3994,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       else { if (lt > R.t) push = true; return; }
       if (k === "sf_cfg") val = Object.assign({}, val, { key: cfg.key, clientId: cfg.clientId });
       var js = JSON.stringify(val);
-      if (js !== JSON.stringify(L)) { try { localStorage.setItem(k, js); } catch (e) {} changed.push(k); }
+      if (js !== JSON.stringify(L)) { if (k === "sf_cfg" && L) { try { localStorage.setItem("sf_cfgBak", JSON.stringify(L)); } catch (e) {} } try { localStorage.setItem(k, js); } catch (e) {} changed.push(k); }
       if (js !== JSON.stringify(k === "sf_cfg" ? Object.assign({}, R.v, { key: cfg.key, clientId: cfg.clientId }) : R.v)) { syncM[k] = Date.now(); push = true; } else syncM[k] = R.t;
     });
     return { changed: changed, push: push };
@@ -3898,17 +4043,85 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   function syncNudge() { note("sync", "Sync needs a quick Google sign-in.", { urgent: true, sub: "Until then this browser keeps working and saves locally.", act: "Sign in", fn: function () { syncNow(true); } }); }
   function syncLine(msg, bad) {
     var l = $("syncLine"); if (!l) return;
-    $("syncBtn").textContent = sync.on ? "Sync now" : "Turn on sync"; $("syncOffBtn").hidden = !sync.on;
+    $("syncBtn").textContent = sync.on ? "Sync now" : "Turn on sync"; $("syncOffBtn").hidden = !sync.on; try { $("syncRestoreBtn").hidden = !localStorage.getItem("sf_cfgBak"); } catch (e) {}
     l.style.color = bad ? "var(--warn)" : "";
     if (msg) { l.textContent = msg; return; }
     l.textContent = sync.on ? ("On. Last synced " + (sync.at ? ago(sync.at) : "never") + ". Changes upload a few seconds after you make them.") : "Off. Keeps your channels, watched marks, taste and Jukebox the same on every browser, using a private app folder in your Google Drive.";
   }
   $("syncBtn").addEventListener("click", function () { if (!sync.on) { readSettings(); save("sf_cfg", cfg); } syncNow(true); });
   $("syncOffBtn").addEventListener("click", function () { sync.on = false; clearTimeout(syncT); syncSaveState(); drop("sf_synctok"); syncLine(); toast("Sync is off for this browser. Your Drive copy is untouched.", null, null); });
+  $("syncRestoreBtn").addEventListener("click", function () {
+    try { var b = JSON.parse(localStorage.getItem("sf_cfgBak") || "null"); if (!b) return; var c = Object.assign({}, DEFAULT_CFG, b, { key: cfg.key, clientId: cfg.clientId }); localStorage.setItem("sf_cfg", JSON.stringify(c)); localStorage.removeItem("sf_cfgBak"); syncTouch("sf_cfg"); toast("Previous settings restored. Reloading.", null, null); setTimeout(function () { location.reload(); }, 900); } catch (e) {}
+  });
   $("settingsBtn").addEventListener("click", function () { syncLine(); });
   window.addEventListener("pagehide", function () { if (sync.on && syncT && syncTok()) { clearTimeout(syncT); syncT = 0; try { if (sync.fileId) fetch(DRIVE_UP + "/" + encodeURIComponent(sync.fileId) + "?uploadType=media", { method: "PATCH", keepalive: true, headers: { Authorization: "Bearer " + syncTok(), "Content-Type": "application/json" }, body: syncPayload() }); } catch (e) {} } });
   syncLine();
   if (sync.on) { if (syncTok()) setTimeout(function () { if (!sessionStorage.getItem("sf_syncr")) { syncNow(false); } try { sessionStorage.removeItem("sf_syncr"); } catch (e) {} }, 1200); else setTimeout(syncNudge, 1500); }
+  // ---------- TV mode: settings, pointer bar space, remote-control navigation ----------
+  (function () {
+    $("tvMode").value = TVPREF; $("tvTop").value = String(TVTOP); $("tvWhen").value = TVWHEN;
+    $("tvMode").addEventListener("change", function () { try { localStorage.setItem("sf_tv", JSON.stringify($("tvMode").value)); } catch (e) {} toast("TV mode saved. Reloading.", null, null); setTimeout(function () { location.reload(); }, 700); });
+    $("tvTop").addEventListener("change", function () { TVTOP = +$("tvTop").value; try { localStorage.setItem("sf_tvtop", JSON.stringify(TVTOP)); } catch (e) {} document.body.style.setProperty("--tvtop", TVTOP + "px"); });
+    $("tvWhen").addEventListener("change", function () { TVWHEN = $("tvWhen").value; try { localStorage.setItem("sf_tvwhen", JSON.stringify(TVWHEN)); } catch (e) {} document.body.classList.toggle("tvalw", TV && TVWHEN === "alw"); });
+    if (!TV) return;
+    var ptrT = 0;
+    function ptr() { document.body.classList.add("tvp"); clearTimeout(ptrT); ptrT = setTimeout(function () { document.body.classList.remove("tvp"); }, 5000); }
+    ["mousemove", "mousedown", "wheel"].forEach(function (ev) { window.addEventListener(ev, ptr, { passive: true }); });
+    var SEL = "button, a[href], input, select, textarea, [tabindex='0']";
+    new MutationObserver(function () { document.querySelectorAll(".f-card, .stk, .sh-card, .jk-row, .later-card, .ch-card").forEach(function (e) { if (!e.hasAttribute("tabindex")) e.setAttribute("tabindex", "0"); }); }).observe(document.body, { childList: true, subtree: true });
+    function root() {
+      if (!$("pv").hidden) return $("pv");
+      var sh = document.querySelector(".sh-wrap"); if (sh) return sh;
+      return document.body;
+    }
+    function cands(r) {
+      var out = [];
+      r.querySelectorAll(SEL).forEach(function (e) {
+        if (e.disabled || e.hidden || e.closest("[hidden]")) return;
+        var b = e.getBoundingClientRect(); if (b.width < 6 || b.height < 6) return;
+        var cs = getComputedStyle(e); if (cs.visibility === "hidden" || cs.display === "none") return;
+        out.push({ e: e, x: b.left + b.width / 2, y: b.top + b.height / 2, b: b });
+      });
+      return out;
+    }
+    function move(dir) {
+      var a = document.activeElement, r = root(), list = cands(r), cur = null;
+      if (a && a !== document.body && r !== document.body && !r.contains(a)) a = null;
+      if (a && a !== document.body) { var ab = a.getBoundingClientRect(); cur = { x: ab.left + ab.width / 2, y: ab.top + ab.height / 2, b: ab }; }
+      if (!cur) { var first = null; list.forEach(function (c) { if (!first && c.b.top >= 0 && c.e.classList.contains("vid")) first = c; }); (first || list[0] || {}).e && (first || list[0]).e.focus(); return; }
+      var best = null, bs = 1e12;
+      list.forEach(function (c) {
+        if (c.e === a) return;
+        var dx = c.x - cur.x, dy = c.y - cur.y, p, q;
+        if (dir === "ArrowRight") { if (c.b.left < cur.b.right - 4 && dx <= 4) return; p = dx; q = Math.abs(dy); }
+        else if (dir === "ArrowLeft") { if (c.b.right > cur.b.left + 4 && dx >= -4) return; p = -dx; q = Math.abs(dy); }
+        else if (dir === "ArrowDown") { if (c.b.top < cur.b.bottom - 4 && dy <= 4) return; p = dy; q = Math.abs(dx); }
+        else { if (c.b.bottom > cur.b.top + 4 && dy >= -4) return; p = -dy; q = Math.abs(dx); }
+        if (p <= 0) return;
+        var sc = p + q * 2.2; if (sc < bs) { bs = sc; best = c; }
+      });
+      if (best) { best.e.focus({ preventScroll: true }); try { best.e.scrollIntoView({ block: "center", inline: "nearest", behavior: "smooth" }); } catch (e) { best.e.scrollIntoView(); } }
+      else if (dir === "ArrowDown" || dir === "ArrowUp") window.scrollBy({ top: dir === "ArrowDown" ? 300 : -300, behavior: "smooth" });
+    }
+    document.addEventListener("keydown", function (e) {
+      var kc = e.keyCode;
+      if (kc === 461 || kc === 10009) { e.preventDefault(); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true })); return; }
+      if (!$("pv").hidden) {
+        if (kc === 415) { pvCmd("playVideo"); pvSt = 1; e.preventDefault(); }
+        else if (kc === 19) { pvCmd("pauseVideo"); pvSt = 2; e.preventDefault(); }
+        else if (kc === 417) { pvT = Math.min(pvDur || 1e9, pvT + 15); pvCmd("seekTo", [pvT, true]); e.preventDefault(); }
+        else if (kc === 412) { pvT = Math.max(0, pvT - 15); pvCmd("seekTo", [pvT, true]); e.preventDefault(); }
+        else if (kc === 13 && !(document.activeElement && /BUTTON|A/.test(document.activeElement.tagName))) { if (pvSt === 1) { pvCmd("pauseVideo"); pvSt = 2; } else { pvCmd("playVideo"); pvSt = 1; } e.preventDefault(); }
+        return;
+      }
+      if (document.body.classList.contains("shOn")) return;
+      var t = e.target, tn = t && t.tagName, typing = tn === "INPUT" || tn === "TEXTAREA" || tn === "SELECT" || (t && t.isContentEditable);
+      if (e.key === "ArrowUp" || e.key === "ArrowDown" || ((e.key === "ArrowLeft" || e.key === "ArrowRight") && !typing)) {
+        document.body.classList.remove("tvp"); e.preventDefault(); e.stopImmediatePropagation(); move(e.key); return;
+      }
+      if (e.key === "Enter" && t && t.getAttribute && t.getAttribute("tabindex") === "0" && !/BUTTON|A|INPUT|SELECT|TEXTAREA/.test(tn)) { e.preventDefault(); t.click(); }
+    }, true);
+  })();
   // ---------- band boxes with suggestions ----------
   var mbT = 0, mbSeq = 0, mbCache = {};
   function mbSuggest(q, cb) {
