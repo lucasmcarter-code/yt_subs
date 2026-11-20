@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ceI6/7ttBqnV5s+j877/knsCPb2k3HDGjlZSfonJjFI=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-UKWYCvQC7YfMrmf1hbar7zFTIP1k3yM8EaDQKNCbquU=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -529,7 +529,9 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
 .tp-chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 700; }
 .grp-list { margin-top: 6px; }
 .grp-t { display: flex; align-items: baseline; gap: 8px; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid rgba(0,0,0,.14); padding: 7px 2px; font: inherit; font-size: 14px; line-height: 1.3; color: inherit; cursor: pointer; }
-.grp-t span { flex: 1; min-width: 0; }
+.grp-t span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.grp-t[hidden] { display: none; }
+.grp-all { font-weight: 700; }
 .grp-t small { opacity: .65; font-size: 12px; }
 .grp-t.seen { opacity: .55; }
 .vid.grp-child { margin-left: 18px; border-left: 4px solid var(--accent); padding-left: 6px; }
@@ -1230,8 +1232,10 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
       ti.textContent = ld.channel; a.classList.add("grp");
       if (sub) sub.textContent = (n + 1) + " videos · " + ago(new Date(gm.at).getTime());
       var ul = el("div", "grp-list");
-      [ld].concat(gm.others).forEach(function (o) {
-        var t = el("button", "grp-t" + (seen[o.id] ? " seen" : "")); t.type = "button";
+      var all = [ld].concat(gm.others), extra = [];
+      all.forEach(function (o, oi) {
+        var t = el("button", "grp-t" + (seen[o.id] ? " seen" : "")); t.type = "button"; t.title = o.title;
+        if (all.length > 2 && oi >= 2) { t.hidden = true; extra.push(t); }
         t.appendChild(el("span", null, o.title)); if (o.dur) t.appendChild(el("small", null, fmtDur(o.dur)));
         t.addEventListener("click", function (ev) {
           ev.preventDefault(); ev.stopPropagation();
@@ -1240,6 +1244,15 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
         });
         ul.appendChild(t);
       });
+      if (extra.length) {
+        var sa = el("button", "grp-t grp-all"); sa.type = "button"; sa.appendChild(el("span", null, "See all")); sa.setAttribute("aria-expanded", "false");
+        sa.addEventListener("click", function (ev) {
+          ev.preventDefault(); ev.stopPropagation();
+          var open = sa.getAttribute("aria-expanded") !== "true";
+          extra.forEach(function (t) { t.hidden = !open; }); sa.setAttribute("aria-expanded", String(open)); sa.firstChild.textContent = open ? "Show fewer" : "See all";
+        });
+        ul.appendChild(sa);
+      }
       meta.appendChild(ul);
     }
     b.addEventListener("click", function (ev) {
@@ -3588,7 +3601,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 47;
+  var VERSION = 48;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
