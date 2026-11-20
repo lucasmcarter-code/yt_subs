@@ -4,7 +4,7 @@ A private, single-page front end for YouTube. It shows your subscriptions as a w
 
 Live app: https://lucasmcarter-code.github.io/yt_subs/
 
-Current version: 51
+Current version: 52
 
 ## What it does
 
@@ -67,7 +67,7 @@ Fork this repository and turn on GitHub Pages for the main branch. The whole app
 - **Check** marks a video watched and teaches the app you liked it. **X** hides it and teaches the opposite.
 - **Refresh** (top bar) fetches new uploads. Discover refreshes are limited per day to protect the API quota. The ring on the Settings button shows quota used.
 - **Grouped cards** show the channel name with the videos listed underneath. Tap a title to play it, or the "+N more" badge to spread them out.
-- **Settings** holds your topics, tags, muted words, blocked categories, Jukebox bands and search words, the Polaroid title font, a button to refresh your subscription list, sync, backup and TV options.
+- **Settings** is grouped into sections you tap to open (Account, Discover, Jukebox, Look, TV, Sync and backup, Advanced). It holds your topics, tags, muted words, blocked categories, Jukebox bands and search words, the Polaroid title font, a button to refresh your subscription list, sync, backup and TV options.
   - **My topics**: which topics label your cards. Add your own.
   - **My tags**: one per line, such as `Tiny Desk: tiny desk`. A matching video gets that tag.
   - **Start fresh** clears training and lists on one device.

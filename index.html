@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-B76cxbA0pOANb/vxu8q0OMMfZY7japNX49rF86xL+dk=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-LGfWTDoW1Z0SwxPX9m88DQs163Nns11HIuNyEekUC2c=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -594,6 +594,15 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
 .font-prev { margin: 14px 4px 4px; max-width: 250px; background: var(--paper); color: #2a2622; border-radius: 6px; padding: 8px 8px 12px; transform: rotate(-1.5deg); box-shadow: 0 2px 4px rgba(0,0,0,.25); }
 .font-prev i { display: block; aspect-ratio: 16 / 9; border-radius: 3px; background: #5b5148; margin-bottom: 8px; }
 .font-prev small { font-size: 12px; opacity: .7; }
+details.sgrp { border-top: 1px solid var(--line); }
+details.sgrp:last-of-type { border-bottom: 1px solid var(--line); margin-bottom: 18px; }
+details.sgrp > summary { font-family: var(--font-display); font-size: 18px; font-weight: 600; padding: 16px 2px; cursor: pointer; }
+details.sgrp[open] > summary { color: var(--accent); }
+.sgrp-b { padding: 4px 0 18px; }
+.jk-more { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; flex-basis: 100%; }
+.jk-more[hidden] { display: none; }
+.jk-ctl.open { flex-wrap: wrap !important; }
+.jk .jk-cost[hidden] { display: none; }
 </style>
 </head>
 <body>
@@ -684,10 +693,10 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
     </div>
   </section>
   <section id="settingsView" class="sheet" hidden>
-    <h2>Connect your subscriptions</h2>
+    <h2>Settings</h2>
     <div class="verbar"><b id="versionTop"></b><button class="btn ghost" id="reloadBtn" type="button">Reload newest</button><span id="updMsg">Checking for a newer version</span></div>
     <p>This page reads your subscription list from YouTube and shows the newest uploads, nothing else. Everything you enter stays in this browser.</p>
-
+    <details class="sgrp" data-g="acct"><summary>Account and subscriptions</summary><div class="sgrp-b">
     <details class="help">
       <summary>How to get an API key (one time, free)</summary>
       <ol>
@@ -727,10 +736,13 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
       <input type="text" id="clientId" autocomplete="off" autocapitalize="off" spellcheck="false">
       <div class="btn-row kb"><button class="btn ghost" type="button" data-copy="clientId">Copy</button></div>
     </div>
-
-    <h3>Daily quota</h3>
+    <div class="field"><label>Refresh</label><div class="hint" id="subsAtLine"></div><div class="hint" id="jkAtLine"></div>
+      <div class="btn-row"><button class="btn ghost" id="subsRefBtn" type="button">Refresh subscription list</button></div></div>
+    <div class="field"><label>Daily quota</label>
     <div class="d-bar" id="quotaBox"><div id="quotaTxt"></div><div class="d-meter"><i id="quotaFill"></i></div></div>
-    <h3>Discover</h3>
+    </div>
+    </div></details>
+    <details class="sgrp" data-g="disc"><summary>Discover and filters</summary><div class="sgrp-b">
     <div class="field">
       <label for="topics">Topics to look for</label>
       <input type="text" id="topics" placeholder="hobby machining, guitar building, physics" autocomplete="off" autocapitalize="off">
@@ -742,8 +754,6 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
       <label>Never show these categories in Discover</label>
       <div class="cats" id="cats"></div>
     </div>
-
-    <h3>Filters and learning</h3>
     <div class="field"><label>My topics</label><div class="hint">Topics that label your cards and theme your channels. Tap to switch one on or off.</div>
       <div class="tp-grid" id="tpGrid"></div>
       <label class="cb-l" for="tpOwn">Your own topics</label><input type="text" id="tpOwn" placeholder="birdwatching, sourdough" autocomplete="off" autocapitalize="off">
@@ -759,9 +769,13 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
       <button class="btn ghost" id="resetLearnBtn" type="button">Reset what it has learned</button>
       <button class="btn ghost" id="clearMutedBtn" type="button">Unmute all channels</button>
     </div>
-
-    <h3>Playback</h3>
     <label class="check"><input type="checkbox" id="srchInf" checked> Let my pinned and repeated searches steer Discover (up to 20% of picks)</label>
+    <div class="btn-row"><button class="btn ghost small" id="srchClear" type="button">Clear remembered searches</button></div>
+    <label class="check"><input type="checkbox" id="slopOn" checked> Filter out AI-made and content-farm videos (Discover, Search and Shorts)</label>
+    <label class="check"><input type="checkbox" id="hideShorts" checked> Leave out Shorts and live streams (from Subs and Discover)</label>
+    <div class="field"><label>Channels hidden from the Shorts tab</label><div id="shChList"></div></div>
+    </div></details>
+    <details class="sgrp" data-g="juke"><summary>Jukebox</summary><div class="sgrp-b">
     <textarea id="favMusic" hidden></textarea>
     <div class="field" id="jkbBox"><label>Jukebox bands</label><div class="hint">Refill searches these by full name. They are your own list, saved in this browser and synced to your own Google Drive.</div>
       <label class="cb-l" for="cbOwnIn">My bands</label><div class="cb" id="cbOwn"></div>
@@ -771,19 +785,50 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
       <div class="hint">Refill searches each band by name, and again with these words added. Up to two, separated by a comma.</div>
     </div>
     <div class="hint">The Jukebox looks for new artists like these, and it learns from what you play or skip.</div>
-    <div class="btn-row"><button class="btn ghost small" id="srchClear" type="button">Clear remembered searches</button></div>
-    <label class="check"><input type="checkbox" id="slopOn" checked> Filter out AI-made and content-farm videos (Discover, Search and Shorts)</label>
-    <label class="check"><input type="checkbox" id="hideShorts" checked> Leave out Shorts and live streams (from Subs and Discover)</label>
-    <div class="field"><label>Channels hidden from the Shorts tab</label><div id="shChList"></div></div>
+    </div></details>
+    <details class="sgrp" data-g="look"><summary>Look and playback</summary><div class="sgrp-b">
+    <div class="field"><label id="fontLbl">Polaroid font</label><div class="hint">Changes the titles on the cards. Follows you to your other devices when sync is on.</div>
+      <div class="font-pick"><button class="font-btn" id="fontBtn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="fontLbl fontBtn"></button><div class="font-list" id="fontList" role="listbox" aria-labelledby="fontLbl" hidden></div></div>
+      <div class="font-prev" aria-hidden="true"><i></i><div class="title" id="fontPrevT">A sample video title on a Polaroid</div><small>Channel name · 2 hours ago</small></div></div>
+    <label class="check"><input type="checkbox" id="openInApp"> Use the direct app link (may show an "Open in YouTube?" prompt)</label>
+    <label class="check"><input type="checkbox" id="sway" checked> Cards swing when you scroll</label>
+    <label class="check"><input type="checkbox" id="lightMode"> Light mode: no swing, flat shadows, fewer cards drawn at once (turns on by itself after a crash)</label>
+    <p>Press and hold a video to save it to Watch later.</p>
+    </div></details>
+    <details class="sgrp" data-g="tv"><summary>TV</summary><div class="sgrp-b">
     <div class="field"><label for="tvMode">TV mode</label><select id="tvMode"><option value="auto">Automatic (on for LG TVs)</option><option value="on">Always on</option><option value="off">Off</option></select>
       <div class="hint">Big cards, remote-control arrows, and the wall layout with a side bar. Saved on this device only.</div>
       <label for="tvTop" class="cb-l">Space for the TV browser bar</label><select id="tvTop"><option value="0">None</option><option value="40">Small</option><option value="70">Medium</option><option value="100">Large</option><option value="130">Extra large</option></select>
       <label for="tvWhen" class="cb-l">Make that space</label><select id="tvWhen"><option value="ptr">Only while the pointer is moving</option><option value="alw">Always</option></select>
       <div class="hint">The LG browser bar slides over the top when you use the pointer. The side bar and top buttons move down so it never covers them.</div></div>
-    <label class="check"><input type="checkbox" id="openInApp"> Use the direct app link (may show an "Open in YouTube?" prompt)</label>
-    <label class="check"><input type="checkbox" id="sway" checked> Cards swing when you scroll</label>
-    <label class="check"><input type="checkbox" id="lightMode"> Light mode: no swing, flat shadows, fewer cards drawn at once (turns on by itself after a crash)</label>
-    <p>Press and hold a video to save it to Watch later.</p>
+    </div></details>
+    <details class="sgrp" data-g="sync"><summary>Sync and backup</summary><div class="sgrp-b">
+    <div class="field" id="syncBox"><label>Sync between browsers</label>
+        <p class="hint" id="syncLine">Off. Keeps your channels, watched marks, taste and Jukebox the same on every browser, using a private app folder in your Google Drive.</p>
+        <div class="btn-row"><button class="btn" id="syncBtn" type="button">Turn on sync</button><button class="btn ghost" id="syncOffBtn" type="button" hidden>Turn off</button><button class="btn ghost" id="syncRestoreBtn" type="button" hidden>Restore previous settings</button></div>
+        <details class="help"><summary>One-time setup</summary><p>In Google Cloud Console, open the project that holds your OAuth client ID, go to APIs and Services, Library, find "Google Drive API" and press Enable. Then press Turn on sync here and approve the Google prompt. Do the Turn on step once in each browser.</p></details>
+      </div>
+    <div class="field"><label>Backup</label><div class="hint">Saves your keepers, hidden items, favorites, learning and follows into one file. It leaves out your API key and client ID.</div>
+      <div class="btn-row"><button class="btn ghost" id="inviteBtn" type="button">Copy invite for a friend</button></div><div class="hint">The invite holds only your API key and client ID, so a friend can paste one code. They share your daily quota, and you still need to add them as a test user in Google Cloud.</div>
+      <div class="btn-row"><button class="btn ghost" id="expBtn" type="button">Export backup</button><button class="btn ghost" id="impBtn" type="button">Import backup</button></div>
+      <input type="file" id="impFile" accept="application/json,.json" hidden></div>
+    </div></details>
+    <details class="sgrp" data-g="adv"><summary>Advanced</summary><div class="sgrp-b">
+    <div class="btn-row">
+      <button class="btn ghost" id="fullBtn" type="button">Check every channel now</button>
+      <button class="btn ghost" id="clearSeenBtn" type="button">Reset watched marks</button>
+      <button class="btn ghost" id="restoreUnfBtn" type="button">Bring back unfollowed channels</button>
+      <button class="btn ghost" id="forgetBtn" type="button">Forget everything on this device</button>
+    </div>
+    <div class="field"><label>Diagnostics</label>
+    <p>If something looks wrong, tap Copy and paste the result into chat. It has no API key, sign-in token or watch history.</p>
+    </div>
+    <div class="btn-row"><button class="btn ghost" id="diagBtn" type="button">Copy diagnostics</button><button class="btn" id="crashBtn" type="button">Copy crash report</button></div>
+    <textarea class="mtest" id="diagBox" rows="9" readonly hidden></textarea>
+    <div class="field"><label>What I've learned</label><div class="hint">Built from your Keepers, Nahs, thumbs and watching. Tap Not true to make me forget a lesson.</div><div id="tasteSet"></div></div>
+    <div class="field"><label>Start fresh</label><div class="hint">Clears taste training, watched and hidden marks, lists, topics and tags on this device, and turns sync off here. Your API key, client ID and subscriptions stay. Other devices and your Drive copy are not touched.</div>
+      <div class="btn-row"><button class="btn ghost" id="freshBtn" type="button">Start fresh on this device</button></div></div>
+    </div></details>
 
     <div class="btn-row">
       <button class="btn" id="saveBtn" type="button">Save and load feed</button>
@@ -791,34 +836,6 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
       <button class="btn ghost" id="closeBtn" type="button">Back to feed</button>
     </div>
     <div class="status" id="setupStatus" role="status"></div>
-
-    <div class="btn-row">
-      <button class="btn ghost" id="fullBtn" type="button">Check every channel now</button>
-      <button class="btn ghost" id="clearSeenBtn" type="button">Reset watched marks</button>
-      <button class="btn ghost" id="restoreUnfBtn" type="button">Bring back unfollowed channels</button>
-      <button class="btn ghost" id="forgetBtn" type="button">Forget everything on this device</button>
-    </div>
-    <h3>Diagnostics</h3>
-    <p>If something looks wrong, tap Copy and paste the result into chat. It has no API key, sign-in token or watch history.</p>
-    <div class="field"><label>What I've learned</label><div class="hint">Built from your Keepers, Nahs, thumbs and watching. Tap Not true to make me forget a lesson.</div><div id="tasteSet"></div></div>
-    <div class="field"><label id="fontLbl">Polaroid font</label><div class="hint">Changes the titles on the cards. Follows you to your other devices when sync is on.</div>
-      <div class="font-pick"><button class="font-btn" id="fontBtn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="fontLbl fontBtn"></button><div class="font-list" id="fontList" role="listbox" aria-labelledby="fontLbl" hidden></div></div>
-      <div class="font-prev" aria-hidden="true"><i></i><div class="title" id="fontPrevT">A sample video title on a Polaroid</div><small>Channel name · 2 hours ago</small></div></div>
-    <div class="field"><label>Refresh</label><div class="hint" id="subsAtLine"></div><div class="hint" id="jkAtLine"></div>
-      <div class="btn-row"><button class="btn ghost" id="subsRefBtn" type="button">Refresh subscription list</button></div></div>
-    <div class="field" id="syncBox"><label>Sync between browsers</label>
-        <p class="hint" id="syncLine">Off. Keeps your channels, watched marks, taste and Jukebox the same on every browser, using a private app folder in your Google Drive.</p>
-        <div class="btn-row"><button class="btn" id="syncBtn" type="button">Turn on sync</button><button class="btn ghost" id="syncOffBtn" type="button" hidden>Turn off</button><button class="btn ghost" id="syncRestoreBtn" type="button" hidden>Restore previous settings</button></div>
-        <details class="help"><summary>One-time setup</summary><p>In Google Cloud Console, open the project that holds your OAuth client ID, go to APIs and Services, Library, find "Google Drive API" and press Enable. Then press Turn on sync here and approve the Google prompt. Do the Turn on step once in each browser.</p></details>
-      </div>
-    <div class="field"><label>Start fresh</label><div class="hint">Clears taste training, watched and hidden marks, lists, topics and tags on this device, and turns sync off here. Your API key, client ID and subscriptions stay. Other devices and your Drive copy are not touched.</div>
-      <div class="btn-row"><button class="btn ghost" id="freshBtn" type="button">Start fresh on this device</button></div></div>
-    <div class="field"><label>Backup</label><div class="hint">Saves your keepers, hidden items, favorites, learning and follows into one file. It leaves out your API key and client ID.</div>
-      <div class="btn-row"><button class="btn ghost" id="inviteBtn" type="button">Copy invite for a friend</button></div><div class="hint">The invite holds only your API key and client ID, so a friend can paste one code. They share your daily quota, and you still need to add them as a test user in Google Cloud.</div>
-      <div class="btn-row"><button class="btn ghost" id="expBtn" type="button">Export backup</button><button class="btn ghost" id="impBtn" type="button">Import backup</button></div>
-      <input type="file" id="impFile" accept="application/json,.json" hidden></div>
-    <div class="btn-row"><button class="btn ghost" id="diagBtn" type="button">Copy diagnostics</button><button class="btn" id="crashBtn" type="button">Copy crash report</button></div>
-    <textarea class="mtest" id="diagBox" rows="9" readonly hidden></textarea>
     <p id="versionLine"></p>
   </section>
 </main>
@@ -2457,7 +2474,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   function jkQ(b, extra) { var one = jkBandKey(b).indexOf(" ") < 0; return '"' + b.replace(/"/g, "") + '"' + (extra ? " " + extra : (one ? " band" : "")); }
 
   // ---------- Jukebox ----------
-  var jb = load("sf_jb", { seeds: [], items: [] }), jkKeepOnly = false, jkSel = 0, jkPage = 0, jkList = [], jkUI = null, jkMode = "music", jkAuto = load("sf_jkAuto", false), jkRand = load("sf_jkRand", false), jkSeed = 1 + Math.floor(Math.random() * 1e9), jkCycle = {}, jkHist = [], jkUpNext = -1, jkPlayingId = "";
+  var jb = load("sf_jb", { seeds: [], items: [] }), jkKeepOnly = false, jkSel = 0, jkPage = 0, jkList = [], jkUI = null, jkMode = "music", jkMore = load("sf_jkMore", false), jkHelp = false, jkAuto = load("sf_jkAuto", false), jkRand = load("sf_jkRand", false), jkSeed = 1 + Math.floor(Math.random() * 1e9), jkCycle = {}, jkHist = [], jkUpNext = -1, jkPlayingId = "";
   jb.items = jb.items || []; jb.seeds = jb.seeds || [];
   var jbl = load("sf_jbl", { t: {} });
   if (load("sf_jbv", 0) < 2) {
@@ -2625,12 +2642,17 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       if (bd && bd !== "!") rows.push({ label: "Wrong band (not " + bd + ")", checked: false, pick: function () { done("band", "Removed. " + v.channel + " will no longer count as " + bd + "."); } });
       openSheet("Fix this video", rows);
     });
-    ctl.appendChild(prev); ctl.appendChild(play); ctl.appendChild(next); ctl.appendChild(keepB); ctl.appendChild(nah); ctl.appendChild(tAuto); ctl.appendChild(tRand); ctl.appendChild(reshuf); ctl.appendChild(fixB); ctl.appendChild(kv); ctl.appendChild(refill); jk.appendChild(ctl);
+    ctl.appendChild(prev); ctl.appendChild(play); ctl.appendChild(next); var moreB = el("button", "jk-moreb", jkMore ? "Less" : "More"), more = el("div", "jk-more"), helpB = el("button", "jk-help", "?");
+    moreB.type = "button"; helpB.type = "button"; helpB.setAttribute("aria-label", "How the Jukebox works"); moreB.setAttribute("aria-expanded", String(!!jkMore)); more.hidden = !jkMore; ctl.classList.toggle("open", !!jkMore);
+    moreB.addEventListener("click", function () { jkMore = !jkMore; save("sf_jkMore", jkMore); more.hidden = !jkMore; ctl.classList.toggle("open", jkMore); moreB.textContent = jkMore ? "Less" : "More"; moreB.setAttribute("aria-expanded", String(jkMore)); });
+    ctl.appendChild(keepB); ctl.appendChild(nah); ctl.appendChild(moreB);
+    more.appendChild(tAuto); more.appendChild(tRand); more.appendChild(reshuf); more.appendChild(fixB); more.appendChild(kv); more.appendChild(refill); more.appendChild(helpB); ctl.appendChild(more); jk.appendChild(ctl);
     var strip = el("div", "jk-strip"), pager = el("div", "jk-pager");
     var pp = el("button", null, "‹ Prev page"), pn = el("button", null, "Next page ›"), pt = el("span");
     pp.type = "button"; pn.type = "button"; pager.appendChild(pp); pager.appendChild(pt); pager.appendChild(pn);
     jk.appendChild(strip); jk.appendChild(pager);
-    jk.appendChild(el("div", "jk-cost", "Play starts the video. ✓ trains more like it; ✗ hides it (Undo for a few seconds). Wrong section moves or removes a video that was sorted wrong, and teaches the sorter. Refill runs 3 searches (300 units) for your bands and similar bands."));
+    var costEl = el("div", "jk-cost", "Play starts the video. ✓ trains more like it; ✗ hides it (Undo for a few seconds). Wrong section moves or removes a video that was sorted wrong, and teaches the sorter. Refill runs 3 searches (300 units) for your bands and similar bands."); costEl.hidden = !jkHelp; jk.appendChild(costEl);
+    helpB.addEventListener("click", function () { jkHelp = !jkHelp; costEl.hidden = !jkHelp; });
     jkUI = { cover: cover, title: title, meta: meta, play: play, strip: strip, pageTxt: pt, pp: pp, pn: pn, reel: reel };
     prev.addEventListener("click", function () {
       if (jkRand && jkHist.length) { var id = jkHist.pop(); for (var i = 0; i < jkList.length; i++) if (jkList[i].id === id) { jkSel = i; jkUpdate(true); return; } }
@@ -3536,8 +3558,12 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     else if (cfg.clientId) googleImport();
     else setStatus("Add your channel handle, or use Import with Google.", true);
   });
+  function sgrpSet() {
+    var all = load("sf_testhook", false);
+    Array.prototype.forEach.call(document.querySelectorAll("details.sgrp"), function (d) { d.open = all || (d.getAttribute("data-g") === "acct" && !(cfg.key && subs.length)); });
+  }
   function fillSettings() {
-    fontDraw(); refLines();
+    sgrpSet(); fontDraw(); refLines();
     $("apiKey").value = cfg.key || "";
     $("channel").value = cfg.channel || "";
     $("clientId").value = cfg.clientId || "";
@@ -3732,7 +3758,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 51;
+  var VERSION = 52;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -4367,7 +4393,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     var ptrT = 0;
     function ptr() { document.body.classList.add("tvp"); clearTimeout(ptrT); ptrT = setTimeout(function () { document.body.classList.remove("tvp"); }, 5000); }
     ["mousemove", "mousedown", "wheel"].forEach(function (ev) { window.addEventListener(ev, ptr, { passive: true }); });
-    var SEL = "button, a[href], input, select, textarea, [tabindex='0']";
+    var SEL = "button, a[href], input, select, textarea, summary, [tabindex='0']";
     var CARD = ".vid, .f-card, .stk, .sh-card, .jk-row, .later-card, .ch-card", tabT = 0, selCard = null;
     function tabIdx() { tabT = 0; document.querySelectorAll(".f-card, .stk, .sh-card, .jk-row, .later-card, .ch-card").forEach(function (e) { if (!e.hasAttribute("tabindex")) e.setAttribute("tabindex", "0"); }); }
     new MutationObserver(function () { if (!tabT) tabT = setTimeout(tabIdx, 250); }).observe($("app") || document.body, { childList: true, subtree: true });
