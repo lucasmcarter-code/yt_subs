@@ -4,7 +4,7 @@ A private, single-page front end for YouTube. It shows your subscriptions as a w
 
 Live app: https://lucasmcarter-code.github.io/yt_subs/
 
-Current version: 50
+Current version: 51
 
 ## What it does
 
@@ -14,6 +14,7 @@ Current version: 50
 - **Jukebox**: music from the bands you list and bands like them, with a Music and Talk switch, autoplay and shuffle. It reshuffles each time you open it and refills itself once a day. A thumbs-up moves a song to Keepers. **Wrong section** moves a video between Music and Talk, or removes one that is not music or is by the wrong band, and the sorter learns from the words in the title, description and tags.
 - **Shorts**: a swipe view for short videos.
 - **Learning**: the check and X on each card teach the app what you like. Muted words and blocked categories hide what you don't want.
+- **Quality filter**: Discover, Search and Shorts leave out AI-made and content-farm videos, using YouTube's altered-content label, channel age and upload rate, clickbait title patterns, and a **Not legit** button that mutes the channel and teaches a word filter. Channels you subscribe to are not affected in Discover or Search. A Settings switch turns it off.
 - **Bell**: notices such as quota use, sync status and new versions.
 - **Sync**: optional. Saves your lists and settings to a private file in your own Google Drive so your phone, computer and TV match. The file is `north-star-sync.json` in the app's hidden Drive folder: it does not show among your Drive files, but appears under Drive, Settings, Manage apps. Settings shows when it last synced.
 - **Layouts**: phone, desktop (side bar, card wall and an in-page player) and TV (LG webOS browser, remote-control navigation).

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-kCJ60noRKEVQ/ft2utlpCLzfoun+VOV1HC+iISk9nQw=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-B76cxbA0pOANb/vxu8q0OMMfZY7japNX49rF86xL+dk=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -772,6 +772,7 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
     </div>
     <div class="hint">The Jukebox looks for new artists like these, and it learns from what you play or skip.</div>
     <div class="btn-row"><button class="btn ghost small" id="srchClear" type="button">Clear remembered searches</button></div>
+    <label class="check"><input type="checkbox" id="slopOn" checked> Filter out AI-made and content-farm videos (Discover, Search and Shorts)</label>
     <label class="check"><input type="checkbox" id="hideShorts" checked> Leave out Shorts and live streams (from Subs and Discover)</label>
     <div class="field"><label>Channels hidden from the Shorts tab</label><div id="shChList"></div></div>
     <div class="field"><label for="tvMode">TV mode</label><select id="tvMode"><option value="auto">Automatic (on for LG TVs)</option><option value="on">Always on</option><option value="off">Off</option></select>
@@ -1091,7 +1092,7 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
     items.forEach(function (v) { byId[v.id] = v; });
     return chunks.reduce(function (p, chunk) {
       return p.then(function () {
-        return api("videos", { part: "contentDetails,snippet,statistics", id: chunk.map(function (v) { return v.id; }).join(","), maxResults: 50 })
+        return api("videos", { part: "contentDetails,snippet,statistics,status", id: chunk.map(function (v) { return v.id; }).join(","), maxResults: 50 })
           .then(function (j) {
             (j.items || []).forEach(function (it) {
               var v = byId[it.id]; if (!v) return;
@@ -1100,6 +1101,7 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
               v.cat = (it.snippet && it.snippet.categoryId) || "";
               if (it.statistics && it.statistics.viewCount != null) v.views = +it.statistics.viewCount;
               v.det = 1;
+              if (it.status && it.status.containsSyntheticMedia) v.syn = 1;
               if (it.snippet && (v.cat === "10" || v.kwq)) { v.kw = jkKw(it.snippet.description, it.snippet.tags); delete v.kwq; }
             });
           });
@@ -1903,6 +1905,68 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   // ---------- filters ----------
   function mutedWordList() { return (cfg.mutedWords || "").toLowerCase().split(",").map(function (s) { return s.trim(); }).filter(Boolean); }
   function topicList() { return (cfg.topics || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean); }
+  // ---------- quality filter: AI-made and content-farm videos (Discover, Search, Shorts) ----------
+  var slop = load("sf_slop", { w: {} }), chq = load("sf_chq", {});
+  slop.w = slop.w || {};
+  var SLOP_STRONG = /\b\d+\s*(min(ute)?s?|hours?|hrs?)\s+ago\b|\b(sad|tragic|terrible|heartbreaking|devastating)\s+news\b|\bin tears\b|\bheartbreaking\b|\byou won'?t believe\b|\bnobody saw (this|it) coming\b|\bleaves? (fans|everyone|nascar|the world) (stunned|speechless|shocked)\b/i;
+  var SLOP_WEAK = /\bshock(ing|ed|s)?\b|\bbombshell\b|\bstunn(ed|ing)\b|\bspeechless\b|\bjust (announced|happened|confirmed|leaked|revealed|dropped)\b|\bbreaking\b|\bhuge (news|announcement|update)\b|\bfinally (breaks|reveals|speaks|confirms|admits)\b|\bchanges everything\b|\bleaked\b|\bfurious\b|\binsane\b|\bgoes (off|viral)\b|\bit'?s over\b|\bofficially (over|done|confirmed)\b|\bexposed\b/gi;
+  function slopTitle(t) {
+    t = String(t || ""); if (SLOP_STRONG.test(t)) return true;
+    var weak = (t.match(SLOP_WEAK) || []).length; if (weak >= 2) return true;
+    var ws = t.split(/\s+/).filter(function (w) { return /[A-Za-z]{3,}/.test(w); }), caps = ws.filter(function (w) { return w === w.toUpperCase(); }).length;
+    return weak >= 1 && ws.length >= 4 && caps / ws.length > 0.5;
+  }
+  // A young channel that posts more than once a day is a content farm, not a person.
+  function slopCh(id) { var c = chq[id]; if (!c || !c[0] || c[1] < 20) return false; var days = (Date.now() - c[0]) / 86400000; return days < 365 && c[1] / Math.max(days, 1) > 1; }
+  function slopFeat(v) {
+    if (typeof JK_STOP === "undefined" || !JK_STOP) return [];
+    var skip = {}, got = {}, out = [];
+    jkNorm(v.channel).split(" ").forEach(function (w) { skip[w] = 1; });
+    var tw = jkWords(v.title).filter(function (w) { return !skip[w]; });
+    tw.concat(tw.slice(1).map(function (w, i) { return tw[i] + "_" + w; })).concat(String(v.kw || "").split(" ").filter(function (w) { return w && !skip[w]; })).forEach(function (w) { if (!got[w]) { got[w] = 1; out.push(w); } });
+    return out;
+  }
+  function slopScore(v) { var n = 0, w = slop.w; if (!Object.keys(w).length) return 0; slopFeat(v).forEach(function (f) { if (w[f]) n += w[f]; }); return n; }
+  function slopOn() { return cfg.slop !== false; }
+  // Why a video is filtered ("" when it is fine). light: title and learned words only (for subscribed Shorts).
+  function slopOf(v, light) {
+    if (!slopOn()) return "";
+    if (!light && v.syn) return "label";
+    if (!light && slopCh(v.chId)) return "farm";
+    if (slopTitle(v.title)) return "title";
+    return slopScore(v) >= 3 ? "words" : "";
+  }
+  // Mute the channel and learn the words that set this video apart from what you follow and your topics.
+  function slopTeach(v) {
+    var legit = {};
+    feed.items.forEach(function (x) { jkWords(x.title).forEach(function (w) { legit[w] = 1; }); });
+    topicList().concat(String(v.topic || "")).forEach(function (t) { jkWords(t).forEach(function (w) { legit[w] = 1; }); });
+    var fs = slopFeat(v).filter(function (f) { return !f.split("_").some(function (p) { return legit[p]; }); });
+    fs.forEach(function (f) { slop.w[f] = Math.min(2, (slop.w[f] || 0) + 1); });
+    var ks = Object.keys(slop.w); if (ks.length > 800) ks.sort(function (a, b) { return slop.w[a] - slop.w[b]; }).slice(0, ks.length - 800).forEach(function (k) { delete slop.w[k]; });
+    save("sf_slop", slop);
+    if (v.chId) { mutedCh[v.chId] = v.channel; save("sf_mutedCh", mutedCh); }
+    return fs;
+  }
+  // Look up channel age and size for channels not seen before (1 unit per 50).
+  function chanCheck(items, subIds) {
+    if (!slopOn()) return Promise.resolve();
+    var need = [], got = {};
+    items.forEach(function (v) { if (v.chId && !chq[v.chId] && !got[v.chId] && !(subIds && subIds[v.chId])) { got[v.chId] = 1; need.push(v.chId); } });
+    if (!need.length) return Promise.resolve();
+    var chunks = []; for (var i = 0; i < need.length; i += 50) chunks.push(need.slice(i, i + 50));
+    return chunks.reduce(function (p, ch) {
+      return p.then(function () {
+        return api("channels", { part: "snippet,statistics", id: ch.join(","), maxResults: 50 }).then(function (j) {
+          (j.items || []).forEach(function (it) { var t = Date.parse((it.snippet && it.snippet.publishedAt) || ""); chq[it.id] = [isNaN(t) ? 0 : t, +((it.statistics && it.statistics.videoCount) || 0)]; });
+          ch.forEach(function (id) { if (!chq[id]) chq[id] = [0, 0]; });
+        });
+      });
+    }, Promise.resolve()).then(function () {
+      var ks = Object.keys(chq); if (ks.length > 3000) ks.slice(0, ks.length - 2500).forEach(function (k) { delete chq[k]; });
+      save("sf_chq", chq);
+    }).catch(function () {});
+  }
   function passes(v, forDiscover, mw, subIds) {
     if (hidden[v.id] || mutedCh[v.chId] || unf[v.sid || v.chId]) return false;
     var hay = (v.title + " " + v.channel).toLowerCase();
@@ -1914,6 +1978,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       if (v.live && v.live !== "none") return false;
       if (cfg.hideShorts && v.dur && v.dur < 180) return false;
       if (cfg.minViews && v.views != null && ageDays(v) >= 30 && v.views < cfg.minViews) return false;
+      if (slopOf(v)) return false;
     }
     return true;
   }
@@ -2054,7 +2119,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
             var t = sn.thumbnails || {};
             fresh.push({
               id: id, title: decodeEntities(sn.title), channel: decodeEntities(sn.channelTitle), chId: sn.channelId,
-              at: sn.publishedAt, topic: topic,
+              at: sn.publishedAt, topic: topic, kwq: 1,
               thumb: (t.medium || t.high || t.default || {}).url || ("https://i.ytimg.com/vi/" + id + "/mqdefault.jpg")
             });
           });
@@ -2064,9 +2129,11 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       save("sf_dq", dq);
       setStatus("Checking categories and views");
       return addDetails(fresh);
-    }).then(function () {
+    }).then(function () { return chanCheck(fresh, null); }).then(function () {
       settleSkips();
       var mw = mutedWordList(), subIds = {}; subs.forEach(function (x) { subIds[x.id] = 1; });
+      var nSlop = fresh.filter(function (v) { return v.det && !subIds[v.chId] && slopOf(v); }).length;
+      if (nSlop) setTimeout(function () { toast("Filtered out " + nSlop + " AI-made or low-quality video" + (nSlop === 1 ? "" : "s") + ".", null, null); }, 400);
       var keep = fresh.filter(function (v) { return ageDays(v) <= TEN_YEARS && passes(v, true, mw, subIds); });
       keep.sort(function (a, b) { return (b.views || 0) - (a.views || 0); });
       dseen = dseen.concat(prev, fresh.map(function (v) { return v.id; }));
@@ -2097,6 +2164,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
       rows.push({ label: "Rest this keyword for 30 days", checked: false, pick: function () { var d = load("sf_dq", {}); (d[key] || (d[key] = { o: 0, p: 0, tok: "", dur: "", rest: 0 })).rest = Date.now() + 30 * 86400000; save("sf_dq", d); toast(v.topic + " is resting for 30 days.", null, null); } });
     }
     rows.push({ label: "Mute " + v.channel, checked: false, pick: function () { mutedCh[v.chId] = v.channel; save("sf_mutedCh", mutedCh); render(); } });
+    rows.push({ label: "Not legit (AI or junk)", checked: false, pick: function () { slopTeach(v); hidden[v.id] = 1; save("sf_hidden", hidden); render(); toast("Muted " + v.channel + ". Similar videos will be filtered out.", null, null); } });
     openSheet("This video", rows, null);
   }
 
@@ -2200,10 +2268,10 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
         var id = it.id && it.id.videoId, sn = it.snippet || {};
         if (!id || have[id]) return; have[id] = 1;
         var t = sn.thumbnails || {};
-        fresh.push({ id: id, title: decodeEntities(sn.title), channel: decodeEntities(sn.channelTitle), chId: sn.channelId, at: sn.publishedAt, topic: "", thumb: (t.medium || t.high || t.default || {}).url || ("https://i.ytimg.com/vi/" + id + "/mqdefault.jpg") });
+        fresh.push({ id: id, title: decodeEntities(sn.title), channel: decodeEntities(sn.channelTitle), chId: sn.channelId, at: sn.publishedAt, topic: "", kwq: 1, thumb: (t.medium || t.high || t.default || {}).url || ("https://i.ytimg.com/vi/" + id + "/mqdefault.jpg") });
       });
       return addDetails(fresh).catch(function () {});
-    }).then(function () {
+    }).then(function () { var si0 = {}; subs.forEach(function (x) { si0[x.id] = 1; }); return chanCheck(fresh, si0); }).then(function () {
       base.items = base.items.concat(fresh);
       sres = base;
       var c = scGet(); c[key] = base;
@@ -2248,7 +2316,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     renderSrchPanel();
     var mw = mutedWordList(), subIds = {}; subs.forEach(function (x) { subIds[x.id] = 1; });
     var ok = sres.key === sKey();
-    var items = ok ? sres.items.filter(function (v) { return passes(v, false, mw, subIds); }) : [];
+    var items = ok ? sres.items.filter(function (v) { return passes(v, false, mw, subIds) && (subIds[v.chId] || !slopOf(v)); }) : [];
     $("srchMoreBox").hidden = !(ok && sres.tok && sres.pages < 4 && sres.items.length);
     $("srchMore").textContent = "Load more (100 units) · page " + (sres.pages + 1) + " of 4";
     if (!ok) { setStatus(sq.q.trim() ? "" : "Search YouTube. Anything you tap ✗ on stays hidden everywhere."); return; }
@@ -2689,7 +2757,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   var shs = load("sf_shorts", { items: [], at: 0 }), shCh = load("sf_shch", {}), shList = [], shI = 0, shBusy = 0;
   shs.items = shs.items || [];
   function shOrder() {
-    var per = {}, out = shs.items.filter(function (v) { return !hidden[v.id] && !shCh[v.chId]; }).sort(function (a, b) { return (seen[a.id] ? 1 : 0) - (seen[b.id] ? 1 : 0) || String(b.at).localeCompare(String(a.at)); });
+    var per = {}, out = shs.items.filter(function (v) { return !hidden[v.id] && !shCh[v.chId] && (v.keep || !slopOf(v, true)); }).sort(function (a, b) { return (seen[a.id] ? 1 : 0) - (seen[b.id] ? 1 : 0) || String(b.at).localeCompare(String(a.at)); });
     out = out.filter(function (v) { per[v.chId] = (per[v.chId] || 0) + 1; return per[v.chId] <= 3; });
     var rest = out.slice(), res = [], recent = [];
     while (rest.length) {
@@ -2898,7 +2966,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   })();
 
   // ---------- backup ----------
-  var BK_KEYS = ["sf_jkb", "sf_tasteSeen", "sf_visit", "sf_folSort", "sf_folRev", "sf_cfg", "sf_subs", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_chTags", "sf_jb", "sf_jbl", "sf_shorts", "sf_shch", "sf_rec", "sf_recNo", "sf_recYes", "sf_seeds", "sf_later", "sf_sh", "sf_unf", "sf_dboost", "sf_chTheme", "sf_tset", "sf_tags"];
+  var BK_KEYS = ["sf_slop", "sf_jkb", "sf_tasteSeen", "sf_visit", "sf_folSort", "sf_folRev", "sf_cfg", "sf_subs", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_chTags", "sf_jb", "sf_jbl", "sf_shorts", "sf_shch", "sf_rec", "sf_recNo", "sf_recYes", "sf_seeds", "sf_later", "sf_sh", "sf_unf", "sf_dboost", "sf_chTheme", "sf_tset", "sf_tags"];
   function bkMake() {
     var data = {};
     BK_KEYS.forEach(function (k) { var raw = localStorage.getItem(k); if (raw == null) return; try { data[k] = JSON.parse(raw); } catch (e) {} });
@@ -3476,7 +3544,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     $("topics").value = cfg.topics || "";
     $("minViews").value = cfg.minViews != null ? cfg.minViews : 25000; $("refreshCap").value = cfg.refreshCap || 4;
     $("mutedWords").value = cfg.mutedWords || "";
-    $("hideShorts").checked = cfg.hideShorts !== false; renderShCh(); renderTaste($("tasteSet"), 6, false);
+    $("slopOn").checked = cfg.slop !== false; $("hideShorts").checked = cfg.hideShorts !== false; renderShCh(); renderTaste($("tasteSet"), 6, false);
     $("openInApp").checked = !!cfg.openInApp;
     $("sway").checked = cfg.sway !== false; $("srchInf").checked = cfg.srchInf !== false; $("favMusic").value = cfg.favMusic || "";
     $("lightMode").checked = !!light.on;
@@ -3512,7 +3580,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       blockCats: blocked,
       hideShorts: $("hideShorts").checked,
       openInApp: $("openInApp").checked,
-      sway: $("sway").checked, srchInf: $("srchInf").checked, favMusic: $("favMusic").value.trim(), font: cfg.font || "",
+      sway: $("sway").checked, srchInf: $("srchInf").checked, favMusic: $("favMusic").value.trim(), font: cfg.font || "", slop: $("slopOn").checked,
       v2: 1
     };
     save("sf_cfg", cfg);
@@ -3664,7 +3732,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 50;
+  var VERSION = 51;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -3886,7 +3954,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
 
   // ---------- diagnostics (no key, token or watch history) ----------
   function clean(t) { return String(t).replace(/AIza[\w-]+/g, "[key]").replace(/ya29\.[\w.-]+/g, "[token]").replace(/([?&](?:key|access_token)=)[^&\s"]+/g, "$1[x]"); }
-  if (load("sf_testhook", false)) window.__sf = { jkFixV: function (id, kind) { var v = jkList.filter(function (x) { return x.id === id; })[0]; if (!v) return null; var f = jkFix(v, kind); render(); return f; }, jkKw: jkKw, jkFeat: jkFeat, jkFixes: function () { return jkb.fix; }, jkState: function () { return { sel: jkSel, id: jkList[jkSel] && jkList[jkSel].id, n: jkList.length, ids: jkList.map(function (v) { return v.id; }), up: jkList[jkUpNext] && jkList[jkUpNext].id }; }, inviteMake: inviteMake, quotaUsed: function () { return quotaUsed(); }, jkKind: jkKind, jkBandOf: jkBandOf, jukeQueries: jukeQueries, pvEnd: function () { pvEnded(); }, pvState: function () { return { id: pvV && pvV.id, st: pvSt }; }, shLog: SHLOG, shSet: function (t, d) { shT = t; shDur = d; }, noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
+  if (load("sf_testhook", false)) window.__sf = { slopOf: slopOf, slopTitle: slopTitle, slopW: function () { return slop.w; }, jkFixV: function (id, kind) { var v = jkList.filter(function (x) { return x.id === id; })[0]; if (!v) return null; var f = jkFix(v, kind); render(); return f; }, jkKw: jkKw, jkFeat: jkFeat, jkFixes: function () { return jkb.fix; }, jkState: function () { return { sel: jkSel, id: jkList[jkSel] && jkList[jkSel].id, n: jkList.length, ids: jkList.map(function (v) { return v.id; }), up: jkList[jkUpNext] && jkList[jkUpNext].id }; }, inviteMake: inviteMake, quotaUsed: function () { return quotaUsed(); }, jkKind: jkKind, jkBandOf: jkBandOf, jukeQueries: jukeQueries, pvEnd: function () { pvEnded(); }, pvState: function () { return { id: pvV && pvV.id, st: pvSt }; }, shLog: SHLOG, shSet: function (t, d) { shT = t; shDur = d; }, noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
   function diagText() {
     var sz = {}, tot = 0;
     try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i), n = (localStorage.getItem(k) || "").length; if (k.indexOf("sf_") === 0) { sz[k.slice(3)] = n; tot += n; } } } catch (e) {}
