@@ -4,7 +4,7 @@ A private, single-page front end for YouTube. It shows your subscriptions as a w
 
 Live app: https://lucasmcarter-code.github.io/yt_subs/
 
-Current version: 52
+Current version: 53
 
 ## What it does
 
