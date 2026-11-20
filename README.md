@@ -4,14 +4,14 @@ A private, single-page front end for YouTube. It shows your subscriptions as a w
 
 Live app: https://lucasmcarter-code.github.io/yt_subs/
 
-Current version: 49
+Current version: 50
 
 ## What it does
 
 - **Subs**: recent uploads from your subscriptions. Several uploads from one channel within 24 hours fold into one card. Sort by newest, oldest, for you, most viewed, length or channel. Hide watched videos, filter by length, or search.
 - **Discover**: recent videos on the topics you list, ranked by what you keep and skip.
 - **Following**: your channels, grouped by topic, with a page per channel.
-- **Jukebox**: music from the bands you list and bands like them, with a Music and Talk switch, autoplay and shuffle. It reshuffles each time you open it and refills itself once a day.
+- **Jukebox**: music from the bands you list and bands like them, with a Music and Talk switch, autoplay and shuffle. It reshuffles each time you open it and refills itself once a day. A thumbs-up moves a song to Keepers. **Wrong section** moves a video between Music and Talk, or removes one that is not music or is by the wrong band, and the sorter learns from the words in the title, description and tags.
 - **Shorts**: a swipe view for short videos.
 - **Learning**: the check and X on each card teach the app what you like. Muted words and blocked categories hide what you don't want.
 - **Bell**: notices such as quota use, sync status and new versions.

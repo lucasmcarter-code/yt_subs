@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-36y5ZLG+Fotg4vjio+j96+mHUF/2w9+Pc4D2cqAhFRU=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-kCJ60noRKEVQ/ft2utlpCLzfoun+VOV1HC+iISk9nQw=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1100,6 +1100,7 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
               v.cat = (it.snippet && it.snippet.categoryId) || "";
               if (it.statistics && it.statistics.viewCount != null) v.views = +it.statistics.viewCount;
               v.det = 1;
+              if (it.snippet && (v.cat === "10" || v.kwq)) { v.kw = jkKw(it.snippet.description, it.snippet.tags); delete v.kwq; }
             });
           });
       });
@@ -2261,7 +2262,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   var jbSig = "";
   function seedJukebox() {
     var got = {}, out = [];
-    [feed.items, disc.items, sres.items].forEach(function (a) { (a || []).forEach(function (v) { if (v.cat === "10" && !got[v.id]) { got[v.id] = 1; out.push({ id: v.id, title: v.title, channel: v.channel, chId: v.chId, at: v.at, dur: v.dur || 0, cat: "10", live: "none", det: 1 }); } }); });
+    [feed.items, disc.items, sres.items].forEach(function (a) { (a || []).forEach(function (v) { if (v.cat === "10" && !got[v.id]) { got[v.id] = 1; out.push({ id: v.id, title: v.title, channel: v.channel, chId: v.chId, at: v.at, dur: v.dur || 0, cat: "10", live: "none", det: 1, kw: v.kw || "" }); } }); });
     var m = {};
     out.forEach(function (x) { m[x.id] = 1; });
     (jb.seeds || []).forEach(function (x) { if (!m[x.id]) { m[x.id] = 1; out.push(x); } });
@@ -2320,13 +2321,64 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   var JK_ALTER = /\b(slowed|reverb|sped up|speed up|nightcore|daycore|8d audio|bass boosted|1 hour|10 hours|hour loop|looped)\b/i;
   var JK_TALK = /\b(interviews?|podcast|q ?& ?a|q and a|talks? (about|to|with)|discuss(es|ing|ion)?|in conversation|conversation with|documentary|behind the scenes|track by track|commentary|episode [0-9]+|ep\.? ?[0-9]+)\b/i;
   // "junk" = never show (practice material, covers, reactions, altered audio, fan lyric uploads); "talk" = interviews and podcasts; "music" otherwise.
+  // ---- "Wrong section" fixes: each one pins that video and teaches a small word model (title, description words, tags).
+  var JK_STOP = /^(the|and|for|with|from|this|that|you|your|our|out|now|new|are|was|has|have|not|all|can|will|more|here|his|her|its|their|they|them|who|what|when|http|https|www|com|org|net|bit|youtu|youtube|subscribe|follow|instagram|facebook|twitter|tiktok|spotify|apple|bandcamp|soundcloud|merch|store|shop|tickets|tour|stream|listen|watch|official|video|videos|music|band|album|song|songs|records|recordings|channel|link|links|click|like|share|comment|copyright|rights|reserved|produced|directed|filmed|recorded|mixed|mastered|lyrics|feat|live)$/;
+  function jkWords(x) { return jkNorm(String(x || "").replace(/https?:\/\/\S+/g, " ")).split(" ").filter(function (w) { return w.length >= 3 && w.length <= 24 && !/^\d+$/.test(w) && !JK_STOP.test(w); }); }
+  function jkKw(desc, tags) {
+    var got = {}, out = [];
+    jkWords(String(desc || "").slice(0, 600) + " " + (tags || []).slice(0, 12).join(" ")).forEach(function (w) { if (!got[w] && out.length < 40) { got[w] = 1; out.push(w); } });
+    return out.join(" ").slice(0, 320);
+  }
+  function jkFx() { if (!jkb.fix) jkb.fix = { v: {}, w: {}, j: {}, xb: {} }; var f = jkb.fix; f.v = f.v || {}; f.w = f.w || {}; f.j = f.j || {}; f.xb = f.xb || {}; return f; }
+  function jkFeat(v) {
+    var skip = {}, bd = jkBandOf(v), got = {}, out = [];
+    jkNorm(v.channel).split(" ").concat(bd && bd !== "!" ? jkNorm(bd).split(" ") : []).forEach(function (w) { skip[w] = 1; });
+    var tw = jkWords(v.title).filter(function (w) { return !skip[w]; });
+    var all = tw.concat(tw.slice(1).map(function (w, i) { return tw[i] + "_" + w; })).concat(String(v.kw || "").split(" ").filter(function (w) { return w && !skip[w]; }));
+    all.forEach(function (w) { if (!got[w]) { got[w] = 1; out.push(w); } });
+    return out;
+  }
+  function jkScore(v, map) { var n = 0; jkFeat(v).forEach(function (f) { if (map[f]) n += map[f]; }); return n; }
+  function jkXb(v, bd) { var fx = jkb.fix; return !!(fx && fx.xb && bd && bd !== "!" && fx.xb[jkBandKey(bd) + "|" + (v.chId || "")]); }
+  function jkTrim(map, max) { var ks = Object.keys(map); if (ks.length > max) ks.sort(function (a, b) { return Math.abs(map[a]) - Math.abs(map[b]); }).slice(0, ks.length - max).forEach(function (k) { delete map[k]; }); }
+  // kind: "music" | "talk" | "junk" | "band" (matched to the wrong band)
+  function jkFix(v, kind) {
+    var fx = jkFx(), feats = jkFeat(v), pool = jkList.filter(function (x) { return x.id !== v.id; }), cnt = {};
+    pool.forEach(function (x) { jkFeat(x).forEach(function (f) { cnt[f] = (cnt[f] || 0) + 1; }); });
+    // Words that most of this section shares say nothing about why this one is different.
+    if (pool.length >= 5) feats = feats.filter(function (f) { return (cnt[f] || 0) / pool.length <= 0.2; });
+    if (kind === "band") { var bd = jkBandOf(v); if (bd && bd !== "!") fx.xb[jkBandKey(bd) + "|" + (v.chId || "")] = 1; fx.v[v.id] = "junk"; }
+    else {
+      fx.v[v.id] = kind;
+      feats.forEach(function (f) {
+        if (kind === "junk") fx.j[f] = Math.min(2, (fx.j[f] || 0) + 1);
+        else fx.w[f] = Math.max(-2, Math.min(2, (fx.w[f] || 0) + (kind === "talk" ? 1 : -1)));
+        if (fx.w[f] === 0) delete fx.w[f];
+      });
+    }
+    var ids = Object.keys(fx.v); if (ids.length > 600) ids.slice(0, ids.length - 600).forEach(function (k) { delete fx.v[k]; });
+    jkTrim(fx.w, 800); jkTrim(fx.j, 800);
+    if (kind === "junk" || kind === "band") { jb.items = jb.items.filter(function (x) { return x.id !== v.id; }); save("sf_jb", jb); }
+    jkKindMemo = {}; save("sf_jkb", jkb);
+    return feats;
+  }
   function jkKind(v) {
     var mk = v.id + "|" + v.title; if (jkKindMemo[mk]) return jkKindMemo[mk];
+    var fx = jkb.fix;
+    if (fx && fx.v && fx.v[v.id]) return jkKindMemo[mk] = fx.v[v.id];
+    var k0 = jkKind0(v);
+    if (fx && k0 !== "junk") {
+      if (fx.j && jkScore(v, fx.j) >= 3) k0 = "junk";
+      else if (fx.w) { var sc = jkScore(v, fx.w); if (k0 === "music" && sc >= 3) k0 = "talk"; else if (k0 === "talk" && sc <= -3) k0 = "music"; }
+    }
+    return jkKindMemo[mk] = k0;
+  }
+  function jkKind0(v) {
     var t = String(v.title || ""), ch = String(v.channel || ""), out = "music";
     if (JK_PRACTICE.test(t) || /\bcharts?\b/i.test(ch) || JK_COVER.test(t) || JK_REACT.test(t) || JK_ALTER.test(t)) out = "junk";
     else if (/\blyrics?\b/i.test(t)) { var bd = jkBandOf(v), c = jkNorm(artistOf(ch)).replace(/^the /, "").replace(/ (official|band|music|vevo|tv)$/, ""); if (!(bd && bd !== "!" && c === jkBandKey(bd)) && !JK_SESS.test(jkNorm(ch))) out = "junk"; }
     if (out === "music" && JK_TALK.test(t)) out = "talk";
-    return jkKindMemo[mk] = out;
+    return out;
   }
   function jkBandKey(name) { return jkNorm(name).replace(/^the /, ""); }
   function jkTake(list, ptr, n, skip) {
@@ -2347,12 +2399,12 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     save("sf_jb", jb); save("sf_jbl", jbl); save("sf_jbv", 2);
   }
   if (load("sf_jbv", 0) < 3) { save("sf_jbv", 3); setTimeout(function () { var n0 = jb.items.length; jb.items = jb.items.filter(function (x) { return x.keep || jkKind(x) !== "junk"; }); if (jb.items.length !== n0) save("sf_jb", jb); }, 0); }
-  function jbItem(v) { return { id: v.id, title: v.title, channel: v.channel, chId: v.chId, at: v.at, dur: v.dur || 0, cat: v.cat || "", views: v.views, live: "none", det: 1 }; }
+  function jbItem(v) { return { id: v.id, title: v.title, channel: v.channel, chId: v.chId, at: v.at, dur: v.dur || 0, cat: v.cat || "", views: v.views, live: "none", det: 1, kw: v.kw || "" }; }
   function jbAdd(v) { jbLearn(v, 1); if (!jb.items.some(function (x) { return x.id === v.id; })) { jb.items.unshift(jbItem(v)); jb.items = jb.items.slice(0, 150); save("sf_jb", jb); } toast("Added to the Jukebox.", null, null); }
   function jukeList() {
     var mw = mutedWordList(), si = {}, got = {}, out = [];
     subs.forEach(function (x) { si[x.id] = 1; });
-    jb.items.concat(jb.seeds.filter(function (v) { return !si[v.chId] && jkBandOf(v) && jkBandOf(v) !== "!"; })).forEach(function (v) { if (got[v.id]) return; got[v.id] = 1; var bd = jkBandOf(v); if (bd === "!") return; var kd = jkKind(v); if (kd === "junk" && !v.keep) return; if ((kd === "talk") !== (jkMode === "talk")) return; if (!v.keep && (jbl.t[bd ? jkBandKey(bd) : artistOf(v.channel).toLowerCase()] || 0) <= -6) return; if (passes(v, false, mw, si)) out.push(v); });
+    jb.items.concat(jb.seeds.filter(function (v) { return !si[v.chId] && jkBandOf(v) && jkBandOf(v) !== "!"; })).forEach(function (v) { if (got[v.id]) return; got[v.id] = 1; var bd = jkBandOf(v); if (bd === "!" || jkXb(v, bd)) return; var kd = jkKind(v); if (kd === "junk" && !v.keep) return; if ((kd === "talk") !== (jkMode === "talk")) return; if (!v.keep && (jbl.t[bd ? jkBandKey(bd) : artistOf(v.channel).toLowerCase()] || 0) <= -6) return; if (passes(v, false, mw, si)) out.push(v); });
     // Keepers live in their own view; a thumbs-up takes the song off the main list.
     out = out.filter(function (v) { return jkKeepOnly ? v.keep : !v.keep; });
     var per = {}; out = out.filter(function (v) { var k = artistKey(v); per[k] = (per[k] || 0) + 1; return per[k] <= 3; });
@@ -2495,12 +2547,22 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     tAuto.addEventListener("click", function () { jkAuto = !jkAuto; save("sf_jkAuto", jkAuto); tAuto.classList.toggle("on", jkAuto); tAuto.setAttribute("aria-pressed", String(jkAuto)); toast(jkAuto ? "Autoplay is on. The next song starts when one ends." : "Autoplay is off.", null, null); });
     tRand.addEventListener("click", function () { jkRand = !jkRand; save("sf_jkRand", jkRand); tRand.classList.toggle("on", jkRand); tRand.setAttribute("aria-pressed", String(jkRand)); jkUpNext = -1; toast(jkRand ? "Random is on." : "Random is off. Songs play in list order.", null, null); });
     reshuf.addEventListener("click", function () { jkSeed = (jkSeed || 1) + 1; jkSel = 0; jkPage = 0; jkHist = []; render(); toast("Reshuffled.", null, null); });
-    ctl.appendChild(prev); ctl.appendChild(play); ctl.appendChild(next); ctl.appendChild(keepB); ctl.appendChild(nah); ctl.appendChild(tAuto); ctl.appendChild(tRand); ctl.appendChild(reshuf); ctl.appendChild(kv); ctl.appendChild(refill); jk.appendChild(ctl);
+    var fixB = el("button", "jk-fix", "Wrong section"); fixB.type = "button";
+    fixB.addEventListener("click", function () {
+      var v = jkList[jkSel]; if (!v) return;
+      var to = jkMode === "talk" ? "music" : "talk", bd = jkBandOf(v);
+      function done(kind, msg) { jkFix(v, kind); if (jkSel >= jkList.length - 1) jkSel = Math.max(0, jkSel - 1); render(); toast(msg, null, null); }
+      var rows = [{ label: to === "talk" ? "Move to Talk (interview or podcast)" : "Move to Music", checked: false, pick: function () { done(to, "Moved to " + (to === "talk" ? "Talk" : "Music") + ". Similar videos will be sorted the same way."); } },
+        { label: "Not music at all", checked: false, pick: function () { done("junk", "Removed. Similar videos will be filtered out."); } }];
+      if (bd && bd !== "!") rows.push({ label: "Wrong band (not " + bd + ")", checked: false, pick: function () { done("band", "Removed. " + v.channel + " will no longer count as " + bd + "."); } });
+      openSheet("Fix this video", rows);
+    });
+    ctl.appendChild(prev); ctl.appendChild(play); ctl.appendChild(next); ctl.appendChild(keepB); ctl.appendChild(nah); ctl.appendChild(tAuto); ctl.appendChild(tRand); ctl.appendChild(reshuf); ctl.appendChild(fixB); ctl.appendChild(kv); ctl.appendChild(refill); jk.appendChild(ctl);
     var strip = el("div", "jk-strip"), pager = el("div", "jk-pager");
     var pp = el("button", null, "‹ Prev page"), pn = el("button", null, "Next page ›"), pt = el("span");
     pp.type = "button"; pn.type = "button"; pager.appendChild(pp); pager.appendChild(pt); pager.appendChild(pn);
     jk.appendChild(strip); jk.appendChild(pager);
-    jk.appendChild(el("div", "jk-cost", "Play starts the video. ✓ trains more like it; ✗ hides it (Undo for a few seconds). Refill runs 3 searches (300 units) for your bands and similar bands."));
+    jk.appendChild(el("div", "jk-cost", "Play starts the video. ✓ trains more like it; ✗ hides it (Undo for a few seconds). Wrong section moves or removes a video that was sorted wrong, and teaches the sorter. Refill runs 3 searches (300 units) for your bands and similar bands."));
     jkUI = { cover: cover, title: title, meta: meta, play: play, strip: strip, pageTxt: pt, pp: pp, pn: pn, reel: reel };
     prev.addEventListener("click", function () {
       if (jkRand && jkHist.length) { var id = jkHist.pop(); for (var i = 0; i < jkList.length; i++) if (jkList[i].id === id) { jkSel = i; jkUpdate(true); return; } }
@@ -2604,14 +2666,14 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
           (j.items || []).forEach(function (it) {
             var id = it.id && it.id.videoId, sn = it.snippet || {};
             if (!id || have[id] || seen[id] || hidden[id] || si[sn.channelId]) return; have[id] = 1;
-            fresh.push({ id: id, title: decodeEntities(sn.title), channel: decodeEntities(sn.channelTitle), chId: sn.channelId, at: sn.publishedAt, topic: "" });
+            fresh.push({ id: id, title: decodeEntities(sn.title), channel: decodeEntities(sn.channelTitle), chId: sn.channelId, at: sn.publishedAt, topic: "", kwq: 1 });
           });
         });
       });
     }, Promise.resolve()).then(function () { return addDetails(fresh).catch(function () {}); }).then(function () {
       var mw = mutedWordList(), cnt = {};
       var keep = fresh.filter(function (v) { return v.det && v.dur >= 120 && (!v.live || v.live === "none") && passes(v, false, mw, si); }).filter(function (v) {
-        var bd = jkBandOf(v); if (!bd || bd === "!") return false;
+        var bd = jkBandOf(v); if (!bd || bd === "!" || jkXb(v, bd)) return false;
         var kd = jkKind(v); if (kd === "junk" || (kd === "talk") !== (jkMode === "talk")) return false;
         var k = jkBandKey(bd); cnt[k] = (cnt[k] || 0) + 1; return cnt[k] <= 3;
       }).map(function (v) { var it = jbItem(v); it.band = jkBandOf(v); return it; });
@@ -3602,7 +3664,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 49;
+  var VERSION = 50;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -3824,7 +3886,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
 
   // ---------- diagnostics (no key, token or watch history) ----------
   function clean(t) { return String(t).replace(/AIza[\w-]+/g, "[key]").replace(/ya29\.[\w.-]+/g, "[token]").replace(/([?&](?:key|access_token)=)[^&\s"]+/g, "$1[x]"); }
-  if (load("sf_testhook", false)) window.__sf = { jkState: function () { return { sel: jkSel, id: jkList[jkSel] && jkList[jkSel].id, n: jkList.length, ids: jkList.map(function (v) { return v.id; }), up: jkList[jkUpNext] && jkList[jkUpNext].id }; }, inviteMake: inviteMake, quotaUsed: function () { return quotaUsed(); }, jkKind: jkKind, jkBandOf: jkBandOf, jukeQueries: jukeQueries, pvEnd: function () { pvEnded(); }, pvState: function () { return { id: pvV && pvV.id, st: pvSt }; }, shLog: SHLOG, shSet: function (t, d) { shT = t; shDur = d; }, noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
+  if (load("sf_testhook", false)) window.__sf = { jkFixV: function (id, kind) { var v = jkList.filter(function (x) { return x.id === id; })[0]; if (!v) return null; var f = jkFix(v, kind); render(); return f; }, jkKw: jkKw, jkFeat: jkFeat, jkFixes: function () { return jkb.fix; }, jkState: function () { return { sel: jkSel, id: jkList[jkSel] && jkList[jkSel].id, n: jkList.length, ids: jkList.map(function (v) { return v.id; }), up: jkList[jkUpNext] && jkList[jkUpNext].id }; }, inviteMake: inviteMake, quotaUsed: function () { return quotaUsed(); }, jkKind: jkKind, jkBandOf: jkBandOf, jukeQueries: jukeQueries, pvEnd: function () { pvEnded(); }, pvState: function () { return { id: pvV && pvV.id, st: pvSt }; }, shLog: SHLOG, shSet: function (t, d) { shT = t; shDur = d; }, noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
   function diagText() {
     var sz = {}, tot = 0;
     try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i), n = (localStorage.getItem(k) || "").length; if (k.indexOf("sf_") === 0) { sz[k.slice(3)] = n; tot += n; } } } catch (e) {}
