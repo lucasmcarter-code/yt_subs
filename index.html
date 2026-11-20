@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-UKWYCvQC7YfMrmf1hbar7zFTIP1k3yM8EaDQKNCbquU=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-36y5ZLG+Fotg4vjio+j96+mHUF/2w9+Pc4D2cqAhFRU=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2353,7 +2353,8 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     var mw = mutedWordList(), si = {}, got = {}, out = [];
     subs.forEach(function (x) { si[x.id] = 1; });
     jb.items.concat(jb.seeds.filter(function (v) { return !si[v.chId] && jkBandOf(v) && jkBandOf(v) !== "!"; })).forEach(function (v) { if (got[v.id]) return; got[v.id] = 1; var bd = jkBandOf(v); if (bd === "!") return; var kd = jkKind(v); if (kd === "junk" && !v.keep) return; if ((kd === "talk") !== (jkMode === "talk")) return; if (!v.keep && (jbl.t[bd ? jkBandKey(bd) : artistOf(v.channel).toLowerCase()] || 0) <= -6) return; if (passes(v, false, mw, si)) out.push(v); });
-    if (jkKeepOnly) out = out.filter(function (v) { return v.keep; });
+    // Keepers live in their own view; a thumbs-up takes the song off the main list.
+    out = out.filter(function (v) { return jkKeepOnly ? v.keep : !v.keep; });
     var per = {}; out = out.filter(function (v) { var k = artistKey(v); per[k] = (per[k] || 0) + 1; return per[k] <= 3; });
     // Deal the records out in a shuffled order (stable until Reshuffle), so refills, bands and kinds are interleaved.
     out = out.map(function (v) { return [jkMix(hash(v.id), jkSeed), v]; }).sort(function (a, b) { return a[0] - b[0]; }).map(function (x) { return x[1]; });
@@ -2526,7 +2527,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       if (!jb.items.some(function (x) { return x.id === v.id; })) jb.items.unshift(jbItem(v));
       jb.items.forEach(function (x) { if (x.id === v.id) x.keep = 1; });
       v.keep = 1; save("sf_jb", jb);
-      jkStamp("keep", function () { jkBusy = 0; toast("Keeper. More like this will show up.", null, null); });
+      jkStamp("keep", function () { jkBusy = 0; if (!jkKeepOnly) render(); toast("Keeper. Moved to Keepers; more like this will show up.", null, null); });
     });
     nah.addEventListener("click", function () {
       var v = jkList[jkSel]; if (!v || jkBusy) return; jkBusy = 1;
@@ -3601,7 +3602,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 48;
+  var VERSION = 49;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
