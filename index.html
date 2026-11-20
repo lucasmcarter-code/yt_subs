@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-9177lpt1PfEUfRJ3k0QVcHUNFHQoX0fM9XjzmtJxhTM=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ClbMz87lIo0d3srVkcAMLPGQg+t4dOu9SvdF8Uy7zPg=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -524,6 +524,9 @@ body.tv :focus, body.tv :focus-visible { outline: 5px solid var(--accent); outli
 body.tv input:focus, body.tv textarea:focus, body.tv select:focus { outline-offset: 2px; }
 body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:focus { z-index: 2; }
 .grp-badge { position: absolute; left: 8px; top: 8px; z-index: 3; height: 28px; padding: 0 12px; border: 0; border-radius: 14px; background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 13px; box-shadow: 0 2px 6px rgba(0,0,0,.4); }
+.tp-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 4px; }
+.tp-chip { height: 34px; padding: 0 13px; border-radius: 17px; border: 1px solid var(--line); background: transparent; color: inherit; font: inherit; font-size: 13px; cursor: pointer; }
+.tp-chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 700; }
 .grp-list { margin-top: 6px; }
 .grp-t { display: flex; align-items: baseline; gap: 8px; width: 100%; text-align: left; background: none; border: 0; border-top: 1px solid rgba(0,0,0,.14); padding: 7px 2px; font: inherit; font-size: 14px; line-height: 1.3; color: inherit; cursor: pointer; }
 .grp-t span { flex: 1; min-width: 0; }
@@ -651,7 +654,7 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
   <section id="welcomeView" hidden>
     <div class="wl">
       <h2>Welcome to North Star</h2>
-      <p>Three steps and your feed is ready. Everything you enter stays in this browser.</p>
+      <p>A few steps and your feed is ready. Everything you enter stays in this browser.</p>
       <div class="wl-step"><span class="wl-n">1</span><div><b>Connect to YouTube</b><p>Paste a YouTube API key, or an invite code from a friend.</p>
         <input type="text" id="wKey" placeholder="API key or invite code" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="API key or invite code">
         <div class="wl-ok" id="wKeyOk" hidden></div>
@@ -660,7 +663,9 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
         <input type="text" id="wCid" placeholder="Google OAuth client ID" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Google OAuth client ID" hidden>
         <input type="text" id="wHandle" placeholder="@yourhandle" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Channel handle" hidden>
         <div class="btn-row"><button class="btn" id="wGoogle" type="button">Sign in with Google</button><button class="btn ghost" id="wUseHandle" type="button">Use a handle instead</button></div></div></div>
-      <div class="wl-step"><span class="wl-n">3</span><div><b>Already use North Star elsewhere?</b><p>Turn on sync to pull your saved data from your own Google Drive. Optional.</p>
+      <div class="wl-step"><span class="wl-n">3</span><div><b>Pick a few interests</b><p>These label your cards and give Discover something to look for. Optional. Change them any time in Settings.</p>
+        <div class="tp-grid" id="wTopics"></div></div></div>
+      <div class="wl-step"><span class="wl-n">4</span><div><b>Already use North Star elsewhere?</b><p>Turn on sync to pull your saved data from your own Google Drive. Optional.</p>
         <div class="btn-row"><button class="btn ghost" id="wSync" type="button">Turn on sync</button></div></div></div>
       <div class="status" id="wStatus" role="status"></div>
       <div class="wl-end"><button class="btn ghost" id="wFull" type="button">All settings</button><button class="btn" id="wLoad" type="button">Load my feed</button></div>
@@ -727,9 +732,14 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
     </div>
 
     <h3>Filters and learning</h3>
+    <div class="field"><label>My topics</label><div class="hint">Topics that label your cards and theme your channels. Tap to switch one on or off.</div>
+      <div class="tp-grid" id="tpGrid"></div>
+      <label class="cb-l" for="tpOwn">Your own topics</label><input type="text" id="tpOwn" placeholder="birdwatching, sourdough" autocomplete="off" autocapitalize="off">
+      <label class="cb-l" for="myTags">My tags</label><textarea id="myTags" rows="4" placeholder="Tag name: words to look for, more words" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+      <div class="hint">One tag per line, such as "Tiny Desk: tiny desk". A video whose title or channel has any of the words gets that tag. Add a topic in brackets to borrow its color: "NASCAR (Cars): nascar, cup series".</div></div>
     <div class="field">
       <label for="mutedWords">Muted words</label>
-      <input type="text" id="mutedWords" placeholder="election, debate" autocomplete="off" autocapitalize="off">
+      <input type="text" id="mutedWords" placeholder="spoilers, giveaway" autocomplete="off" autocapitalize="off">
       <span class="hint">Videos with any of these in the title or channel name are hidden on both tabs.</span>
     </div>
     <p id="learnInfo"></p>
@@ -745,6 +755,8 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
       <label class="cb-l" for="cbOwnIn">My bands</label><div class="cb" id="cbOwn"></div>
       <label class="cb-l" for="cbSimIn">Similar bands</label><div class="cb" id="cbSim"></div><div class="hint">Bands like yours that Refill should also try. A recommender such as hate5six.com/sage can suggest some.</div>
       <label class="cb-l" for="cbNeverIn">Never show</label><div class="cb" id="cbNever"></div>
+      <label class="cb-l" for="jkWords">Extra search words</label><input type="text" id="jkWords" placeholder="live session" autocomplete="off" autocapitalize="off">
+      <div class="hint">Refill searches each band by name, and again with these words added. Up to two, separated by a comma.</div>
     </div>
     <div class="hint">The Jukebox looks for new artists like these, and it learns from what you play or skip.</div>
     <div class="btn-row"><button class="btn ghost small" id="srchClear" type="button">Clear remembered searches</button></div>
@@ -781,6 +793,8 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
         <div class="btn-row"><button class="btn" id="syncBtn" type="button">Turn on sync</button><button class="btn ghost" id="syncOffBtn" type="button" hidden>Turn off</button><button class="btn ghost" id="syncRestoreBtn" type="button" hidden>Restore previous settings</button></div>
         <details class="help"><summary>One-time setup</summary><p>In Google Cloud Console, open the project that holds your OAuth client ID, go to APIs and Services, Library, find "Google Drive API" and press Enable. Then press Turn on sync here and approve the Google prompt. Do the Turn on step once in each browser.</p></details>
       </div>
+    <div class="field"><label>Start fresh</label><div class="hint">Clears taste training, watched and hidden marks, lists, topics and tags on this device, and turns sync off here. Your API key, client ID and subscriptions stay. Other devices and your Drive copy are not touched.</div>
+      <div class="btn-row"><button class="btn ghost" id="freshBtn" type="button">Start fresh on this device</button></div></div>
     <div class="field"><label>Backup</label><div class="hint">Saves your keepers, hidden items, favorites, learning and follows into one file. It leaves out your API key and client ID.</div>
       <div class="btn-row"><button class="btn ghost" id="inviteBtn" type="button">Copy invite for a friend</button></div><div class="hint">The invite holds only your API key and client ID, so a friend can paste one code. They share your daily quota, and you still need to add them as a test user in Google Cloud.</div>
       <div class="btn-row"><button class="btn ghost" id="expBtn" type="button">Export backup</button><button class="btn ghost" id="impBtn" type="button">Import backup</button></div>
@@ -844,7 +858,7 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
   }
   function drop(k) { delete mem[k]; try { localStorage.removeItem(k); } catch (e) {} }
 
-  var DEFAULT_CFG = { key: "", channel: "", clientId: "", hideShorts: true, openInApp: false, sway: true, topics: "", mutedWords: "", blockCats: ["25"], minViews: 25000, refreshCap: 4 };
+  var DEFAULT_CFG = { key: "", channel: "", clientId: "", hideShorts: true, openInApp: false, sway: true, topics: "", mutedWords: "", blockCats: [], minViews: 25000, refreshCap: 4 };
   var cfg = Object.assign({}, DEFAULT_CFG, load("sf_cfg", {})); delete cfg.tilt;
   if (!cfg.v2) { cfg.openInApp = false; cfg.v2 = 1; save("sf_cfg", cfg); }
   var subs = load("sf_subs", []), unf = load("sf_unf", {}), chTags = load("sf_chTags", {});
@@ -1311,12 +1325,36 @@ var FAMS = {"wood":["#B3763E","#8E5A2C"],"metal":["#6E7F8A","#4E5C66"],"tech":["
 var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square","tape-measure","x-plane","x-chisel","x-dovetail","table-furniture","chair-rolling","toolbox","tools","screw-flat-top"],["woodwork","woodworking","woodworker","carpentry","carpenter","joinery","dovetail","workshop","furniture","lumber","plywood","hand plane","table saw","bandsaw","router","chisel","shop build"]],["Woodturning","wood",["x-lathe","x-pen","bowl","bowl-mix","tree","pine-tree","cube-outline","x-chisel"],["woodturning","wood turning","woodturner","pen blank","spindle","segmented","hollowing","turned bowl","lathe"]],["Furniture building","wood",["table-furniture","chair-rolling","wardrobe","dresser","bed","door","bookshelf","cupboard","sofa","lamp"],["furniture","table build","dining table","bed frame","desk build","workbench build","coffee table","bench build"]],["Hand tools","wood",["x-plane","x-chisel","hammer","saw-blade","ruler-square","tape-measure","pencil-ruler","screwdriver","pliers","x-vise"],["hand tool","hand tools","hand plane","handsaw","spokeshave","neander","hand cut","marking gauge","hand-cut"]],["Router and CNC","wood",["x-routerbit","x-endmill","cube-scan","cube-unfolded","printer-3d","robot-industrial","cog","laser-pointer","chip"],["router","cnc","shapeoko","x-carve","inlay","vcarve","v-carve","cnc router","gcode","g-code","fusion 360"]],["Lumber and milling","wood",["tree","pine-tree","saw-blade","axe","wheel-barrow","factory","layers","cube-outline","truck-flatbed"],["sawmill","lumber","milling","jointer","planer","live edge","slab","kiln","hardwood","logs","lumber mill"]],["Finishing and staining","wood",["brush","spray","spray-bottle","palette","format-paint","water","creation","blur"],["finish","finishing","stain","varnish","polyurethane","shellac","lacquer","wipe-on","oil finish","tung oil"]],["Shop organization","wood",["toolbox","toolbox-outline","tools","ruler-square-compass","archive","warehouse","screwdriver","pliers"],["shop tour","shop organization","shop storage","workshop tour","dust collection","french cleat","workbench","garage shop","shop build"]],["Resin casting","wood",["beaker","flask-outline","water","opacity","cube-outline","palette","diamond-stone","flask","format-color-fill"],["resin","epoxy","river table","casting resin","cast resin","silicone mold","mold making","resin art"]],["Cabinetry","wood",["cupboard","dresser","wardrobe","door","hammer-screwdriver","screwdriver","ruler-square","tape-measure","toolbox"],["cabinet","cabinetry","cabinets","kitchen cabinet","face frame","frameless","drawer","built-in","built in"]],["Pens and bowls","wood",["x-pen","pen","bowl","bowl-mix","x-lathe","pencil","fountain-pen-tip","tree"],["pen turning","bowl turning","kitless","pens","bowls","pen maker","turned pen"]],["Lathe work","metal",["x-lathe","x-endmill","cog","hexagon","nut","bolt","wrench-outline","x-vise","cube-outline","robot-industrial"],["lathe","mill","lathe work","bridgeport","tool post","metal lathe","milling machine","machine shop","turning"]],["Machining","metal",["x-lathe","x-endmill","x-caliper","cog","hexagon","nut","bolt","wrench-outline","factory","robot-industrial","x-vise"],["machining","machinist","machine shop","cnc machining","tool and die","milling machine","haas","mastercam","end mill","tolerance","tooling"]],["Welding","metal",["x-torch","fire","lightning-bolt","flash","hammer-wrench","anvil","wrench","gas-burner","factory"],["weld","welding","welder","tig","mig","stick welding","arc welding","flux core","weld test"]],["Metalworking","metal",["anvil","hammer","hammer-wrench","x-flame","x-crucible","x-vise","factory","cog","hexagon"],["metalworking","metal working","metal shop","sheet metal","forging","brazing","metal fabrication","sheetmetal"]],["Fabrication","metal",["x-torch","x-vise","x-cclamp","hammer-wrench","wrench","truck-trailer","factory","cog","hexagon-outline","ruler-square"],["fabrication","fabricator","metal fab","custom fab","fabricating","roll cage","trailer build","steel build"]],["Plasma cutting","metal",["x-plasma","lightning-bolt","flash","scissors-cutting","content-cut","laser-pointer","fire","cube-scan"],["plasma","plasma cutter","plasma cutting","cnc plasma","torch table","cutting table"]],["Blacksmithing","metal",["anvil","hammer","x-flame","fire","pickaxe","sword","axe","x-crucible","gas-burner"],["blacksmith","blacksmithing","forge","forging","anvil","smith","hot steel","forge welding"]],["Casting and foundry","metal",["x-crucible","x-flame","fire","cube-outline","factory","gas-burner","beaker","water","cog"],["foundry","casting","aluminum casting","lost wax","sand casting","crucible","molten","backyard foundry","melting"]],["Knives and blades","metal",["knife","knife-military","sword","sword-cross","axe","x-whetstone","silverware-fork-knife","food-steak","pickaxe"],["knife","knives","blade","blades","knifemaker","knife making","edc","pocket knife","chef knife"]],["Bladesmithing","metal",["sword","sword-cross","knife-military","anvil","hammer","x-flame","fire","x-whetstone","axe"],["bladesmith","bladesmithing","damascus","forge knife","knife maker","heat treat","quench"]],["Sharpening","metal",["x-whetstone","knife","scissors-cutting","sword","axe","saw-blade","blur"],["sharpening","sharpen","whetstone","honing","strop","waterstone","sharpening stone"]],["Tool grinding","metal",["cog","hexagon","x-endmill","saw-blade","blur","lightning-bolt","flash","x-caliper","wrench-outline"],["grinder","grinding","tool grinding","surface grinder","tool and cutter","bench grinder"]],["Metrology","metal",["x-caliper","ruler","ruler-square","tape-measure","compass-outline","gauge","scale-balance","pencil-ruler","circle-double"],["metrology","measurement","calibration","micrometer","caliper","gauge block","cmm","precision measuring","measuring tools"]],["Electronics","tech",["chip","memory","resistor","soldering-iron","raspberry-pi","usb-flash-drive","meter-electric","sine-wave","current-ac","lightbulb","flash"],["electronics","electronic","circuit","soldering","arduino","esp32","raspberry pi","pcb","oscilloscope","multimeter","microcontroller","diy electronics"]],["Robotics","tech",["robot","robot-industrial","robot-industrial-outline","robot-happy","cog","chip","gamepad-variant","remote","radar"],["robot","robotics","robotic","servo","autonomous","humanoid","robot arm","robots"]],["Drones","tech",["drone","quadcopter","airplane","helicopter","camera-outline","remote","radar","gamepad-variant","cube-scan"],["drone","drones","fpv","quadcopter","uav","dji","multirotor","quad build"]],["Electrical Engineering","tech",["flash","lightning-bolt","current-ac","sine-wave","transmission-tower","wind-turbine","solar-power","chip","meter-electric","power-plug"],["electrical engineering","power systems","transformers","three phase","power grid","circuits","signals","motors","power electronics"]],["Electrician","tech",["power-socket","flash","lightbulb","meter-electric","power-plug","lightning-bolt-circle","pliers","screwdriver","toolbox","transmission-tower"],["electrician","electrical","wiring","breaker","conduit","outlet","service panel","journeyman","panel upgrade"]],["Nuclear Engineering","tech",["x-reactor","radioactive","atom","flash","molecule","transmission-tower","orbit","solar-power","lightning-bolt"],["nuclear","reactor","nuclear power","uranium","fission","fusion","radiation","nuclear engineering","thorium"]],["3D printing","tech",["printer-3d","printer-3d-nozzle","cube-outline","cube-scan","cube-unfolded","layers","cog","chip","ruler-square"],["3d print","3d printing","3d printer","filament","resin print","prusa","bambu","ender","slicer","fdm"]],["Cars","vehicle",["car","car-wrench","car-electric","engine-outline","car-cog","car-sports","steering","gas-station","tire","wrench-outline","speedometer"],["car","cars","automotive","mechanic","engine","restoration","detailing","racing","drift","jdm","muscle car","truck","auto repair"]],["Aviation","vehicle",["airplane","airplane-takeoff","airplane-landing","helicopter","rocket-launch","radar","compass-outline","airballoon","parachute","weather-windy"],["aviation","aircraft","pilot","flight","airplane","airline","airliner","cockpit","atc","aerospace","aviator"]],["Trains","vehicle",["train","train-variant","railroad-light","subway-variant","tram","bus-side","transit-connection","map-marker-path","clock-outline"],["train","trains","railroad","railway","locomotive","model railroad","railfan","subway","transit"]],["Pets","nature",["paw","dog","cat","bone","fish","bird","rabbit","turtle","heart","home-heart"],["pet","pets","dog","dogs","cat","cats","puppy","kitten","aquarium","vet","animal care","fish tank","reptile"]],["Camping and hiking","nature",["tent","hiking","campfire","pine-tree","flashlight","compass","map","terrain","image-filter-hdr"],["camping","hiking","backpacking","trail","outdoors","bushcraft","survival","tent","overlanding","wilderness","thru-hike","campfire"]],["Gaming","fun",["gamepad-variant","controller-classic","gamepad-square","space-invaders","pac-man","dice-5","chess-knight","cards-playing","sword-cross"],["gaming","gameplay","let's play","playthrough","minecraft","esports","speedrun","walkthrough","streamer","steam","game review"]],["Retro games","fun",["space-invaders","pac-man","controller-classic","floppy","cassette","vhs","television-classic","invert-colors","ghost"],["retro","retro gaming","nes","snes","arcade","atari","n64","vintage games","game boy","sega","console repair"]],["Music","music",["music-note","music","guitar-acoustic","piano","microphone","headphones","album","radio","equalizer"],["music","song","songs","band","album","producer","beats","cover","remix","musician","composer","music production"]],["Guitar","music",["guitar-acoustic","guitar-electric","guitar-pick","amplifier","music-note","microphone-variant","waveform","equalizer-outline","cable-data"],["guitar","guitarist","bass","riff","fretboard","amp","pedals","strat","les paul","tabs","acoustic"]],["Piano","music",["piano","music-clef-treble","music-note","keyboard-outline","waveform","metronome","headphones","music-note-eighth","radio"],["piano","pianist","keyboard","keys","classical","chopin","sheet music","synth","organ","synthesizer"]],["Filmmaking","media",["film","video-vintage","movie-open","camera-outline","filmstrip","movie-roll","lightbulb","microphone","video"],["filmmaking","film","cinematography","cinema","movie","director","screenwriting","video editing","vfx","short film","behind the scenes"]],["Photography","media",["camera-outline","camera-iris","image-filter-hdr","film","flash-outline","panorama-variant","image-multiple","timer-outline"],["photography","photographer","photo","camera","lens","lightroom","portrait","landscape","photoshoot","mirrorless"]],["Drawing and painting","media",["palette","brush","pencil","pen","draw","spray","format-paint","image-outline","eyedropper","shape"],["drawing","painting","artist","sketch","illustration","watercolor","oil painting","digital art","procreate","acrylic"]],["Crafts","media",["scissors-cutting","needle","hand-heart","sprout-outline","shoe-sneaker","puzzle","star-four-points","gift","hand-back-left-outline","paperclip"],["craft","crafts","diy","handmade","crafting","maker","leather","pottery","ceramics","paper craft","handcraft"]],["Comedy","media",["emoticon-excited","drama-masks","emoticon-lol-outline","emoticon-happy","microphone-variant","party-popper","theater","popcorn","emoticon-wink"],["comedy","funny","stand-up","standup","sketch","humor","jokes","parody","skit","roast"]],["Science","science",["flask-outline","test-tube","microscope","atom","beaker","molecule","dna","chart-bell-curve","calculator-variant","magnet"],["science","scientist","physics","biology","experiment","research","explained","math","engineering explained"]],["Space","science",["rocket","rocket-launch","telescope","orbit","satellite-variant","star-four-points","weather-night","moon-waning-crescent","creation","ufo-outline"],["space","nasa","spacex","rocket","astronomy","planet","telescope","cosmos","mars","astronaut"]],["Chemistry","science",["flask-outline","test-tube","beaker","molecule","periodic-table","atom","fire","gas-burner","water","skull-crossbones"],["chemistry","chemical","chemist","reaction","element","periodic","molecules","organic chemistry","acid"]],["History","science",["castle","bank","pillar","book-open-page-variant","sword-cross","shield-outline","pyramid","ship-wheel","map-outline"],["history","historical","ancient","medieval","empire","historian","archaeology","civilization","documentary","world war"]],["Martial arts","fun",["karate","boxing-glove","sword","sword-cross","meditation","yoga","arm-flex-outline","shield-outline","run-fast","bullseye"],["martial arts","karate","judo","bjj","jiu-jitsu","boxing","muay thai","kung fu","taekwondo","mma","sparring","self defense"]],["Sports","fun",["soccer","basketball","football","baseball","tennis","golf","trophy","whistle","run-fast","medal"],["sports","football","basketball","baseball","soccer","nfl","nba","hockey","golf","highlights","athlete","tennis"]],["Travel","nature",["airplane-takeoff","globe-model","map-marker-path","bag-suitcase","compass-outline","passport","camera-outline","ferry","bus","palm-tree"],["travel","trip","vlog","destination","adventure","journey","explore","abroad","flights","road trip"]],["Home repair","tech",["hammer-screwdriver","ladder","faucet","pipe-wrench","tools","toolbox-outline","wall","hammer"],["home repair","diy home","plumbing","renovation","drywall","tiling","remodel","contractor","handyman","roof","house flip"]]];
 // @@ICONS-END
 
-  if (!load("sf_topicsSeeded", false)) {
-    save("sf_topicsSeeded", true);
+  // The topics above are a shared catalog. Which ones are switched on, and any extra ones, are each user's own data (sf_tset).
+  var TOPICS_MORE = [
+    ["Cooking","nature",["silverware-fork-knife","food-steak","bowl","fire"],["cooking","recipe","recipes","chef","baking","kitchen","bbq","grilling","meal prep","food"]],
+    ["Fitness","fun",["arm-flex-outline","run-fast","yoga","meditation"],["fitness","workout","gym","exercise","running","yoga","bodybuilding","strength training"]],
+    ["Tech","tech",["chip","memory","usb-flash-drive","robot-happy"],["tech","technology","gadget","gadgets","smartphone","laptop","pc build","software","programming","coding"]],
+    ["Movies and TV","media",["film","popcorn","movie-roll","television-classic","theater"],["movie","movies","film review","trailer","tv show","series","cinema","recap"]],
+    ["Podcasts","music",["microphone","headphones","radio"],["podcast","podcasts","episode","interview","talk show"]],
+    ["Money","science",["bank","calculator-variant","scale-balance","chart-bell-curve"],["finance","investing","money","stocks","budget","economy","real estate","crypto"]],
+    ["Gardening","nature",["sprout-outline","tree","pine-tree","wheel-barrow"],["garden","gardening","plants","homestead","farm","lawn"]],
+    ["Learning","science",["pencil","calculator-variant","bookshelf"],["lesson","tutorial","course","lecture","explained","study","education"]]];
+  var CATALOG = TOPICS.concat(TOPICS_MORE);
+  var STARTER = ["Gaming", "Music", "Science", "History", "Sports", "Travel", "Comedy", "Pets", "Cooking", "Fitness", "Tech", "Movies and TV", "Podcasts", "Money", "Learning", "Home repair"];
+  // was45: this browser was already set up before V45, so it keeps everything that used to be built in.
+  var was45 = !load("sf_m45", 0) && !!load("sf_cfg", {}).key;
+  var tset = load("sf_tset", null);
+  if (!tset || !tset.on) { tset = { on: was45 ? TOPICS.map(function (t) { return t[0]; }) : STARTER.slice(), own: [] }; save("sf_tset", tset); }
+  tset.own = tset.own || [];
+  function topicsBuild() {
+    var on = {}; tset.on.forEach(function (n) { on[String(n).toLowerCase()] = 1; });
+    TOPICS = CATALOG.filter(function (t) { return on[t[0].toLowerCase()]; });
+    tset.own.forEach(function (n) {
+      n = String(n).trim(); var k = n.toLowerCase();
+      if (n && !TOPICS.some(function (t) { return t[0].toLowerCase() === k; })) TOPICS.push([n, "media", ["star-four-points", "shape", "puzzle"], [k]]);
+    });
+    themeMemo = {}; noteMemo = {}; kwMemo = {};
   }
   var chTheme = load("sf_chTheme", {});             // channelId -> topic name, or "none": your own choice for a card
   var folTopic = null, chipScroll = 0, themeMemo = {}, symDone = {};
   function norm(x) { return " " + String(x || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim() + " "; }
+  topicsBuild();
   var normMemo = {};
   function countIn(hay, kw, cap) { var k = normMemo[kw] || (normMemo[kw] = norm(kw)), n = 0, at = 0; while (n < cap && (at = hay.indexOf(k, at)) >= 0) { n++; at += k.length - 1; } return n; }
   function topicIdx(name) { for (var i = 0; i < TOPICS.length; i++) if (TOPICS[i][0].toLowerCase() === String(name).toLowerCase()) return i; return -1; }
@@ -2032,9 +2070,18 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
 
 
   // ---------- card notes: a topic and a format on each video ----------
-  var NOTE_SPEC = [[/nascar|cup series|daytona 500|talladega|xfinity series/i, "NASCAR", "Cars"], [/formula ?1|\bf1\b|grand prix/i, "Formula 1", "Cars"], [/indycar|indy 500/i, "IndyCar", "Cars"], [/\bimsa\b|le mans|\bwec\b|sports car/i, "Sports cars", "Cars"], [/motogp|superbike|motocross/i, "Motorcycles", "Cars"],
-    [/\bnfl\b/i, "NFL", "Sports"], [/\bnba\b/i, "NBA", "Sports"], [/\bmlb\b/i, "MLB", "Sports"], [/\bnhl\b/i, "NHL", "Sports"], [/\bufc\b/i, "UFC", "Martial arts"], [/minecraft/i, "Minecraft", "Gaming"], [/pok[eé]mon/i, "Pokémon", "Gaming"],
-    [/tiny desk/i, "Tiny Desk", "Music"], [/spacex|starship|\bnasa\b/i, "Space", "Space"], [/arduino|esp32|raspberry pi/i, "Microcontrollers", "Electronics"], [/\bf-?150\b|\bmustang\b|\bcorvette\b/i, "American cars", "Cars"], [/lego/i, "LEGO", "Crafts"], [/sourdough|baking|recipe/i, "Cooking", "Crafts"]];
+  // @@OWNER-SEED: one-time carry-over for a browser that was set up before V45. Delete this block in the next build.
+  var SEED45 = { words: ["live session", "hate5six"], alias: { "ttng": ["this town needs guns"], "the world is a beautiful place & i am no longer afraid to die": ["the world is a beautiful place", "twiabp"], "their / they're / there": ["their theyre there"], "empire! empire! (i was a lonely estate)": ["empire empire"], "the sound of animals fighting": ["tsoaf"], "the receiving end of sirens": ["treos"] }, tags: [
+    { l: "NASCAR", t: "Cars", w: "nascar, cup series, daytona 500, talladega, xfinity series" }, { l: "Formula 1", t: "Cars", w: "formula 1, formula1, f1, grand prix" }, { l: "IndyCar", t: "Cars", w: "indycar, indy 500" },
+    { l: "Sports cars", t: "Cars", w: "imsa, le mans, wec, sports car, sports cars" }, { l: "Motorcycles", t: "Cars", w: "motogp, superbike, motocross" },
+    { l: "NFL", t: "Sports", w: "nfl" }, { l: "NBA", t: "Sports", w: "nba" }, { l: "MLB", t: "Sports", w: "mlb" }, { l: "NHL", t: "Sports", w: "nhl" }, { l: "UFC", t: "Martial arts", w: "ufc" },
+    { l: "Minecraft", t: "Gaming", w: "minecraft" }, { l: "Pok\u00e9mon", t: "Gaming", w: "pokemon, pok\u00e9mon" }, { l: "Tiny Desk", t: "Music", w: "tiny desk" }, { l: "Space", t: "Space", w: "spacex, starship, nasa" },
+    { l: "Microcontrollers", t: "Electronics", w: "arduino, esp32, raspberry pi" }, { l: "American cars", t: "Cars", w: "f-150, f150, mustang, corvette" }, { l: "LEGO", t: "Crafts", w: "lego" }, { l: "Cooking", t: "Crafts", w: "sourdough, baking, recipe, recipes" }] };
+  // @@OWNER-SEED-END
+  // Tags: words to look for in a title or channel name, and the tag to show. Each user's own list (sf_tags).
+  var tags = load("sf_tags", null), tagC = null;
+  if (!tags) { tags = was45 ? SEED45.tags : []; save("sf_tags", tags); }
+  function tagsCompile() { tagC = tags.map(function (t) { return { l: t.l, t: t.t || "", ws: String(t.w || "").split(",").map(function (w) { return norm(w); }).filter(function (w) { return w.trim(); }) }; }); }
   var noteMemo = {};
   function fmtOf(v) {
     var t = (v.title || "") + " " + (v.channel || "");
@@ -2053,7 +2100,9 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
   function noteTopic(v) {
     var t = (v.title || "") + " " + (v.channel || ""), i;
-    for (i = 0; i < NOTE_SPEC.length; i++) if (NOTE_SPEC[i][0].test(t)) return { label: NOTE_SPEC[i][1], idx: topicIdx(NOTE_SPEC[i][2]) };
+    if (!tagC) tagsCompile();
+    var hay = norm(t);
+    for (i = 0; i < tagC.length; i++) { var tg = tagC[i]; if (tg.ws.some(function (w) { return hay.indexOf(w) >= 0; })) return { label: tg.l, idx: topicIdx(tg.t || tg.l) }; }
     var ti = norm(v.title), ci = norm(v.channel), best = -1, bs = 2;
     TOPICS.forEach(function (tp, k) {
       var sc = 0; tp[3].forEach(function (kw) { sc += countIn(ti, kw, 1) * 3 + countIn(ci, kw, 1) * 2; });
@@ -2201,25 +2250,13 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
 
   var GENRE_RE = /\b(rock|jazz|blues|country|bluegrass|hip.?hop|rap|metal|punk|folk|indie|soul|funk|reggae|electronic|classical|r&b|pop|latin|gospel|ska|shoegaze|synth|americana|disco|house|techno|ambient|psychedelic|grunge|emo|swing|opera|k-?pop)\b/gi;
   // ---------- Jukebox band lists: picks go by band, never by loose title words ----------
-  var JK_OWN = "Midwest Pen Pals|Merchant Ships|Hikes|IDLES|Delta Sleep|Love Letter|Best Sleep|Bloc Party|Sparta|Jim Ward|The Receiving End of Sirens|Verse|mewithoutYou|Pool Kids|Minus the Bear|Motion City Soundtrack|Glass Bones|Hundreds of Au|The Speed of Sound in Seawater|Militarie Gun|Thursday|Slow Joy|No Pressure|Mikey Erg|saturdays at your place|The Smashing Pumpkins|Gulfer|Incubus|Grimoires|L.S. Dunes|I Feel Fine|Avec Plaisir|Mansions|Dryjacket|standards|Rule Them All|awakebutstillinbed|Astral Planes|Disco Inc. & fredo disco|Parachute Day|Good Sleepy|Swordfish|Jimmy Eat World|Foals|The Dear Hunter|The Reptilian|William Bonney|Polyphia|Joyce Manor|Anathallo|Thrice|Manchester Orchestra|Bad Books|Kevin Devine|Pedro the Lion|La Dispute|Cursive|TTNG|Have Heart|Turnstile|Trophy Scars|Hot Water Music|Bear vs. Shark|Foxing".split("|");
-  var JK_OWNX = "Snotty Nose Rez Kids|AURORA|Jeaux Seph|No Bird Sing|Poor Man's Poison|Dessa|Ren|Adam Guzman|Father Of Peace|Unamused Dave".split("|");
-  var JK_SIM = "Casket Lottery|Prawn|Braid|Look Mexico|Sundays Best|Sunny Day Real Estate|Engine Down|Hey Mercedes|Balance and Composure|Circa Survive|Their / They're / There|Piebald|The World Is a Beautiful Place & I Am No Longer Afraid to Die|The Jealous Sound|The Get Up Kids|Elliott|At the Drive-In|Moneen|You Blew It!|Seahaven|Benton Falls|Boys Night Out|Pianos Become the Teeth|A Great Big Pile of Leaves|CSTVT|Small Leaks Sink Ships|Colour Revolt|Mock Orange|Tiny Moving Parts|Snowing|No Knife|Chamberlain|The Appleseed Cast|Texas Is the Reason|The Anniversary|Everyone Everywhere|The Promise Ring|Young Statues|American Football|Hot Rod Circuit|Native|Dads|Jeremy Enigk|Moving Mountains|Deer Leap|My Heart to Joy|Glassjaw|The Republic of Wolves|Rival Schools|Small Brown Bike|The New Amsterdams|Hightide Hotel|Desaparecidos|Looming|Weatherbox|Joie De Vivre|Cap'n Jazz|The Fire Theft|Empire! Empire! (I Was a Lonely Estate)|Further Seems Forever|I Hate Myself|Kittyhawk|Sainthood Reps|Have Mercy|The Sound of Animals Fighting|Crash of Rhinos|Jets to Brazil|Football, etc.|Pop Unknown|The Gloria Record|Petal|Owen|Knapsack|On the Might of Princes|As Cities Burn|From Indian Lakes|Algernon Cadwallader|Into It. Over It.|Microwave|Frodus|The Good Life|Cardboard Swords|Koji|These Arms Are Snakes|Cross My Heart|I Kill Giants|Armor for Sleep|Adventures|Lydia|Street Smart Cyclist|Reggie and the Full Effect|New End Original|Restorations|The Juliana Theory".split("|");
-  var JK_SIMX = "Doomtree|P.O.S|Sims|Brother Ali|Atmosphere|Aesop Rock|Sage Francis|Open Mike Eagle|billy woods|Armand Hammer|Frank Waln|The Halluci Nation|Shad|Noname|Astronautalis|Kae Tempest|Sigrid|Susanne Sundfør|Daughter|Highasakite|Of Monsters and Men|Agnes Obel|Eivør|The Dead South|Amigo the Devil".split("|");
-  var JK_NEVER0 = ["Brand New", "Touché Amoré", "Taylor Swift", "Chappell Roan"];
-  // The lists above are only a one-time starter for browsers that were already set up before V40. From here on the bands are the user's own data (sf_jkb), synced to their own Drive; new setups start empty.
+  // Bands, nicknames and search words are the user's own data (sf_jkb), synced to their own Drive. New setups start empty.
   var jkb = load("sf_jkb", null), jkbRev = 0;
-  if (!jkb) {
-    var jkOld = !!(load("sf_cfg", {}).key);
-    jkb = { own: [], sim: [], never: [], v: 1 };
-    if (jkOld) {
-      var gI = new RegExp(GENRE_RE.source, "i"), favOld = String(load("sf_cfg", {}).favMusic || "").split(/[\n,;]+/).map(function (x) { return x.trim(); }).filter(function (x) { return x.length >= 2 && !gI.test(x); });
-      jkb.own = favOld.concat(JK_OWN, JK_OWNX); jkb.sim = JK_SIM.concat(JK_SIMX); jkb.never = JK_NEVER0.slice();
-    }
-    save("sf_jkb", jkb);
-  }
+  if (!jkb) { jkb = { own: [], sim: [], never: [], v: 1 }; save("sf_jkb", jkb); }
   jkb.own = jkb.own || []; jkb.sim = jkb.sim || []; jkb.never = jkb.never || [];
+  if (!jkb.words || !jkb.alias) { jkb.words = jkb.words || (was45 ? SEED45.words.slice() : ["live session"]); jkb.alias = jkb.alias || (was45 ? SEED45.alias : {}); save("sf_jkb", jkb); }
+  if (!load("sf_m45", 0)) save("sf_m45", 1);
   var JK_NEVER = [];
-  var JK_ALIAS = { "ttng": ["this town needs guns"], "the world is a beautiful place & i am no longer afraid to die": ["the world is a beautiful place", "twiabp"], "their / they're / there": ["their theyre there"], "empire! empire! (i was a lonely estate)": ["empire empire"], "the sound of animals fighting": ["tsoaf"], "the receiving end of sirens": ["treos"] };
   var JK_SESS = /audiotree|kexp|npr music|tiny desk|hate5six|little elephant|sofar sounds|jam in the van|bbc|triple j|la blogoth|daytrotter|from the basement|far out|pitchfork|paste|sideonedummy|run for cover|topshelf|count your lucky stars|big scary monsters|epitaph|polyvinyl|tooth|equal vision|triple crown|vagrant|deep elm|jade tree|rhymesayers|doomtree/;
   function jkNorm(x) { var t = String(x || "").toLowerCase(); try { t = t.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); } catch (e) {} return t.replace(/&/g, " and ").replace(/['\u2019.]/g, "").replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim(); }
   var jkIdx = null, jkIdxSig = null, jkBandMemo = {}, jkKindMemo = {};
@@ -2230,7 +2267,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     function add(name, into) {
       var k = jkNorm(name).replace(/^the /, ""); if (!k || got[k] || JK_NEVER.indexOf(k) >= 0) return; got[k] = name; into.push(name);
       keys.push({ k: k, name: name, one: k.indexOf(" ") < 0 });
-      (JK_ALIAS[name.toLowerCase()] || []).forEach(function (a) { keys.push({ k: jkNorm(a), name: name, one: a.indexOf(" ") < 0 }); });
+      ((jkb.alias || {})[name.toLowerCase()] || []).forEach(function (a) { keys.push({ k: jkNorm(a), name: name, one: a.indexOf(" ") < 0 }); });
     }
     jkb.own.forEach(function (n) { add(n, own); }); jkb.sim.forEach(function (n) { add(n, sim); });
     keys.sort(function (a, b) { return b.k.length - a.k.length; });
@@ -2513,8 +2550,8 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     var c = grab(idx.own, "po", 2).concat(grab(idx.sim, "ps", 2));
     return [
       { q: a.map(function (x) { return jkQ(x, jkMode === "talk" ? "interview" : ""); }).join("|"), bands: a, cat: jkMode !== "talk" },
-      { q: b.map(function (x) { return jkQ(x, jkMode === "talk" ? "podcast" : "live session"); }).join("|"), bands: b, cat: jkMode !== "talk" },
-      { q: c.map(function (x) { return jkQ(x, jkMode === "talk" ? "interview" : "hate5six"); }).join("|"), bands: c, cat: false }
+      { q: b.map(function (x) { return jkQ(x, jkMode === "talk" ? "podcast" : (jkb.words[0] || "")); }).join("|"), bands: b, cat: jkMode !== "talk" },
+      { q: c.map(function (x) { return jkQ(x, jkMode === "talk" ? "interview" : (jkb.words[1] || jkb.words[0] || "")); }).join("|"), bands: c, cat: jkMode !== "talk" && !jkb.words[1] }
     ].filter(function (x) { return x.bands.length; });
   }
   function jukeRefill() {
@@ -2767,7 +2804,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   })();
 
   // ---------- backup ----------
-  var BK_KEYS = ["sf_jkb", "sf_tasteSeen", "sf_visit", "sf_folSort", "sf_folRev", "sf_cfg", "sf_subs", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_chTags", "sf_jb", "sf_jbl", "sf_shorts", "sf_shch", "sf_rec", "sf_recNo", "sf_recYes", "sf_seeds", "sf_later", "sf_sh", "sf_unf", "sf_dboost", "sf_chTheme"];
+  var BK_KEYS = ["sf_jkb", "sf_tasteSeen", "sf_visit", "sf_folSort", "sf_folRev", "sf_cfg", "sf_subs", "sf_seen", "sf_hidden", "sf_mutedCh", "sf_model", "sf_chTags", "sf_jb", "sf_jbl", "sf_shorts", "sf_shch", "sf_rec", "sf_recNo", "sf_recYes", "sf_seeds", "sf_later", "sf_sh", "sf_unf", "sf_dboost", "sf_chTheme", "sf_tset", "sf_tags"];
   function bkMake() {
     var data = {};
     BK_KEYS.forEach(function (k) { var raw = localStorage.getItem(k); if (raw == null) return; try { data[k] = JSON.parse(raw); } catch (e) {} });
@@ -3508,7 +3545,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 44;
+  var VERSION = 45;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -4014,6 +4051,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
         else { val = { day: L.day, by: {}, out: (L.out || R.v.out) ? 1 : 0 }; [R.v.by || {}, L.by || {}].forEach(function (m) { Object.keys(m).forEach(function (d) { val.by[d] = Math.max(val.by[d] || 0, +m[d] || 0); }); }); }
       }
       else if (k === "sf_cfg" && (first || R.t > lt)) val = mergeCfg(L, R.v, first);
+      else if (first && (k === "sf_tset" || k === "sf_tags")) val = R.v || L;
       else if (first || SYNC_UNION[k]) {
         if (k === "sf_model") val = ((R.v && R.v.n) || 0) > ((L && L.n) || 0) ? R.v : L;
         else if (k === "sf_cfg" || k === "sf_folSort" || k === "sf_folRev") val = L;
@@ -4086,6 +4124,52 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   window.addEventListener("pagehide", function () { if (sync.on && syncT && syncTok()) { clearTimeout(syncT); syncT = 0; try { if (sync.fileId) fetch(DRIVE_UP + "/" + encodeURIComponent(sync.fileId) + "?uploadType=media", { method: "PATCH", keepalive: true, headers: { Authorization: "Bearer " + syncTok(), "Content-Type": "application/json" }, body: syncPayload() }); } catch (e) {} } });
   syncLine();
   if (sync.on) { if (syncTok()) setTimeout(function () { if (!sessionStorage.getItem("sf_syncr")) { syncNow(false); } try { sessionStorage.removeItem("sf_syncr"); } catch (e) {} }, 1200); else setTimeout(syncNudge, 1500); }
+  // ---------- personal presets: topics, tags, Jukebox search words, starter picks, start fresh ----------
+  function tpDraw(rootId, picked, onTap) {
+    var root = $(rootId); root.textContent = "";
+    CATALOG.map(function (t) { return t[0]; }).sort().forEach(function (n) {
+      var b = el("button", "tp-chip", n); b.type = "button"; b.setAttribute("aria-pressed", String(picked(n)));
+      b.addEventListener("click", function () { onTap(n); b.setAttribute("aria-pressed", String(picked(n))); });
+      root.appendChild(b);
+    });
+  }
+  function commaList(v) { var got = {}; return String(v || "").split(",").map(function (x) { return x.trim().replace(/\s+/g, " "); }).filter(function (x) { var k = x.toLowerCase(); if (!x || got[k]) return false; got[k] = 1; return true; }); }
+  function tsetHas(n) { var k = n.toLowerCase(); return tset.on.some(function (x) { return String(x).toLowerCase() === k; }); }
+  function tsetSave() { save("sf_tset", tset); topicsBuild(); }
+  function tsetDraw() { tpDraw("tpGrid", tsetHas, function (n) { var k = n.toLowerCase(); if (tsetHas(n)) tset.on = tset.on.filter(function (x) { return String(x).toLowerCase() !== k; }); else tset.on.push(n); tsetSave(); }); }
+  tsetDraw();
+  $("tpOwn").value = tset.own.join(", ");
+  $("tpOwn").addEventListener("change", function () { tset.own = commaList($("tpOwn").value).slice(0, 30); $("tpOwn").value = tset.own.join(", "); tsetSave(); toast("Topics saved.", null, null); });
+  function tagsText() { return tags.map(function (t) { return t.l + (t.t ? " (" + t.t + ")" : "") + ": " + t.w; }).join("\n"); }
+  $("myTags").value = tagsText();
+  $("myTags").addEventListener("change", function () {
+    var out = [];
+    $("myTags").value.split("\n").forEach(function (ln) {
+      var m = /^\s*([^:()]+?)\s*(?:\(([^)]*)\))?\s*:\s*(.+)$/.exec(ln); if (!m) return;
+      var w = commaList(m[3]).join(", "); if (w) out.push({ l: m[1].trim().slice(0, 30), t: (m[2] || "").trim(), w: w });
+    });
+    tags = out.slice(0, 60); save("sf_tags", tags); tagC = null; noteMemo = {}; $("myTags").value = tagsText(); toast("Tags saved.", null, null);
+  });
+  $("jkWords").value = jkb.words.join(", ");
+  $("jkWords").addEventListener("change", function () { jkb.words = commaList($("jkWords").value).slice(0, 2); $("jkWords").value = jkb.words.join(", "); jkbChanged(); toast("Search words saved.", null, null); });
+  var wPicks = [];
+  tpDraw("wTopics", function (n) { return wPicks.indexOf(n) >= 0; }, function (n) { var i = wPicks.indexOf(n); if (i >= 0) wPicks.splice(i, 1); else wPicks.push(n); });
+  function wPicksApply() {
+    if (!wPicks.length) return;
+    tset.on = wPicks.slice(); tsetSave(); tsetDraw();
+    if (!String(cfg.topics || "").trim()) { cfg.topics = wPicks.join(", "); save("sf_cfg", cfg); if ($("topics")) $("topics").value = cfg.topics; }
+    wPicks = [];
+  }
+  $("freshBtn").addEventListener("click", function () {
+    openSheet("Clear this device?", [{ label: "Yes, clear this device", checked: false, pick: function () {
+      var keep = Object.assign({}, DEFAULT_CFG, { key: cfg.key, clientId: cfg.clientId, channel: cfg.channel });
+      try {
+        BK_KEYS.concat(["sf_sync", "sf_synctok", "sf_syncm", "sf_jb", "sf_cfgBak", "sf_disc", "sf_dq", "sf_shown", "sf_light"]).forEach(function (k) { if (k !== "sf_subs") localStorage.removeItem(k); });
+        localStorage.setItem("sf_cfg", JSON.stringify(keep)); localStorage.setItem("sf_m45", "1");
+      } catch (e) {}
+      location.reload();
+    } }, { label: "Cancel", checked: false, pick: function () {} }], null);
+  });
   // ---------- TV mode: settings, pointer bar space, remote-control navigation ----------
   (function () {
     $("tvMode").value = TVPREF; $("tvTop").value = String(TVTOP); $("tvWhen").value = TVWHEN;
@@ -4257,6 +4341,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   $("wLoad").addEventListener("click", function () {
     if (!wApply()) { setStatus("Paste an API key or invite code in step 1 first.", true); return; }
     if (!cfg.channel && !subs.length) { setStatus("Do step 2 first: sign in with Google, or add your channel handle.", true); return; }
+    wPicksApply();
     setStatus("Loading"); tab = "subs"; save("sf_tab", tab); refreshSubs({ reimport: !!cfg.channel && !subs.length });
   });
   // ---------- bell: status notices live here, not on the page ----------
