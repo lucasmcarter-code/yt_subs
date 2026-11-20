@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7FD++Z3M3LHISFJdFe30GubwFBIspZcwiPEjTvTX2aw=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ceI6/7ttBqnV5s+j877/knsCPb2k3HDGjlZSfonJjFI=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -154,7 +154,7 @@ body { padding-bottom: calc(env(safe-area-inset-bottom) + 112px); }
 .vid::before { content: ""; position: absolute; top: -6px; left: 50%; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; z-index: 2; background: var(--accent); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), inset 0 -2px 3px rgba(0, 0, 0, 0.25); }
 .vid:active .thumb { transform: none; }
 .thumb { border-radius: 3px; box-shadow: none; }
-.title { font-family: "Caveat", "Bradley Hand", cursive; font-weight: 700; font-size: 25px; line-height: 1.1; margin-bottom: 4px; }
+.title { font-family: var(--fc, "Caveat", "Bradley Hand", cursive); font-weight: 700; font-size: calc(25px * var(--fc-s, 1)); line-height: 1.1; margin-bottom: 4px; }
 .sub { color: var(--pmuted); }
 .meta { padding-left: 2px; }
 .act-btn { background: rgba(42, 38, 34, 0.08); color: var(--pmuted); }
@@ -516,7 +516,7 @@ body.tv .tab { height: 60px; font-size: 18px; }
 body.tv .tab svg { width: 26px; height: 26px; }
 body.tv .icon-btn { width: 54px; height: 54px; }
 body.tv .list { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 44px 32px; }
-body.tv .title { font-size: 20px; }
+body.tv .title { font-size: calc(20px * var(--fc-s, 1)); }
 body.tv .vid, body.tv .f-card, body.tv .stk, body.tv .vid.live, body.tv .f-card.live, body.tv .stk.live { transform: none; will-change: auto; }
 body.tv .tv-sel { outline: 5px solid #fff; outline-offset: 4px; }
 body.tv.pvOn .tabs, body.tv.pvOn .brand { visibility: hidden; }
@@ -582,6 +582,16 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
   .brand { font-size: 27px; gap: 6px; }
   .brand svg { width: 26px; height: 26px; }
 }
+.font-pick { position: relative; max-width: 340px; }
+.font-btn { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; min-height: 48px; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel, transparent); color: var(--ink); font-size: 22px; text-align: left; cursor: pointer; }
+.font-btn::after { content: "\25BE"; font: 14px system-ui, sans-serif; opacity: .7; }
+.font-list { margin-top: 6px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.font-opt { display: block; width: 100%; min-height: 48px; padding: 8px 14px; border: 0; border-top: 1px solid var(--line); background: none; color: var(--ink); font-size: 22px; text-align: left; cursor: pointer; }
+.font-opt:first-child { border-top: 0; }
+.font-opt[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+.font-prev { margin: 14px 4px 4px; max-width: 250px; background: var(--paper); color: #2a2622; border-radius: 6px; padding: 8px 8px 12px; transform: rotate(-1.5deg); box-shadow: 0 2px 4px rgba(0,0,0,.25); }
+.font-prev i { display: block; aspect-ratio: 16 / 9; border-radius: 3px; background: #5b5148; margin-bottom: 8px; }
+.font-prev small { font-size: 12px; opacity: .7; }
 </style>
 </head>
 <body>
@@ -788,6 +798,11 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
     <h3>Diagnostics</h3>
     <p>If something looks wrong, tap Copy and paste the result into chat. It has no API key, sign-in token or watch history.</p>
     <div class="field"><label>What I've learned</label><div class="hint">Built from your Keepers, Nahs, thumbs and watching. Tap Not true to make me forget a lesson.</div><div id="tasteSet"></div></div>
+    <div class="field"><label id="fontLbl">Polaroid font</label><div class="hint">Changes the titles on the cards. Follows you to your other devices when sync is on.</div>
+      <div class="font-pick"><button class="font-btn" id="fontBtn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="fontLbl fontBtn"></button><div class="font-list" id="fontList" role="listbox" aria-labelledby="fontLbl" hidden></div></div>
+      <div class="font-prev" aria-hidden="true"><i></i><div class="title" id="fontPrevT">A sample video title on a Polaroid</div><small>Channel name · 2 hours ago</small></div></div>
+    <div class="field"><label>Refresh</label><div class="hint" id="subsAtLine"></div><div class="hint" id="jkAtLine"></div>
+      <div class="btn-row"><button class="btn ghost" id="subsRefBtn" type="button">Refresh subscription list</button></div></div>
     <div class="field" id="syncBox"><label>Sync between browsers</label>
         <p class="hint" id="syncLine">Off. Keeps your channels, watched marks, taste and Jukebox the same on every browser, using a private app folder in your Google Drive.</p>
         <div class="btn-row"><button class="btn" id="syncBtn" type="button">Turn on sync</button><button class="btn ghost" id="syncOffBtn" type="button" hidden>Turn off</button><button class="btn ghost" id="syncRestoreBtn" type="button" hidden>Restore previous settings</button></div>
@@ -861,6 +876,11 @@ body.tv .vid:focus, body.tv .f-card:focus, body.tv .stk:focus, body.tv .jk-row:f
   var DEFAULT_CFG = { key: "", channel: "", clientId: "", hideShorts: true, openInApp: false, sway: true, topics: "", mutedWords: "", blockCats: [], minViews: 25000, refreshCap: 4 };
   var cfg = Object.assign({}, DEFAULT_CFG, load("sf_cfg", {})); delete cfg.tilt;
   if (!cfg.v2) { cfg.openInApp = false; cfg.v2 = 1; save("sf_cfg", cfg); }
+  var FONTS = [["caveat", "Caveat", '"Caveat", "Bradley Hand", cursive', 1], ["marker", "Marker", '"Marker Felt", "Chalkboard SE", "Comic Sans MS", "Comic Neue", cursive', 0.8], ["georgia", "Georgia", 'Georgia, "Times New Roman", serif', 0.76], ["helv", "Helvetica", '"Helvetica Neue", Helvetica, Arial, sans-serif', 0.72], ["courier", "Courier", '"Courier New", Courier, monospace', 0.68]];
+  function fontOf(id) { for (var i = 0; i < FONTS.length; i++) if (FONTS[i][0] === id) return FONTS[i]; return FONTS[0]; }
+  function fontApply() { var f = fontOf(cfg.font), st = document.documentElement.style; st.setProperty("--fc", f[2]); st.setProperty("--fc-s", String(f[3])); }
+  fontApply();
+  function fmtOn(ms) { try { return new Date(ms).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }); } catch (e) { return new Date(ms).toString().slice(4, 21); } }
   var subs = load("sf_subs", []), unf = load("sf_unf", {}), chTags = load("sf_chTags", {});
   subs = subs.filter(function (x) { return !unf[x.id]; });
   var feed = load("sf_feed", { at: 0, items: [] });
@@ -1915,7 +1935,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var needSubs = opts.reimport || !subs.length;
     var p = needSubs ? importSubs(opts.token).then(function (list) {
       if (!list.length) throw new Error("No subscriptions found on that account.");
-      subs = list.filter(function (x) { return !unf[x.id]; }); save("sf_subs", subs);
+      subs = list.filter(function (x) { return !unf[x.id]; }); save("sf_subs", subs); save("sf_subsAt", Date.now());
     }) : Promise.resolve();
 
     var now = Date.now(), mode = cfg.hideShorts ? "UULF" : "UU", todo = [], kept = [];
@@ -2304,7 +2324,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   function jkQ(b, extra) { var one = jkBandKey(b).indexOf(" ") < 0; return '"' + b.replace(/"/g, "") + '"' + (extra ? " " + extra : (one ? " band" : "")); }
 
   // ---------- Jukebox ----------
-  var jb = load("sf_jb", { seeds: [], items: [] }), jkKeepOnly = false, jkSel = 0, jkPage = 0, jkList = [], jkUI = null, jkMode = "music", jkAuto = load("sf_jkAuto", false), jkRand = load("sf_jkRand", false), jkSeed = load("sf_jkSeed", 1), jkCycle = {}, jkHist = [], jkUpNext = -1, jkPlayingId = "";
+  var jb = load("sf_jb", { seeds: [], items: [] }), jkKeepOnly = false, jkSel = 0, jkPage = 0, jkList = [], jkUI = null, jkMode = "music", jkAuto = load("sf_jkAuto", false), jkRand = load("sf_jkRand", false), jkSeed = 1 + Math.floor(Math.random() * 1e9), jkCycle = {}, jkHist = [], jkUpNext = -1, jkPlayingId = "";
   jb.items = jb.items || []; jb.seeds = jb.seeds || [];
   var jbl = load("sf_jbl", { t: {} });
   if (load("sf_jbv", 0) < 2) {
@@ -2460,7 +2480,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     tAuto.type = "button"; tRand.type = "button"; reshuf.type = "button"; tAuto.setAttribute("aria-pressed", String(!!jkAuto)); tRand.setAttribute("aria-pressed", String(!!jkRand));
     tAuto.addEventListener("click", function () { jkAuto = !jkAuto; save("sf_jkAuto", jkAuto); tAuto.classList.toggle("on", jkAuto); tAuto.setAttribute("aria-pressed", String(jkAuto)); toast(jkAuto ? "Autoplay is on. The next song starts when one ends." : "Autoplay is off.", null, null); });
     tRand.addEventListener("click", function () { jkRand = !jkRand; save("sf_jkRand", jkRand); tRand.classList.toggle("on", jkRand); tRand.setAttribute("aria-pressed", String(jkRand)); jkUpNext = -1; toast(jkRand ? "Random is on." : "Random is off. Songs play in list order.", null, null); });
-    reshuf.addEventListener("click", function () { jkSeed = (jkSeed || 1) + 1; save("sf_jkSeed", jkSeed); jkSel = 0; jkPage = 0; jkHist = []; render(); toast("Reshuffled.", null, null); });
+    reshuf.addEventListener("click", function () { jkSeed = (jkSeed || 1) + 1; jkSel = 0; jkPage = 0; jkHist = []; render(); toast("Reshuffled.", null, null); });
     ctl.appendChild(prev); ctl.appendChild(play); ctl.appendChild(next); ctl.appendChild(keepB); ctl.appendChild(nah); ctl.appendChild(tAuto); ctl.appendChild(tRand); ctl.appendChild(reshuf); ctl.appendChild(kv); ctl.appendChild(refill); jk.appendChild(ctl);
     var strip = el("div", "jk-strip"), pager = el("div", "jk-pager");
     var pp = el("button", null, "‹ Prev page"), pn = el("button", null, "Next page ›"), pt = el("span");
@@ -2543,12 +2563,21 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       { q: c.map(function (x) { return jkQ(x, jkMode === "talk" ? "interview" : (jkb.words[1] || jkb.words[0] || "")); }).join("|"), bands: c, cat: jkMode !== "talk" && !jkb.words[1] }
     ].filter(function (x) { return x.bands.length; });
   }
-  function jukeRefill() {
+  // Opening the Jukebox reshuffles it, and refills it when the last refill is over a day old.
+  function jukeOpen() {
+    jkSeed = 1 + Math.floor(Math.random() * 1e9); jkHist = []; jkUpNext = -1;
+    if (cfg.key && Date.now() - (jb.rat || 0) > 24 * 3600000) jukeRefill(true);
+  }
+  setTimeout(function () { if (tab === "juke" && cfg.key && Date.now() - (jb.rat || 0) > 24 * 3600000) jukeRefill(true); }, 1500);
+  function jukeRefill(auto) {
+    auto = auto === true;
     if (busy) return;
-    if (!cfg.key) { show("settings"); setStatus("Add an API key to start.", true); return; }
-    if (quotaLeft() < 340) { toast("Not enough of today's free quota left for a refill.", null, null); return; }
+    if (!cfg.key) { if (!auto) { show("settings"); setStatus("Add an API key to start.", true); } return; }
+    if (quotaLeft() < 340) { if (!auto) toast("Not enough of today's free quota left for a refill.", null, null); return; }
+    if (auto && !(jkb.own.length || jkb.sim.length)) return;
     var qs = jukeQueries(); jb.n = (jb.n || 0) + 1;
-    if (!qs.length) { toast("Add some bands in Settings first, under Jukebox bands.", null, null); return; }
+    if (!qs.length) { if (!auto) toast("Add some bands in Settings first, under Jukebox bands.", null, null); return; }
+    jb.rat = Date.now();
     start();
     var fresh = [], have = {}, lang = (navigator.language || "en").slice(0, 2), si = {};
     subs.forEach(function (x) { si[x.id] = 1; });
@@ -2575,7 +2604,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       keep = jkSpread(keep);
       jb.items = keep.concat(jb.items).slice(0, 200); save("sf_jb", jb);
       jkSel = 0; jkPage = 0;
-      toast(keep.length ? "Added " + keep.length + " songs by bands on your lists." : "Nothing new this time. Try Refill again for the next bands.", null, null);
+      if (!auto || keep.length) toast(keep.length ? (auto ? "Daily refresh: added " : "Added ") + keep.length + " songs by bands on your lists." : "Nothing new this time. Try Refill again for the next bands.", null, null);
       render();
     }).catch(function (e) { setStatus(explain(e), true); }).then(finish);
   }
@@ -3331,15 +3360,40 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     if (node) node.classList.toggle("seen", !!on);
   }
   function setTab(t) {
-    tab = t; save("sf_tab", tab);
+    var prevTab = tab; tab = t; save("sf_tab", tab);
     if (t === "juke") { jkMode = "music"; jkSel = 0; jkPage = 0; }
     setStatus("");
     render();
+    if (t === "juke" && prevTab !== "juke") jukeOpen();
     if (t === "disc" && !disc.items.length && topicList().length) refreshDiscover();
   }
 
   // ---------- settings ----------
+  function fontDraw() {
+    var cur = fontOf(cfg.font), b = $("fontBtn"), l = $("fontList");
+    b.textContent = cur[1]; b.style.fontFamily = cur[2]; l.textContent = "";
+    FONTS.forEach(function (f) {
+      var o = el("button", "font-opt", f[1]); o.type = "button"; o.setAttribute("role", "option"); o.setAttribute("aria-selected", String(f[0] === cur[0])); o.style.fontFamily = f[2];
+      o.addEventListener("click", function () { cfg.font = f[0]; save("sf_cfg", cfg); fontApply(); l.hidden = true; b.setAttribute("aria-expanded", "false"); fontDraw(); try { b.focus(); } catch (e) {} });
+      l.appendChild(o);
+    });
+  }
+  $("fontBtn").addEventListener("click", function () { var l = $("fontList"); l.hidden = !l.hidden; $("fontBtn").setAttribute("aria-expanded", String(!l.hidden)); });
+  function refLines() {
+    var sa = load("sf_subsAt", 0);
+    $("subsAtLine").textContent = subs.length + " channels. Last refreshed on: " + (sa ? fmtOn(sa) : "not recorded yet") + ".";
+    $("jkAtLine").textContent = "Jukebox last refilled on: " + (jb.rat ? fmtOn(jb.rat) : "not recorded yet") + ". It refills itself once a day when you open it.";
+  }
+  $("subsRefBtn").addEventListener("click", function () {
+    if (busy) return;
+    readSettings(); save("sf_cfg", cfg);
+    if (!cfg.key) { setStatus("Add an API key to start.", true); return; }
+    if (cfg.channel) { setStatus("Loading"); tab = "subs"; save("sf_tab", tab); refreshSubs({ reimport: true }); }
+    else if (cfg.clientId) googleImport();
+    else setStatus("Add your channel handle, or use Import with Google.", true);
+  });
   function fillSettings() {
+    fontDraw(); refLines();
     $("apiKey").value = cfg.key || "";
     $("channel").value = cfg.channel || "";
     $("clientId").value = cfg.clientId || "";
@@ -3382,7 +3436,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       blockCats: blocked,
       hideShorts: $("hideShorts").checked,
       openInApp: $("openInApp").checked,
-      sway: $("sway").checked, srchInf: $("srchInf").checked, favMusic: $("favMusic").value.trim(),
+      sway: $("sway").checked, srchInf: $("srchInf").checked, favMusic: $("favMusic").value.trim(), font: cfg.font || "",
       v2: 1
     };
     save("sf_cfg", cfg);
@@ -3534,7 +3588,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 46;
+  var VERSION = 47;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -4079,7 +4133,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       reload = fold.changed.length > 0;
       sync.on = true; sync.inited = true;
       if (!fold.push && valid) return;
-      var body = syncPayload();
+      var body = syncPayload(); sync.kb = Math.max(1, Math.round(body.length / 1024));
       if (sync.fileId) return syncFetch(tok, DRIVE_UP + "/" + encodeURIComponent(sync.fileId) + "?uploadType=media", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: body });
       var bd = "nsb" + Date.now();
       var multi = "--" + bd + "\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n" + JSON.stringify({ name: "north-star-sync.json", parents: ["appDataFolder"] }) + "\r\n--" + bd + "\r\nContent-Type: application/json\r\n\r\n" + body + "\r\n--" + bd + "--";
@@ -4102,7 +4156,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     $("syncBtn").textContent = sync.on ? "Sync now" : "Turn on sync"; $("syncOffBtn").hidden = !sync.on; try { $("syncRestoreBtn").hidden = !localStorage.getItem("sf_cfgBak"); } catch (e) {}
     l.style.color = bad ? "var(--warn)" : "";
     if (msg) { l.textContent = msg; return; }
-    l.textContent = sync.on ? ("On. Last synced " + (sync.at ? ago(sync.at) : "never") + ". Changes upload a few seconds after you make them.") : "Off. Keeps your channels, watched marks, taste and Jukebox the same on every browser, using a private app folder in your Google Drive.";
+    l.textContent = sync.on ? ("On. Last synced on: " + (sync.at ? fmtOn(sync.at) + " (" + ago(sync.at) + ")" : "never") + ". Saved as north-star-sync.json" + (sync.kb ? " (" + sync.kb + " KB)" : "") + " in the app's hidden folder in your Google Drive. It does not show in your Drive files; look under Drive, Settings, Manage apps. Changes upload a few seconds after you make them.") : "Off. Keeps your channels, watched marks, taste and Jukebox the same on every browser, using a private app folder in your Google Drive.";
   }
   $("syncBtn").addEventListener("click", function () { if (!sync.on) { readSettings(); save("sf_cfg", cfg); } syncNow(true); });
   $("syncOffBtn").addEventListener("click", function () { sync.on = false; clearTimeout(syncT); syncSaveState(); drop("sf_synctok"); syncLine(); toast("Sync is off for this browser. Your Drive copy is untouched.", null, null); });

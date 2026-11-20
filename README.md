@@ -4,18 +4,18 @@ A private, single-page front end for YouTube. It shows your subscriptions as a w
 
 Live app: https://lucasmcarter-code.github.io/yt_subs/
 
-Current version: 46
+Current version: 47
 
 ## What it does
 
 - **Subs**: recent uploads from your subscriptions. Several uploads from one channel within 24 hours fold into one card. Sort by newest, oldest, for you, most viewed, length or channel. Hide watched videos, filter by length, or search.
 - **Discover**: recent videos on the topics you list, ranked by what you keep and skip.
 - **Following**: your channels, grouped by topic, with a page per channel.
-- **Jukebox**: music from the bands you list and bands like them, with a Music and Talk switch, autoplay and shuffle.
+- **Jukebox**: music from the bands you list and bands like them, with a Music and Talk switch, autoplay and shuffle. It reshuffles each time you open it and refills itself once a day.
 - **Shorts**: a swipe view for short videos.
 - **Learning**: the check and X on each card teach the app what you like. Muted words and blocked categories hide what you don't want.
 - **Bell**: notices such as quota use, sync status and new versions.
-- **Sync**: optional. Saves your lists and settings to a private file in your own Google Drive so your phone, computer and TV match.
+- **Sync**: optional. Saves your lists and settings to a private file in your own Google Drive so your phone, computer and TV match. The file is `north-star-sync.json` in the app's hidden Drive folder: it does not show among your Drive files, but appears under Drive, Settings, Manage apps. Settings shows when it last synced.
 - **Layouts**: phone, desktop (side bar, card wall and an in-page player) and TV (LG webOS browser, remote-control navigation).
 
 ## What you need
@@ -66,7 +66,7 @@ Fork this repository and turn on GitHub Pages for the main branch. The whole app
 - **Check** marks a video watched and teaches the app you liked it. **X** hides it and teaches the opposite.
 - **Refresh** (top bar) fetches new uploads. Discover refreshes are limited per day to protect the API quota. The ring on the Settings button shows quota used.
 - **Grouped cards** show the channel name with the videos listed underneath. Tap a title to play it, or the "+N more" badge to spread them out.
-- **Settings** holds your topics, tags, muted words, blocked categories, Jukebox bands and search words, sync, backup and TV options.
+- **Settings** holds your topics, tags, muted words, blocked categories, Jukebox bands and search words, the Polaroid title font, a button to refresh your subscription list, sync, backup and TV options.
   - **My topics**: which topics label your cards. Add your own.
   - **My tags**: one per line, such as `Tiny Desk: tiny desk`. A matching video gets that tag.
   - **Start fresh** clears training and lists on one device.
