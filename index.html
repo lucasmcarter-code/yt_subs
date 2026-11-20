@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-knNXHh7uLPkc2pqC0AxKj0SyKpTwDf6oPiVJXdgR+wg=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-V/gnmEGhaoaDJPY1P+wd8J1jHhjUvsy77npsbJ8n2+E=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2985,13 +2985,16 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     return { vo: Math.round(vo), vh: Math.round(vh), ih: window.innerHeight, ch: document.documentElement.clientHeight, sy: Math.round(window.scrollY), rb: Math.round(rb), sc: vv ? +vv.scale.toFixed(2) : 1 };
   }
   (function () {
-    var hdr = document.querySelector("header.bar"), tabs = document.querySelector(".tabs"), gap0 = null, t = 0, lastLog = 0;
+    var hdr = document.querySelector("header.bar"), tabs = document.querySelector(".tabs"), gap0 = null, t = 0, lastLog = 0, touching = false;
     if (!hdr || !tabs) return;
     function set(elm, key, px) { if (Math.abs(px) < 2) px = 0; if (pinState[key] === px) return; pinState[key] = px; elm.style.translate = px ? "0 " + px + "px" : ""; }
     function check() {
       var ae = document.activeElement, typing = ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName);
       if (TV || DESK.matches || LAND.matches || typing || $("feedView").hidden || document.body.classList.contains("shOn")) { set(hdr, "hs", 0); set(tabs, "ts", 0); return; }
-      var m = pinMeasure(); if (!m || m.sc !== 1) return;
+      // While the page is being pulled past its top or bottom edge (rubber band), the phone reports odd offsets. Leave the bars alone.
+      var maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      if (window.scrollY < 0 || window.scrollY > maxY + 1 || touching && window.scrollY <= 0) { set(hdr, "hs", 0); set(tabs, "ts", 0); return; }
+      var m = pinMeasure(); if (!m || m.sc !== 1 || m.vo < 0) { set(hdr, "hs", 0); set(tabs, "ts", 0); return; }
       // Calibrate from the first undrifted reading; never correct before that.
       if (gap0 == null) { if (m.vo !== 0 || m.sy > 4) return; gap0 = m.vh - m.rb; }
       var ts = m.vo + m.vh - m.rb - gap0, hs = m.vo;
@@ -3008,7 +3011,9 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     }
     function soon() { clearTimeout(t); t = setTimeout(settle, 180); }
     window.addEventListener("scroll", soon, { passive: true });
-    document.addEventListener("touchend", soon, { passive: true });
+    document.addEventListener("touchstart", function () { touching = true; }, { passive: true });
+    document.addEventListener("touchend", function () { touching = false; soon(); }, { passive: true });
+    document.addEventListener("touchcancel", function () { touching = false; soon(); }, { passive: true });
     window.addEventListener("pageshow", soon); window.addEventListener("resize", soon);
     document.addEventListener("visibilitychange", function () { if (!document.hidden) soon(); });
     if (window.visualViewport) { window.visualViewport.addEventListener("scroll", check); window.visualViewport.addEventListener("resize", check); }
@@ -3798,7 +3803,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 53;
+  var VERSION = 54;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
