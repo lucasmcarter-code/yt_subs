@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-V/gnmEGhaoaDJPY1P+wd8J1jHhjUvsy77npsbJ8n2+E=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-a3KcLludN8l5MiEoZH3UjSPrLku0SsK2mlMxE80vJm8=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1029,7 +1029,7 @@ details.sgrp[open] > summary { color: var(--accent); }
     });
   }
 
-  function fetchSubs(base, token) {
+  function fetchSubs(base, token, quiet) {
     var out = [];
     function page(pt) {
       var p = Object.assign({ part: "snippet", maxResults: 50, order: "alphabetical" }, base);
@@ -1039,7 +1039,7 @@ details.sgrp[open] > summary { color: var(--accent); }
           var id = it.snippet && it.snippet.resourceId && it.snippet.resourceId.channelId;
           if (id) out.push({ id: id, title: it.snippet.title, f: it.snippet.publishedAt || "" });
         });
-        setStatus("Reading your subscriptions: " + out.length + " so far");
+        if (!quiet) setStatus("Reading your subscriptions: " + out.length + " so far");
         return j.nextPageToken ? page(j.nextPageToken) : out;
       });
     }
@@ -2001,10 +2001,46 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   }
 
   // ---------- flows ----------
-  function importSubs(token) {
-    if (token) return fetchSubs({ mine: "true" }, token);
+  function importSubs(token, quiet) {
+    if (token) return fetchSubs({ mine: "true" }, token, quiet);
     if (!cfg.channel) return Promise.reject(new Error("Add your channel handle, or use Import with Google."));
-    return resolveChannelId(cfg.channel).then(function (id) { return fetchSubs({ channelId: id }, null); });
+    return resolveChannelId(cfg.channel).then(function (id) { return fetchSubs({ channelId: id }, null, quiet); });
+  }
+  // Drop videos and Shorts from channels that are no longer on the subscription list.
+  function subsPrune() {
+    if (!subs.length) return 0;
+    var ok = {}, n = 0; subs.forEach(function (x) { ok[x.id] = 1; });
+    var f = feed.items.filter(function (v) { return ok[v.sid || v.chId]; });
+    if (f.length !== feed.items.length) { n += feed.items.length - f.length; feed.items = f; save("sf_feed", feed); }
+    if (typeof shs !== "undefined" && shs && shs.items) { var sh = shs.items.filter(function (v) { return ok[v.chId] || v.keep; }); if (sh.length !== shs.items.length) { n += shs.items.length - sh.length; shs.items = sh; save("sf_shorts", shs); } }
+    Object.keys(chk).forEach(function (k) { if (k.charAt(0) !== "_" && !ok[k]) delete chk[k]; });
+    return n;
+  }
+  // Re-read the YouTube subscription list quietly (at most every 30 minutes) so unsubscribed channels leave the app.
+  var subsAutoBusy = false, YT_SCOPE = "https://www.googleapis.com/auth/youtube.readonly";
+  function ytTok() { var t = load("sf_synctok", null); return t && t.yt && t.exp > Date.now() + 60000 ? t.tok : ""; }
+  function subsAuto(force) {
+    if (subsAutoBusy || !cfg.key || !subs.length) return Promise.resolve(false);
+    if (!force && Date.now() - load("sf_subsAt", 0) < 30 * 60000) return Promise.resolve(false);
+    var tok = cfg.channel ? "" : ytTok();
+    if (!cfg.channel && !tok) return Promise.resolve(false);
+    if (quotaLeft() < 50) return Promise.resolve(false);
+    subsAutoBusy = true;
+    return importSubs(tok || undefined, true).then(function (list) {
+      subsAutoBusy = false;
+      if (!list.length) return false;
+      var now = {}, old = {}; list.forEach(function (x) { now[x.id] = 1; }); subs.forEach(function (x) { old[x.id] = 1; });
+      var gone = subs.filter(function (x) { return !now[x.id]; }), added = list.filter(function (x) { return !old[x.id] && !unf[x.id]; });
+      save("sf_subsAt", Date.now());
+      // A list that lost most of its channels is more likely the wrong account or a bad answer than a real clear-out.
+      if (gone.length > Math.max(10, subs.length / 2)) { note("subsgone", "Your YouTube subscription list looks very different (" + gone.length + " channels missing), so nothing was removed.", { sub: "If that is right, use Refresh subscription list in Settings." }); return false; }
+      if (!gone.length && !added.length) return false;
+      subs = list.filter(function (x) { return !unf[x.id]; }); save("sf_subs", subs);
+      subsPrune(); save("sf_chk", chk);
+      toast("Subscriptions updated: " + (gone.length ? gone.length + " removed" : "") + (gone.length && added.length ? ", " : "") + (added.length ? added.length + " added" : "") + ".", null, null);
+      if (!busy) render();
+      return true;
+    }).catch(function () { subsAutoBusy = false; return false; });
   }
   function pruneMarks() {
     // Watch history now spans every channel page, so marks are kept; only a very long history is trimmed.
@@ -2032,7 +2068,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     var p = needSubs ? importSubs(opts.token).then(function (list) {
       if (!list.length) throw new Error("No subscriptions found on that account.");
       subs = list.filter(function (x) { return !unf[x.id]; }); save("sf_subs", subs); save("sf_subsAt", Date.now());
-    }) : Promise.resolve();
+    }) : subsAuto(false);
 
     var now = Date.now(), mode = cfg.hideShorts ? "UULF" : "UU", todo = [], kept = [];
     p.then(function () {
@@ -3020,6 +3056,9 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
     setTimeout(check, 600);
   })();
 
+  // On opening: clear out channels another device already dropped, then check YouTube's list.
+  setTimeout(function () { try { if (subsPrune() && !busy) render(); subsAuto(false); } catch (e) {} }, 2500);
+
   // ---------- pull to refresh (Subs) ----------
   (function () {
     var y0 = null, pulled = 0, ptr = $("ptr");
@@ -3803,7 +3842,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 54;
+  var VERSION = 55;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -4025,7 +4064,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
 
   // ---------- diagnostics (no key, token or watch history) ----------
   function clean(t) { return String(t).replace(/AIza[\w-]+/g, "[key]").replace(/ya29\.[\w.-]+/g, "[token]").replace(/([?&](?:key|access_token)=)[^&\s"]+/g, "$1[x]"); }
-  if (load("sf_testhook", false)) window.__sf = { slopOf: slopOf, slopTitle: slopTitle, slopW: function () { return slop.w; }, jkFixV: function (id, kind) { var v = jkList.filter(function (x) { return x.id === id; })[0]; if (!v) return null; var f = jkFix(v, kind); render(); return f; }, jkKw: jkKw, jkFeat: jkFeat, jkFixes: function () { return jkb.fix; }, jkState: function () { return { sel: jkSel, id: jkList[jkSel] && jkList[jkSel].id, n: jkList.length, ids: jkList.map(function (v) { return v.id; }), up: jkList[jkUpNext] && jkList[jkUpNext].id }; }, inviteMake: inviteMake, quotaUsed: function () { return quotaUsed(); }, jkKind: jkKind, jkBandOf: jkBandOf, jukeQueries: jukeQueries, pvEnd: function () { pvEnded(); }, pvState: function () { return { id: pvV && pvV.id, st: pvSt }; }, shLog: SHLOG, shSet: function (t, d) { shT = t; shDur = d; }, noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
+  if (load("sf_testhook", false)) window.__sf = { subsAuto: subsAuto, slopOf: slopOf, slopTitle: slopTitle, slopW: function () { return slop.w; }, jkFixV: function (id, kind) { var v = jkList.filter(function (x) { return x.id === id; })[0]; if (!v) return null; var f = jkFix(v, kind); render(); return f; }, jkKw: jkKw, jkFeat: jkFeat, jkFixes: function () { return jkb.fix; }, jkState: function () { return { sel: jkSel, id: jkList[jkSel] && jkList[jkSel].id, n: jkList.length, ids: jkList.map(function (v) { return v.id; }), up: jkList[jkUpNext] && jkList[jkUpNext].id }; }, inviteMake: inviteMake, quotaUsed: function () { return quotaUsed(); }, jkKind: jkKind, jkBandOf: jkBandOf, jukeQueries: jukeQueries, pvEnd: function () { pvEnded(); }, pvState: function () { return { id: pvV && pvV.id, st: pvSt }; }, shLog: SHLOG, shSet: function (t, d) { shT = t; shDur = d; }, noteEl: noteEl, searchTopics: searchTopics, pickTopics: pickTopics, topicList: topicList, setCfg: function (k, v) { cfg[k] = v; }, setDiscN: function (n) { disc.n = n; } };
   function diagText() {
     var sz = {}, tot = 0;
     try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i), n = (localStorage.getItem(k) || "").length; if (k.indexOf("sf_") === 0) { sz[k.slice(3)] = n; tot += n; } } } catch (e) {}
@@ -4250,8 +4289,8 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       function go() {
         try {
           google.accounts.oauth2.initTokenClient({
-            client_id: cfg.clientId, scope: "https://www.googleapis.com/auth/drive.appdata",
-            callback: function (r) { if (r && r.access_token) { try { localStorage.setItem("sf_synctok", JSON.stringify({ tok: r.access_token, exp: Date.now() + (Math.max(300, +r.expires_in || 3600) - 120) * 1000 })); } catch (e) {} res(r.access_token); } else rej(new Error("Google sign-in was cancelled or refused.")); },
+            client_id: cfg.clientId, scope: "https://www.googleapis.com/auth/drive.appdata" + (cfg.channel ? "" : " " + YT_SCOPE),
+            callback: function (r) { if (r && r.access_token) { var yt = 0; try { yt = !cfg.channel && google.accounts.oauth2.hasGrantedAllScopes(r, YT_SCOPE) ? 1 : 0; } catch (e) {} try { localStorage.setItem("sf_synctok", JSON.stringify({ yt: yt, tok: r.access_token, exp: Date.now() + (Math.max(300, +r.expires_in || 3600) - 120) * 1000 })); } catch (e) {} res(r.access_token); } else rej(new Error("Google sign-in was cancelled or refused.")); },
             error_callback: function () { rej(new Error("Google sign-in did not complete. Allow pop-ups for this page and try again.")); }
           }).requestAccessToken({ prompt: "" });
         } catch (e) { rej(new Error("Google sign-in could not start.")); }
@@ -4356,6 +4395,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       return syncFetch(tok, DRIVE_UP + "?uploadType=multipart&fields=id", { method: "POST", headers: { "Content-Type": "multipart/related; boundary=" + bd }, body: multi }).then(function (r) { return r.json(); }).then(function (j) { sync.fileId = j.id || ""; });
     }).then(function () {
       sync.at = Date.now(); syncSaveState(); syncBusy = false; syncLine(); unnote("sync");
+      if (!reload) subsAuto(false);
       if (reload) { toast("Synced. Loading the newer data.", null, null); try { sessionStorage.setItem("sf_syncr", "1"); } catch (e) {} setTimeout(function () { location.reload(); }, 700); }
       else if (interactive) toast("Synced.", null, null);
       if (syncPending) { syncPending = false; syncT = setTimeout(function () { syncNow(false); }, 3000); }
