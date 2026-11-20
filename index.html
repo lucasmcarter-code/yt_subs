@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-ClbMz87lIo0d3srVkcAMLPGQg+t4dOu9SvdF8Uy7zPg=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7FD++Z3M3LHISFJdFe30GubwFBIspZcwiPEjTvTX2aw=' https://accounts.google.com/gsi/client; style-src 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.ytimg.com https://*.ggpht.com https://*.googleusercontent.com; connect-src 'self' https://www.googleapis.com/youtube/v3/ https://www.googleapis.com/drive/v3/ https://www.googleapis.com/upload/drive/v3/ https://musicbrainz.org/ws/2/ https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/ https://www.youtube.com; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>North Star</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1337,10 +1337,8 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
     ["Learning","science",["pencil","calculator-variant","bookshelf"],["lesson","tutorial","course","lecture","explained","study","education"]]];
   var CATALOG = TOPICS.concat(TOPICS_MORE);
   var STARTER = ["Gaming", "Music", "Science", "History", "Sports", "Travel", "Comedy", "Pets", "Cooking", "Fitness", "Tech", "Movies and TV", "Podcasts", "Money", "Learning", "Home repair"];
-  // was45: this browser was already set up before V45, so it keeps everything that used to be built in.
-  var was45 = !load("sf_m45", 0) && !!load("sf_cfg", {}).key;
   var tset = load("sf_tset", null);
-  if (!tset || !tset.on) { tset = { on: was45 ? TOPICS.map(function (t) { return t[0]; }) : STARTER.slice(), own: [] }; save("sf_tset", tset); }
+  if (!tset || !tset.on) { tset = { on: STARTER.slice(), own: [] }; save("sf_tset", tset); }
   tset.own = tset.own || [];
   function topicsBuild() {
     var on = {}; tset.on.forEach(function (n) { on[String(n).toLowerCase()] = 1; });
@@ -2070,17 +2068,9 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
 
 
   // ---------- card notes: a topic and a format on each video ----------
-  // @@OWNER-SEED: one-time carry-over for a browser that was set up before V45. Delete this block in the next build.
-  var SEED45 = { words: ["live session", "hate5six"], alias: { "ttng": ["this town needs guns"], "the world is a beautiful place & i am no longer afraid to die": ["the world is a beautiful place", "twiabp"], "their / they're / there": ["their theyre there"], "empire! empire! (i was a lonely estate)": ["empire empire"], "the sound of animals fighting": ["tsoaf"], "the receiving end of sirens": ["treos"] }, tags: [
-    { l: "NASCAR", t: "Cars", w: "nascar, cup series, daytona 500, talladega, xfinity series" }, { l: "Formula 1", t: "Cars", w: "formula 1, formula1, f1, grand prix" }, { l: "IndyCar", t: "Cars", w: "indycar, indy 500" },
-    { l: "Sports cars", t: "Cars", w: "imsa, le mans, wec, sports car, sports cars" }, { l: "Motorcycles", t: "Cars", w: "motogp, superbike, motocross" },
-    { l: "NFL", t: "Sports", w: "nfl" }, { l: "NBA", t: "Sports", w: "nba" }, { l: "MLB", t: "Sports", w: "mlb" }, { l: "NHL", t: "Sports", w: "nhl" }, { l: "UFC", t: "Martial arts", w: "ufc" },
-    { l: "Minecraft", t: "Gaming", w: "minecraft" }, { l: "Pok\u00e9mon", t: "Gaming", w: "pokemon, pok\u00e9mon" }, { l: "Tiny Desk", t: "Music", w: "tiny desk" }, { l: "Space", t: "Space", w: "spacex, starship, nasa" },
-    { l: "Microcontrollers", t: "Electronics", w: "arduino, esp32, raspberry pi" }, { l: "American cars", t: "Cars", w: "f-150, f150, mustang, corvette" }, { l: "LEGO", t: "Crafts", w: "lego" }, { l: "Cooking", t: "Crafts", w: "sourdough, baking, recipe, recipes" }] };
-  // @@OWNER-SEED-END
   // Tags: words to look for in a title or channel name, and the tag to show. Each user's own list (sf_tags).
   var tags = load("sf_tags", null), tagC = null;
-  if (!tags) { tags = was45 ? SEED45.tags : []; save("sf_tags", tags); }
+  if (!tags) { tags = []; save("sf_tags", tags); }
   function tagsCompile() { tagC = tags.map(function (t) { return { l: t.l, t: t.t || "", ws: String(t.w || "").split(",").map(function (w) { return norm(w); }).filter(function (w) { return w.trim(); }) }; }); }
   var noteMemo = {};
   function fmtOf(v) {
@@ -2254,8 +2244,7 @@ var TOPICS = [["Woodworking","wood",["hammer","saw-blade","tree","ruler-square",
   var jkb = load("sf_jkb", null), jkbRev = 0;
   if (!jkb) { jkb = { own: [], sim: [], never: [], v: 1 }; save("sf_jkb", jkb); }
   jkb.own = jkb.own || []; jkb.sim = jkb.sim || []; jkb.never = jkb.never || [];
-  if (!jkb.words || !jkb.alias) { jkb.words = jkb.words || (was45 ? SEED45.words.slice() : ["live session"]); jkb.alias = jkb.alias || (was45 ? SEED45.alias : {}); save("sf_jkb", jkb); }
-  if (!load("sf_m45", 0)) save("sf_m45", 1);
+  if (!jkb.words || !jkb.alias) { jkb.words = jkb.words || ["live session"]; jkb.alias = jkb.alias || {}; save("sf_jkb", jkb); }
   var JK_NEVER = [];
   var JK_SESS = /audiotree|kexp|npr music|tiny desk|hate5six|little elephant|sofar sounds|jam in the van|bbc|triple j|la blogoth|daytrotter|from the basement|far out|pitchfork|paste|sideonedummy|run for cover|topshelf|count your lucky stars|big scary monsters|epitaph|polyvinyl|tooth|equal vision|triple crown|vagrant|deep elm|jade tree|rhymesayers|doomtree/;
   function jkNorm(x) { var t = String(x || "").toLowerCase(); try { t = t.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); } catch (e) {} return t.replace(/&/g, " and ").replace(/['\u2019.]/g, "").replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim(); }
@@ -3545,7 +3534,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
   }
 
   // ---------- card physics: one pendulum, pushed by scrolling ----------
-  var VERSION = 45;
+  var VERSION = 46;
   // a = current angle, w = angular speed, rest = where gravity wants the card (always 0). Stepped at a fixed 60 per second.
   var ph = { a: 0, w: 0, b: 0, bv: 0, hist: [], rest: 0, y: window.scrollY || 0, t: 0, raf: 0, last: 0, acc: 0 };
   var BOB_SPRING = 0.05, BOB_DAMP = 0.90, BOB_MAX = 2, LAG = 4;
@@ -4165,7 +4154,7 @@ var rawL = rawT.toLowerCase().replace(/['\u2019.]/g, "").replace(/^\W*(the\s+)?/
       var keep = Object.assign({}, DEFAULT_CFG, { key: cfg.key, clientId: cfg.clientId, channel: cfg.channel });
       try {
         BK_KEYS.concat(["sf_sync", "sf_synctok", "sf_syncm", "sf_jb", "sf_cfgBak", "sf_disc", "sf_dq", "sf_shown", "sf_light"]).forEach(function (k) { if (k !== "sf_subs") localStorage.removeItem(k); });
-        localStorage.setItem("sf_cfg", JSON.stringify(keep)); localStorage.setItem("sf_m45", "1");
+        localStorage.setItem("sf_cfg", JSON.stringify(keep));
       } catch (e) {}
       location.reload();
     } }, { label: "Cancel", checked: false, pick: function () {} }], null);
